@@ -27,12 +27,34 @@ use yii\web\IdentityInterface;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
+ * @property-read string $visual
  * @property-read IdentityInterface $author
  * @property-read IdentityInterface $updater
  * @property-read Bucket[] $buckets
  */
 class Board extends ActiveRecord
 {
+    /**
+     * @var array Colors to user for visualisation generation
+     */
+    private $_colors = [
+        [0, 123, 255],
+        [102, 16, 242],
+        [111, 66, 193],
+        [232, 62, 140],
+        [220, 53, 69],
+        [253, 126, 20],
+        [255, 193, 7],
+        [40, 167, 69],
+        [32, 201, 151],
+        [23, 162, 184]
+    ];
+
+    /**
+     * @var string Visualisation
+     */
+    private $_visual;
+
     /**
      * {@inheritDoc}
      */
@@ -102,6 +124,8 @@ class Board extends ActiveRecord
     /**
      * Find boards assigned to user
      * @param integer|string|null $id
+     *
+     * @return Board[]
      */
     public static function findByUserId($id = null)
     {
@@ -109,11 +133,13 @@ class Board extends ActiveRecord
             $id = Yii::$app->user->id;
         }
 
-        static::find()
+        $query = static::find()
             ->alias('b')
-            ->innerJoin(['ua' => '{{%kanban_board_user_assignment}}'], '{{ua}}.[[board_id]] = {{b}}.[[id]]')
-            ->where(['{{b}}.[[is_public]]' => true])
+            ->leftJoin(['ua' => '{{%kanban_board_user_assignment}}'], '{{ua}}.[[board_id]] = {{b}}.[[id]]')
+            ->where(['{{b}}.[[is_public]]' => 1])
             ->orWhere(['{{ua}}.[[user_id]]' => $id]);
+
+        return $query->all();
     }
 
     /**
@@ -128,6 +154,43 @@ class Board extends ActiveRecord
             ]);
         }
         parent::afterSave($insert, $changedAttributes);
+    }
+
+    /**
+     * Get visualisation. If set, this method return the image, otherwise generates a visualisation
+     * @return string
+     */
+    public function getVisual()
+    {
+        if (!isset($this->image)) {
+            if (empty($this->_visual)) {
+                if (function_exists('imagecreatetruecolor')) {
+                    $color = $this->_colors[($this->id % count($this->_colors) - 1)];
+                    $text = strtoupper(substr($this->name, 0, 1));
+                    $font = Yii::getAlias('@simialbi/yii2/kanban/assets/fonts/arial.ttf');
+
+                    $img = imagecreatetruecolor(120, 100);
+                    $bgColor = imagecolorallocate($img, $color[0], $color[1], $color[2]);
+                    $white = imagecolorallocate($img, 255, 255, 255);
+                    imagefill($img, 0, 0, $bgColor);
+                    $bbox = imagettfbbox(20, 0, $font, $text);
+                    $x = (120 - ($bbox[2] - $bbox[0])) / 2;
+                    $y = 60;
+                    imagettftext($img, 20, 0, $x, $y, $white, $font, $text);
+
+                    ob_start();
+                    imagepng($img);
+                    $image = ob_get_clean();
+
+                    $this->_visual = 'data:image/png;base64,' . base64_encode($image);
+                    imagedestroy($img);
+                }
+            }
+
+            return $this->_visual;
+        }
+
+        return $this->image;
     }
 
     /**

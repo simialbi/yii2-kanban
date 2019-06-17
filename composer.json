@@ -27,12 +27,16 @@
 		"yiisoft/yii2": "^2.0.20",
         "yiisoft/yii2-bootstrap4": "^2.0.4",
         "arogachev/yii2-sortable": "^0.1.6",
-        "simialbi/yii2-simialbi-base": "^0.4"
-	},
+        "simialbi/yii2-simialbi-base": "^0.4",
+        "kartik-v/yii2-widget-datepicker": "^1.4.7"
+    },
 	"require-dev": {
 		"yiisoft/yii2-coding-standards": "~2.0",
 		"phpunit/phpunit": "<7"
 	},
+    "suggest": {
+        "ext-gd": "For autogeneration of visualisations"
+    },
 	"autoload": {
 		"psr-4": {
 			"simialbi\\yii2\\kanban\\": "src"

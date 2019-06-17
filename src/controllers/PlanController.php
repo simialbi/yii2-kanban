@@ -28,6 +28,10 @@ class PlanController extends Controller
                         'allow' => true,
                         'actions' => ['create'],
                         'roles' => ['@']
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'view']
                     ]
                 ]
             ]
@@ -51,11 +55,16 @@ class PlanController extends Controller
      *
      * @param integer $id
      *
+     * @return string
      * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
         $model = $this->findModel($id);
+
+        return $this->render('view', [
+            'model' => $model
+        ]);
     }
 
     /**
@@ -64,7 +73,9 @@ class PlanController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Board();
+        $model = new Board([
+            'is_public' => true
+        ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->session->addFlash('success', Yii::t(
