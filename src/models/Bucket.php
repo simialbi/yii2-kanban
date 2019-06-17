@@ -9,9 +9,11 @@ namespace simialbi\yii2\kanban\models;
 
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
+use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
 
 /**
  * Class Bucket
@@ -26,6 +28,8 @@ use yii\db\ActiveRecord;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
+ * @property-read IdentityInterface $author
+ * @property-read IdentityInterface $updater
  * @property-read Board $board
  * @property-read Task[] $tasks
  */
@@ -80,6 +84,38 @@ class Bucket extends ActiveRecord
                 }
             ]
         ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'id' => Yii::t('simialbi/kanban/model/bucket', 'Id'),
+            'board_id' => Yii::t('simialbi/kanban/model/bucket', 'Board'),
+            'name' => Yii::t('simialbi/kanban/model/bucket', 'Name'),
+            'sort' => Yii::t('simialbi/kanban/model/bucket', 'Sort'),
+            'created_by' => Yii::t('simialbi/kanban/model/bucket', 'Created by'),
+            'updated_by' => Yii::t('simialbi/kanban/model/bucket', 'Updated by'),
+            'created_at' => Yii::t('simialbi/kanban/model/bucket', 'Created at'),
+            'updated_at' => Yii::t('simialbi/kanban/model/bucket', 'Updated at'),
+        ];
+    }
+
+    /**
+     * Get author
+     * @return IdentityInterface
+     */
+    public function getAuthor()
+    {
+        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->created_by);
+    }
+
+    /**
+     * Get user last updated
+     * @return mixed
+     */
+    public function getUpdater()
+    {
+        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
     }
 
     /**

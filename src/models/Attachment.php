@@ -8,9 +8,11 @@
 namespace simialbi\yii2\kanban\models;
 
 
+use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
 
 /**
  * Class Attachment
@@ -28,7 +30,9 @@ use yii\db\ActiveRecord;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
- * @
+ * @property-read IdentityInterface $author
+ * @property-read IdentityInterface $updater
+ * @property-read Task $task
  */
 class Attachment extends ActiveRecord
 {
@@ -78,5 +82,52 @@ class Attachment extends ActiveRecord
                 ]
             ]
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => Yii::t('simialbi/kanban/model/attachment', 'Id'),
+            'task_id' => Yii::t('simialbi/kanban/model/attachment', 'Task'),
+            'name' => Yii::t('simialbi/kanban/model/attachment', 'Name'),
+            'path' => Yii::t('simialbi/kanban/model/attachment', 'Path'),
+            'mime_type' => Yii::t('simialbi/kanban/model/attachment', 'Mime type'),
+            'size' => Yii::t('simialbi/kanban/model/attachment', 'Size'),
+            'card_show' => Yii::t('simialbi/kanban/model/attachment', 'Show on card'),
+            'created_by' => Yii::t('simialbi/kanban/model/attachment', 'Created by'),
+            'updated_by' => Yii::t('simialbi/kanban/model/attachment', 'Updated by'),
+            'created_at' => Yii::t('simialbi/kanban/model/attachment', 'Created at'),
+            'updated_at' => Yii::t('simialbi/kanban/model/attachment', 'Updated at'),
+        ];
+    }
+
+    /**
+     * Get author
+     * @return IdentityInterface
+     */
+    public function getAuthor()
+    {
+        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->created_by);
+    }
+
+    /**
+     * Get user last updated
+     * @return mixed
+     */
+    public function getUpdater()
+    {
+        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
+    }
+
+    /**
+     * Get associated task
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTask()
+    {
+        return $this->hasOne(Task::class, ['id' => 'task_id']);
     }
 }

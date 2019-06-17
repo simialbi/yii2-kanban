@@ -9,9 +9,11 @@ namespace simialbi\yii2\kanban\models;
 
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
+use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
 
 /**
  * Class Task
@@ -32,6 +34,8 @@ use yii\db\ActiveRecord;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
+ * @property-read IdentityInterface $author
+ * @property-read IdentityInterface $updater
  * @property-read Bucket $bucket
  * @property-read Board $board
  * @property-read ChecklistElement[] $checklistElements
@@ -102,6 +106,47 @@ class Task extends ActiveRecord
                 }
             ]
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => Yii::t('simialbi/kanban/model/task', 'Id'),
+            'bucket_id' => Yii::t('simialbi/kanban/model/task', 'Bucket'),
+            'subject' => Yii::t('simialbi/kanban/model/task', 'Subject'),
+            'status' => Yii::t('simialbi/kanban/model/task', 'Status'),
+            'start_date' => Yii::t('simialbi/kanban/model/task', 'Start date'),
+            'end_date' => Yii::t('simialbi/kanban/model/task', 'End date'),
+            'description' => Yii::t('simialbi/kanban/model/task', 'Description'),
+            'card_show_description' => Yii::t('simialbi/kanban/model/task', 'Show description on card'),
+            'card_show_checklist' => Yii::t('simialbi/kanban/model/task', 'Show checklist on card'),
+            'sort' => Yii::t('simialbi/kanban/model/task', 'Sort'),
+            'created_by' => Yii::t('simialbi/kanban/model/task', 'Created by'),
+            'updated_by' => Yii::t('simialbi/kanban/model/task', 'Updated by'),
+            'created_at' => Yii::t('simialbi/kanban/model/task', 'Created at'),
+            'updated_at' => Yii::t('simialbi/kanban/model/task', 'Updated at'),
+        ];
+    }
+
+    /**
+     * Get author
+     * @return IdentityInterface
+     */
+    public function getAuthor()
+    {
+        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->created_by);
+    }
+
+    /**
+     * Get user last updated
+     * @return mixed
+     */
+    public function getUpdater()
+    {
+        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
     }
 
     /**

@@ -9,6 +9,7 @@ namespace simialbi\yii2\kanban\models;
 
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
+use Yii;
 use yii\db\ActiveRecord;
 
 /**
@@ -20,6 +21,8 @@ use yii\db\ActiveRecord;
  * @property string $name
  * @property boolean $is_done
  * @property integer $sort
+ *
+ * @property-read Task $task
  */
 class ChecklistElement extends ActiveRecord
 {
@@ -61,5 +64,28 @@ class ChecklistElement extends ActiveRecord
                 }
             ]
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => Yii::t('simialbi/kanban/model/checklist-element', 'Id'),
+            'task_id' => Yii::t('simialbi/kanban/model/checklist-element', 'Task'),
+            'name' => Yii::t('simialbi/kanban/model/checklist-element', 'Name'),
+            'is_done' => Yii::t('simialbi/kanban/model/checklist-element', 'Is done'),
+            'sort' => Yii::t('simialbi/kanban/model/checklist-element', 'Sort')
+        ];
+    }
+
+    /**
+     * Get associated task
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTask()
+    {
+        return $this->hasOne(Task::class, ['id' => 'task_id']);
     }
 }

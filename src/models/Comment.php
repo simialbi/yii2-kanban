@@ -73,6 +73,20 @@ class Comment extends ActiveRecord
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => Yii::t('simialbi/kanban/model/comment', 'Id'),
+            'task_id' => Yii::t('simialbi/kanban/model/comment', 'Task'),
+            'text' => Yii::t('simialbi/kanban/model/comment', 'Text'),
+            'created_by' => Yii::t('simialbi/kanban/model/comment', 'Created by'),
+            'created_at' => Yii::t('simialbi/kanban/model/comment', 'Created at')
+        ];
+    }
+
+    /**
      * Get author
      * @return IdentityInterface
      */

@@ -1,0 +1,254 @@
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Id"
+msgstr "Id"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Task"
+msgstr "Task"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Name"
+msgstr "Name"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Path"
+msgstr "Path"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Mime type"
+msgstr "Mime type"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Size"
+msgstr "Size"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Show on card"
+msgstr "Show on card"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Created by"
+msgstr "Created by"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Updated by"
+msgstr "Updated by"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Created at"
+msgstr "Created at"
+
+#: models/Attachment.php
+msgctxt "simialbi/kanban/model/attachment"
+msgid "Updated at"
+msgstr "Updated at"
+
+#: models/Board.php
+msgctxt "simialbi/kanban/model/board"
+msgid "Id"
+msgstr "Id"
+
+#: models/Board.php
+msgctxt "simialbi/kanban/model/board"
+msgid "Name"
+msgstr "Name"
+
+#: models/Board.php
+msgctxt "simialbi/kanban/model/board"
+msgid "Image"
+msgstr "Image"
+
+#: models/Board.php
+msgctxt "simialbi/kanban/model/board"
+msgid "Is public"
+msgstr "Is public"
+
+#: models/Board.php
+msgctxt "simialbi/kanban/model/board"
+msgid "Created by"
+msgstr "Created by"
+
+#: models/Board.php
+msgctxt "simialbi/kanban/model/board"
+msgid "Updated by"
+msgstr "Updated by"
+
+#: models/Board.php
+msgctxt "simialbi/kanban/model/board"
+msgid "Created at"
+msgstr "Created at"
+
+#: models/Board.php
+msgctxt "simialbi/kanban/model/board"
+msgid "Updated at"
+msgstr "Updated at"
+
+#: models/Bucket.php
+msgctxt "simialbi/kanban/model/bucket"
+msgid "Id"
+msgstr "Id"
+
+#: models/Bucket.php
+msgctxt "simialbi/kanban/model/bucket"
+msgid "Board"
+msgstr "Board"
+
+#: models/Bucket.php
+msgctxt "simialbi/kanban/model/bucket"
+msgid "Name"
+msgstr "Name"
+
+#: models/Bucket.php
+msgctxt "simialbi/kanban/model/bucket"
+msgid "Sort"
+msgstr "Sort"
+
+#: models/Bucket.php
+msgctxt "simialbi/kanban/model/bucket"
+msgid "Created by"
+msgstr "Created by"
+
+#: models/Bucket.php
+msgctxt "simialbi/kanban/model/bucket"
+msgid "Updated by"
+msgstr "Updated by"
+
+#: models/Bucket.php
+msgctxt "simialbi/kanban/model/bucket"
+msgid "Created at"
+msgstr "Created at"
+
+#: models/Bucket.php
+msgctxt "simialbi/kanban/model/bucket"
+msgid "Updated at"
+msgstr "Updated at"
+
+#: models/ChecklistElement.php
+msgctxt "simialbi/kanban/model/checklist-element"
+msgid "Id"
+msgstr "Id"
+
+#: models/ChecklistElement.php
+msgctxt "simialbi/kanban/model/checklist-element"
+msgid "Task"
+msgstr "Task"
+
+#: models/ChecklistElement.php
+msgctxt "simialbi/kanban/model/checklist-element"
+msgid "Name"
+msgstr "Name"
+
+#: models/ChecklistElement.php
+msgctxt "simialbi/kanban/model/checklist-element"
+msgid "Is done"
+msgstr "Is done"
+
+#: models/ChecklistElement.php
+msgctxt "simialbi/kanban/model/checklist-element"
+msgid "Sort"
+msgstr "Sort"
+
+#: models/Comment.php
+msgctxt "simialbi/kanban/model/comment"
+msgid "Id"
+msgstr "Id"
+
+#: models/Comment.php
+msgctxt "simialbi/kanban/model/comment"
+msgid "Task"
+msgstr "Task"
+
+#: models/Comment.php
+msgctxt "simialbi/kanban/model/comment"
+msgid "Text"
+msgstr "Text"
+
+#: models/Comment.php
+msgctxt "simialbi/kanban/model/comment"
+msgid "Created by"
+msgstr "Created by"
+
+#: models/Comment.php
+msgctxt "simialbi/kanban/model/comment"
+msgid "Created at"
+msgstr "Created at"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Id"
+msgstr "Id"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Bucket"
+msgstr "Bucket"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Subject"
+msgstr "Subject"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Status"
+msgstr "Status"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Start date"
+msgstr "Start date"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "End date"
+msgstr "End date"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Description"
+msgstr "Description"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Show description on card"
+msgstr "Show description on card"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Show checklist on card"
+msgstr "Show checklist on card"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Sort"
+msgstr "Sort"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Created by"
+msgstr "Created by"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Updated by"
+msgstr "Updated by"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Created at"
+msgstr "Created at"
+
+#: models/Task.php
+msgctxt "simialbi/kanban/model/task"
+msgid "Updated at"
+msgstr "Updated at"

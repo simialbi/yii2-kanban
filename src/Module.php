@@ -7,8 +7,26 @@
 
 namespace simialbi\yii2\kanban;
 
-
-class Module extends \yii\base\Module
+class Module extends \simialbi\yii2\base\Module
 {
+    /**
+     * {@inheritDoc}
+     */
+    public $controllerNamespace = 'simialbi\yii2\kanban\controllers';
 
+    /**
+     * {@inheritDoc}
+     */
+    public $defaultRoute = 'plan';
+
+    /**
+     * {@inheritDoc}
+     * @throws \ReflectionException
+     */
+    public function init()
+    {
+        parent::init();
+
+        $this->registerTranslations();
+    }
 }

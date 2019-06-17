@@ -80,6 +80,11 @@ class m190614_125145_init extends Migration
             'created_by' => $this->string(64)->null()->defaultValue(null),
             'created_at' => $this->integer()->unsigned()->notNull()
         ]);
+        $this->createTable('{{%kanban_board_user_assignment}}', [
+            'board_id' => $this->integer()->unsigned()->notNull(),
+            'user_id' => $this->string(64)->notNull(),
+            'PRIMARY KEY ([[board_id]], [[user_id]])'
+        ]);
         $this->createTable('{{%kanban_task_user_assignment}}', [
             'task_id' => $this->integer()->unsigned()->notNull(),
             'user_id' => $this->string(64)->notNull(),
@@ -132,6 +137,15 @@ class m190614_125145_init extends Migration
             'CASCADE'
         );
         $this->addForeignKey(
+            '{{%kanban_board_user_assignment_ibfk_1}}',
+            '{{%kanban_board_user_assignment}}',
+            'board_id',
+            '{{%kanban_board}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+        $this->addForeignKey(
             '{{%kanban_task_user_assignment_ibfk_1}}',
             '{{%kanban_task_user_assignment}}',
             'task_id',
@@ -153,8 +167,10 @@ class m190614_125145_init extends Migration
         $this->dropForeignKey('{{%kanban_attachment_ibfk_1}}', '{{%kanban_attachment}}');
         $this->dropForeignKey('{{%kanban_comment_ibfk_1}}', '{{%kanban_comment}}');
         $this->dropForeignKey('{{%kanban_task_user_assignment_ibfk_1}}', '{{%kanban_task_user_assignment}}');
+        $this->dropForeignKey('{{%kanban_board_user_assignment_ibfk_1}}', '{{%kanban_board_user_assignment}}');
 
         $this->dropTable('{{%kanban_task_user_assignment}}');
+        $this->dropTable('{{%kanban_board_user_assignment}}');
         $this->dropTable('{{%kanban_comment}}');
         $this->dropTable('{{%kanban_attachment}}');
         $this->dropTable('{{%kanban_checklist_element}}');
