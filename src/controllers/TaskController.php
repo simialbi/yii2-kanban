@@ -47,8 +47,8 @@ class TaskController extends Controller
         $model = $this->findBucketModel($bucketId);
         $task = new Task(['bucket_id' => $bucketId]);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->renderAjax('item', ['model' => $model]);
+        if ($task->load(Yii::$app->request->post()) && $task->save()) {
+            return $this->renderAjax('/bucket/item', ['model' => $model]);
         }
 
         return $this->renderAjax('create', [

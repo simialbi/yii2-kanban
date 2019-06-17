@@ -28,7 +28,8 @@
         "yiisoft/yii2-bootstrap4": "^2.0.4",
         "arogachev/yii2-sortable": "^0.1.6",
         "simialbi/yii2-simialbi-base": "^0.4",
-        "kartik-v/yii2-widget-datepicker": "^1.4.7"
+        "kartik-v/yii2-widget-datepicker": "^1.4.7",
+        "rmrevin/yii2-fontawesome": "^3.3.0"
     },
 	"require-dev": {
 		"yiisoft/yii2-coding-standards": "~2.0",

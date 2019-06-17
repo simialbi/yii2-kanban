@@ -23,6 +23,7 @@ use yii\widgets\Pjax;
 
 <div class="kanban-tasks mt-5">
     <?php $form = ActiveForm::begin([
+        'action' => ['task/create', 'bucketId' => $model->id],
         'id' => 'createTaskForm',
         'fieldConfig' => function ($model, $attribute) {
             /* @var $model \yii\base\Model */
@@ -37,10 +38,23 @@ use yii\widgets\Pjax;
     <div class="card">
         <div class="card-body">
             <?= $form->field($task, 'subject')->textInput(); ?>
-            <?= $form->field($task, 'end_date')->widget(DatePicker::class, [
-                'bsVersion' => 4,
-                'type' => DatePicker::TYPE_BUTTON
+            <?= $form->field($task, 'end_date', [
+                'options' => [
+                    'class' => ['form-group', 'mb-0']
+                ]
+            ])->widget(DatePicker::class, [
+                'bsVersion' => '4',
+                'type' => DatePicker::TYPE_INPUT,
+                'pluginOptions' => [
+                    'autoclose' => true
+                ],
+                'options' => [
+                    'readonly' => true
+                ]
             ]); ?>
+        </div>
+        <div class="list-group list-group-flush">
+            <?=Html::submitButton('Save', ['class' => ['list-group-item', 'list-group-item-dark', 'list-group-item-action']])?>
         </div>
     </div>
     <?php ActiveForm::end(); ?>
