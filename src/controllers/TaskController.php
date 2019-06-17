@@ -15,6 +15,12 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
+/**
+ * Class TaskController
+ * @package simialbi\yii2\kanban\controllers
+ *
+ * @property-read \simialbi\yii2\kanban\Module $module
+ */
 class TaskController extends Controller
 {
     /**
@@ -28,7 +34,7 @@ class TaskController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create'],
+                        'actions' => ['create', 'update'],
                         'roles' => ['@']
                     ]
                 ]
@@ -57,9 +63,49 @@ class TaskController extends Controller
         ]);
     }
 
+    /**
+     * @param integer $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+
+        $buckets = Bucket::find()
+            ->select(['name', 'id'])
+            ->orderBy(['name' => SORT_ASC])
+            ->where(['board_id' => $model->board->id])
+            ->indexBy('id')
+            ->column();
+
+        return $this->renderAjax('update', [
+            'model' => $model,
+            'buckets' => $buckets,
+            'statuses' => $this->module->statuses
+        ]);
+    }
 
     /**
-     * Finds the Event model based on its primary key value.
+     * Finds the model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Task the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Task::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+    }
+
+    /**
+     * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
      * @param integer $id

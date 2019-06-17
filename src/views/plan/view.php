@@ -2,6 +2,7 @@
 
 use simialbi\yii2\kanban\KanbanAsset;
 use yii\bootstrap4\Html;
+use yii\bootstrap4\Modal;
 use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
@@ -17,8 +18,6 @@ $this->params['breadcrumbs'] = [
     ],
     $this->title
 ];
-
-Pjax::begin();
 ?>
     <div class="kanban-plan-view">
         <?= $this->render('_navigation', ['model' => $model]); ?>
@@ -46,4 +45,13 @@ Pjax::begin();
         </div>
     </div>
 <?php
-Pjax::end();
+Modal::begin([
+    'id' => 'taskModal',
+    'options' => [
+        'class' => ['modal', 'remote', 'fade']
+    ],
+    'size' => Modal::SIZE_LARGE,
+    'title' => null,
+    'closeButton' => false
+]);
+Modal::end();

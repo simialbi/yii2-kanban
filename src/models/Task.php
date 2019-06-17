@@ -164,7 +164,7 @@ class Task extends ActiveRecord
      */
     public function getBoard()
     {
-        return $this->hasOne(Board::class, ['id' => 'bucket_id'])->via('bucket');
+        return $this->hasOne(Board::class, ['id' => 'board_id'])->via('bucket');
     }
 
     /**

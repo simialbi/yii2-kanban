@@ -54,7 +54,9 @@ use yii\widgets\Pjax;
             ]); ?>
         </div>
         <div class="list-group list-group-flush">
-            <?=Html::submitButton('Save', ['class' => ['list-group-item', 'list-group-item-dark', 'list-group-item-action']])?>
+            <?= Html::submitButton(Yii::t('simialbi/kanban', 'Save'), [
+                'class' => ['list-group-item', 'list-group-item-success', 'list-group-item-action']
+            ]) ?>
         </div>
     </div>
     <?php ActiveForm::end(); ?>

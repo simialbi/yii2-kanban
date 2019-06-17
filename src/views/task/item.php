@@ -10,7 +10,7 @@ use yii\bootstrap4\Html;
 
 ?>
 
-<div class="kanban-task card<?php if ($model->status === Task::STATUS_DONE): ?> status-done<?php endif; ?>">
+<div class="kanban-task mt-2 card<?php if ($model->status === Task::STATUS_DONE): ?> status-done<?php endif; ?>">
     <div class="card-body">
         <h6 class="card-title"><?= Html::encode($model->subject); ?></h6>
         <?php if ($model->card_show_description && $model->description): ?>
@@ -25,7 +25,13 @@ use yii\bootstrap4\Html;
             <?php if (count($model->checklistElements)): ?>
                 <small class="text-light"><?= FAR::i('check-square'); ?> </small>
             <?php endif; ?>
-            <a href="" class="btn btn-light"><?= FAS::i('ellipsis-h'); ?></a>
+            <?= Html::a(FAS::i('ellipsis-h'), ['task/update', 'id' => $model->id], [
+                'class' => ['btn', 'btn-sm', 'ml-auto', 'stretched-link'],
+                'data' => [
+                    'toggle' => 'modal',
+                    'target' => '#taskModal'
+                ]
+            ]); ?>
         </div>
     </div>
 </div>

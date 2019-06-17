@@ -12,7 +12,22 @@ use simialbi\yii2\web\AssetBundle;
 
 class KanbanAsset extends AssetBundle
 {
+    /**
+     * {@inheritDoc}
+     */
     public $css = [
         'css/kanban.css'
+    ];
+
+    public $js = [
+        'js/kanban.js'
+    ];
+
+    /**
+     * {@inheritDoc}
+     */
+    public $depends = [
+        'yii\web\YiiAsset',
+        'rmrevin\yii\fontawesome\AssetBundle'
     ];
 }
