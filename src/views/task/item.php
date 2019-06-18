@@ -11,6 +11,7 @@ use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model Task */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 /* @var $statuses array */
 
 Pjax::begin([
@@ -28,7 +29,7 @@ Pjax::begin([
 ]);
 ?>
 <div class="kanban-task card mt-2 status-<?= $model->status; ?>">
-    <div class="card-body">
+    <div class="kanban-task-content card-body">
         <div class="d-flex justify-content-between">
             <h6 class="card-title">
                 <?= Html::encode($model->subject); ?>
@@ -146,6 +147,87 @@ Pjax::begin([
             ]); ?>
         </div>
     </div>
+    <?php if (count($model->assignees)): ?>
+        <div class="kanban-task-assignees card-footer">
+            <div class="dropdown">
+                <a href="javascript:;" data-toggle="dropdown"
+                   class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
+                    <?php foreach ($model->assignees as $assignee): ?>
+                        <span class="kanban-user">
+                        <?php if ($assignee->image): ?>
+                            <?= Html::img($assignee->image, [
+                                'class' => ['rounded-circle', 'mr-1'],
+                                'title' => Html::encode($assignee->name),
+                                'data' => [
+                                    'toggle' => 'tooltip'
+                                ]
+                            ]); ?>
+                        <?php else: ?>
+                            <span class="kanban-visualisation mr-1" title="<?= Html::encode($assignee->name); ?>"
+                                  data-toggle="tooltip">
+                                <?= strtoupper(substr($assignee->name, 0, 1)); ?>
+                            </span>
+                        <?php endif; ?>
+                        </span>
+                    <?php endforeach; ?>
+                </a>
+                <?php
+                $assignees = [];
+                $newUsers = [];
+                foreach ($model->assignees as $assignee) {
+                    $assignees[] = [
+                        'label' => $this->render('_user', [
+                            'user' => $assignee,
+                            'assigned' => true
+                        ]),
+                        'linkOptions' => [
+                            'class' => ['d-flex', 'align-items-center']
+                        ],
+                        'url' => ['task/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
+                    ];
+                }
+
+                foreach ($users as $user) {
+                    foreach ($model->assignees as $assignee) {
+                        if ($user->getId() === $assignee->getId()) {
+                            continue 2;
+                        }
+                    }
+                    $newUsers[] = [
+                        'label' => $this->render('_user', [
+                            'user' => $user,
+                            'assigned' => false
+                        ]),
+                        'linkOptions' => [
+                            'class' => ['d-flex', 'align-items-center']
+                        ],
+                        'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
+                    ];
+                }
+
+                $items = [];
+                if (!empty($assignees)) {
+                    $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
+                }
+                $items = array_merge($items, $assignees);
+                if (!empty($assignees) && !empty($newUsers)) {
+                    $items[] = '-';
+                }
+                if (!empty($newUsers)) {
+                    $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
+                }
+                $items = array_merge($items, $newUsers);
+                ?>
+                <?= Dropdown::widget([
+                    'items' => $items,
+                    'encodeLabels' => false,
+                    'options' => [
+                        'class' => ['w-100']
+                    ]
+                ]); ?>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 <?php
 Pjax::end();

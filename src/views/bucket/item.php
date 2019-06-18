@@ -5,6 +5,7 @@ use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Bucket */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 /* @var $statuses array */
 
 ?>
@@ -27,6 +28,7 @@ use yii\widgets\Pjax;
         <?php foreach ($model->tasks as $task): ?>
             <?= $this->render('/task/item', [
                 'model' => $task,
+                'users' => $users,
                 'statuses' => $statuses
             ]); ?>
         <?php endforeach; ?>

@@ -23,7 +23,15 @@ Pjax::begin([
 
 <div class="kanban-task-modal">
     <?php $form = ActiveForm::begin([
-        'id' => 'taskModalForm'
+        'id' => 'taskModalForm',
+        'fieldConfig' => [
+            'labelOptions' => [
+                'class' => ['col-form-label-sm', 'py-0']
+            ],
+            'inputOptions' => [
+                'class' => ['form-control', 'form-control-sm']
+            ]
+        ]
     ]); ?>
     <div class="modal-header">
         <h5 class="modal-title">
@@ -110,7 +118,9 @@ Pjax::begin([
         <div class="row">
             <div class="form-group col-12 checklist">
                 <div class="d-flex justify-content-between">
-                    <?= Html::label(Yii::t('simialbi/kanban/task', 'Checklist')); ?>
+                    <?= Html::label(Yii::t('simialbi/kanban/task', 'Checklist'), null, [
+                        'class' => ['col-form-label-sm', 'py-0']
+                    ]); ?>
                     <?= $form->field($model, 'card_show_checklist', [
                         'options' => ['class' => ''],
                         'labelOptions' => [
@@ -120,7 +130,7 @@ Pjax::begin([
                     ])->checkbox(['inline' => true, 'class' => 'custom-control-input']); ?>
                 </div>
                 <?php foreach ($model->checklistElements as $checklistElement): ?>
-                    <div class="input-group mb-3">
+                    <div class="input-group input-group-sm mb-1">
                         <div class="input-group-prepend">
                             <div class="input-group-text">
                                 <?= Html::hiddenInput('checklist[' . $checklistElement->id . '][is_done]', 0); ?>
@@ -138,7 +148,8 @@ Pjax::begin([
                                 'class' => ['form-control'],
                                 'style' => [
                                     'text-decoration' => $checklistElement->is_done ? 'line-through' : 'none'
-                                ]
+                                ],
+                                'placeholder' => Html::encode($checklistElement->name)
                             ]
                         ); ?>
                         <div class="input-group-append">
@@ -148,7 +159,7 @@ Pjax::begin([
                         </div>
                     </div>
                 <?php endforeach; ?>
-                <div class="input-group add-checklist-element mb-3">
+                <div class="input-group input-group-sm add-checklist-element mb-1">
                     <div class="input-group-prepend">
                         <div class="input-group-text">
                             <?= Html::checkbox('checklist[new][][is_done]', false); ?>
@@ -164,7 +175,45 @@ Pjax::begin([
             <!-- TODO: Attachments -->
         </div>
         <div class="row">
-            <!-- TODO: Comments -->
+            <div class="form-group col-12">
+                <?= Html::label(Yii::t('simialbi/kanban/task', 'Comments'), 'comment', [
+                    'class' => ['col-form-label-sm', 'py-0']
+                ]); ?>
+                <?= Html::textarea('comment', null, [
+                    'class' => ['form-control', 'form-control-sm']
+                ]); ?>
+            </div>
+            <?php if (count($model->comments)): ?>
+                <div class="kanban-task-comments col-12">
+                    <?php foreach ($model->comments as $comment): ?>
+                        <div class="kanban-task-comment media">
+                            <div class="kanban-user mr-3">
+                                <?php if ($comment->author->image): ?>
+                                    <?= Html::img($comment->author->image, [
+                                        'class' => ['rounded-circle'],
+                                        'title' => Html::encode($comment->author->name),
+                                        'data' => [
+                                            'toggle' => 'tooltip'
+                                        ]
+                                    ]); ?>
+                                <?php else: ?>
+                                    <span class="kanban-visualisation" data-toggle="tooltip"
+                                          title="<?= Html::encode($comment->author->name); ?>">
+                                        <?= strtoupper(substr($comment->author->name, 0, 1)); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="media-body">
+                                <span class="text-muted d-flex flex-row justify-content-between">
+                                    <span><?= Html::encode($comment->author->name); ?></span>
+                                    <span><?= Yii::$app->formatter->asRelativeTime($comment->created_at); ?></span>
+                                </span>
+                                <?= Yii::$app->formatter->asParagraphs($comment->text); ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
     <div class="modal-footer">

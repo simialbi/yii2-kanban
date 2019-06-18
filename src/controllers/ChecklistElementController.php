@@ -56,6 +56,7 @@ class ChecklistElementController extends Controller
 
         return $this->renderAjax('/task/item', [
             'model' => $model->task,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }

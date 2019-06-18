@@ -21,7 +21,7 @@ window.sa.kanban = (function ($, baseUrl) {
 
     function initTask()
     {
-
+        $('[data-toggle="tooltip"]').tooltip()
     }
 
     function initSortable()

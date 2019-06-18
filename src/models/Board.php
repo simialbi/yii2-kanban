@@ -12,6 +12,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 
 /**
  * Class Board
@@ -29,6 +30,7 @@ use yii\db\ActiveRecord;
  * @property-read string $visual
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
+ * @property-read UserInterface[] $assignees
  * @property-read Bucket[] $buckets
  */
 class Board extends ActiveRecord
@@ -143,6 +145,7 @@ class Board extends ActiveRecord
 
     /**
      * {@inheritDoc}
+     * @throws \yii\db\Exception
      */
     public function afterSave($insert, $changedAttributes)
     {
@@ -150,7 +153,7 @@ class Board extends ActiveRecord
             static::getDb()->createCommand()->insert('{{%kanban_board_user_assignment}}', [
                 'board_id' => $this->id,
                 'user_id' => Yii::$app->user->id
-            ]);
+            ])->execute();
         }
         parent::afterSave($insert, $changedAttributes);
     }
@@ -208,6 +211,25 @@ class Board extends ActiveRecord
     public function getUpdater()
     {
         return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
+    }
+
+    /**
+     * Get users assigned to this task
+     * @return array
+     */
+    public function getAssignees()
+    {
+        $assignees = [];
+
+        $query = new Query();
+        $query->from('{{%kanban_board_user_assignment}}')
+            ->where(['board_id' => $this->id]);
+
+        foreach ($query->all() as $item) {
+            $assignees[] = call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $item['user_id']);
+        }
+
+        return $assignees;
     }
 
     /**

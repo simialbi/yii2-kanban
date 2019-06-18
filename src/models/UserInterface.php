@@ -75,4 +75,10 @@ interface UserInterface extends IdentityInterface
      * @return string|null A users name.
      */
     public function getName();
+
+    /**
+     * Returns a list of users that can be used in assignments
+     * @return static[]
+     */
+    public static function findIdentities();
 }

@@ -12,6 +12,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -36,6 +37,7 @@ use yii\helpers\ArrayHelper;
  * @property-read string $checklistStats
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
+ * @property-read UserInterface[] $assignees
  * @property-read Bucket $bucket
  * @property-read Board $board
  * @property-read ChecklistElement[] $checklistElements
@@ -133,6 +135,25 @@ class Task extends ActiveRecord
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     * @throws \yii\db\Exception
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        if ($insert) {
+            static::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
+                'task_id' => $this->id,
+                'user_id' => Yii::$app->user->id
+            ])->execute();
+        }
+        parent::afterSave($insert, $changedAttributes);
+    }
+
+    /**
+     * Get checklist status information
+     * @return string
+     */
     public function getChecklistStats()
     {
         if (empty($this->checklistElements)) {
@@ -162,6 +183,25 @@ class Task extends ActiveRecord
     public function getUpdater()
     {
         return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
+    }
+
+    /**
+     * Get users assigned to this task
+     * @return array
+     */
+    public function getAssignees()
+    {
+        $assignees = [];
+
+        $query = new Query();
+        $query->from('{{%kanban_task_user_assignment}}')
+            ->where(['task_id' => $this->id]);
+
+        foreach ($query->all() as $item) {
+            $assignees[] = call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $item['user_id']);
+        }
+
+        return $assignees;
     }
 
     /**

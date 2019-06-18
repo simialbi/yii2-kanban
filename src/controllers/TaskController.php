@@ -10,6 +10,7 @@ namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\ChecklistElement;
+use simialbi\yii2\kanban\models\Comment;
 use simialbi\yii2\kanban\models\Task;
 use Yii;
 use yii\filters\AccessControl;
@@ -36,7 +37,7 @@ class TaskController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create', 'update', 'set-status', 'set-end-date'],
+                        'actions' => ['create', 'update', 'set-status', 'set-end-date', 'assign-user', 'expel-user'],
                         'roles' => ['@']
                     ]
                 ]
@@ -58,6 +59,7 @@ class TaskController extends Controller
         if ($task->load(Yii::$app->request->post()) && $task->save()) {
             return $this->renderAjax('/bucket/item', [
                 'model' => $model,
+                'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
                 'statuses' => $this->module->statuses
             ]);
         }
@@ -65,6 +67,7 @@ class TaskController extends Controller
         return $this->renderAjax('create', [
             'model' => $model,
             'task' => $task,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }
@@ -82,6 +85,7 @@ class TaskController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $checklistElements = Yii::$app->request->getBodyParam('checklist', []);
             $newElements = ArrayHelper::remove($checklistElements, 'new', []);
+            $comment = Yii::$app->request->getBodyParam('comment');
 
             ChecklistElement::deleteAll(['not', ['id' => array_keys($checklistElements)]]);
 
@@ -99,6 +103,15 @@ class TaskController extends Controller
                 $element->task_id = $model->id;
 
                 $element->save();
+            }
+
+            if ($comment) {
+                $comment = new Comment([
+                    'task_id' => $model->id,
+                    'text' => $comment
+                ]);
+
+                $comment->save();
             }
 
             return $this->redirect(['plan/view', 'id' => $model->board->id]);
@@ -121,6 +134,7 @@ class TaskController extends Controller
         return $this->renderAjax('update', [
             'model' => $model,
             'buckets' => $buckets,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }
@@ -141,8 +155,9 @@ class TaskController extends Controller
         $model->status = $status;
         $model->save();
 
-        return $this->render('item', [
+        return $this->renderAjax('item', [
             'model' => $model,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }
@@ -164,8 +179,61 @@ class TaskController extends Controller
         $model->end_date = Yii::$app->formatter->asDate($date);
         $model->save();
 
-        return $this->render('item', [
+        return $this->renderAjax('item', [
             'model' => $model,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
+            'statuses' => $this->module->statuses
+        ]);
+    }
+
+    /**
+     * Assign user to task
+     *
+     * @param integer $id
+     * @param integer|string $userId
+     *
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionAssignUser($id, $userId)
+    {
+        $model = $this->findModel($id);
+
+        $model::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
+            'task_id' => $model->id,
+            'user_id' => $userId
+        ])->execute();
+
+        return $this->renderAjax('item', [
+            'model' => $model,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
+            'statuses' => $this->module->statuses
+        ]);
+    }
+
+    /**
+     * Assign user to task
+     *
+     * @param integer $id
+     * @param integer|string $userId
+     *
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionExpelUser($id, $userId)
+    {
+        $model = $this->findModel($id);
+
+        $model::getDb()->createCommand()->delete('{{%kanban_task_user_assignment}}', [
+            'task_id' => $model->id,
+            'user_id' => $userId
+        ])->execute();
+
+        return $this->renderAjax('item', [
+            'model' => $model,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }

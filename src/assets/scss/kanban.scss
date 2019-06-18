@@ -1,4 +1,5 @@
 $bucket-width: 300px;
+$user-image-size: 32px;
 
 .kanban-board {
     -webkit-transition: all .2s ease-in-out;
@@ -20,6 +21,26 @@ $bucket-width: 300px;
     width: $bucket-width;
 }
 
+.kanban-user {
+    > img {
+        height: $user-image-size;
+        object-fit: cover;
+        object-position: center;
+        width: $user-image-size;
+    }
+
+    > .kanban-visualisation {
+        background-color: var(--gray);
+        border-radius: 50%;
+        color: var(--white);
+        display: inline-block;
+        height: $user-image-size;
+        line-height: $user-image-size;
+        text-align: center;
+        width: $user-image-size;
+    }
+}
+
 .kanban-task {
     cursor: pointer;
 
@@ -35,6 +56,49 @@ $bucket-width: 300px;
     &:hover {
         .kanban-task-done-link {
             opacity: 1;
+        }
+    }
+
+    .kanban-task-content {
+        padding: .5rem .75rem;
+    }
+
+    .kanban-task-assignees {
+        background: none transparent;
+        padding: 0;
+
+        .dropdown {
+            .dropdown-toggle {
+                background-color: var(--white);
+                padding: .5rem .75rem;
+                -webkit-transition: background-color .2s ease-in-out;
+                -moz-transition: background-color .2s ease-in-out;
+                -o-transition: background-color .2s ease-in-out;
+                transition: background-color .2s ease-in-out;
+
+                &:hover {
+                    background-color: var(--light);
+
+                    &::after {
+                        opacity: 1;
+                    }
+                }
+
+                &::after {
+                    background: url('data:image/svg+xml,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"%3e%3cpath fill="currentColor" d="M624 208h-64v-64c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v64h-64c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h64v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-64h64c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zm-400 48c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"%3e%3c/path%3e%3c/svg%3e') no-repeat center;
+                    background-size: 75%;
+                    border: 0 none transparent;
+                    content: "";
+                    height: $user-image-size;
+                    margin-left: auto;
+                    opacity: 0;
+                    -webkit-transition: opacity .2s ease-in-out;
+                    -moz-transition: opacity .2s ease-in-out;
+                    -o-transition: opacity .2s ease-in-out;
+                    transition: opacity .2s ease-in-out;
+                    width: $user-image-size;
+                }
+            }
         }
     }
 }
@@ -65,5 +129,17 @@ $bucket-width: 300px;
 
     &:hover {
         color: var(--success);
+    }
+}
+
+.kanban-task-comment {
+    font-size: .75rem;
+
+    p {
+        margin-bottom: .75rem;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
     }
 }

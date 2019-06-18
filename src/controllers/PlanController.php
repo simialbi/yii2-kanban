@@ -70,6 +70,7 @@ class PlanController extends Controller
 
         return $this->render('view', [
             'model' => $model,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }

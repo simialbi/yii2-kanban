@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 /* @var $statuses array */
 
 KanbanAsset::register($this);
@@ -27,6 +28,7 @@ $this->params['breadcrumbs'] = [
                 <?php foreach ($model->buckets as $bucket): ?>
                     <?= $this->render('/bucket/item', [
                         'model' => $bucket,
+                        'users' => $users,
                         'statuses' => $statuses
                     ]); ?>
                 <?php endforeach; ?>
