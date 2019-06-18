@@ -56,6 +56,9 @@ use yii\web\IdentityInterface;
  * }
  * ```
  *
+ * @property-read string|null $name
+ * @property-read string|null $image
+ *
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
@@ -65,11 +68,11 @@ interface UserInterface extends IdentityInterface
      * Returns an a users profile image.
      * @return string|null A users profile image.
      */
-    public static function getImage();
+    public function getImage();
 
     /**
      * Returns an a users name (first and last name or username).
      * @return string|null A users name.
      */
-    public static function getName();
+    public function getName();
 }

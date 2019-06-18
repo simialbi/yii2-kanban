@@ -31,7 +31,7 @@ Pjax::begin([
             <small class="d-block text-muted">
                 <?= Yii::t('simialbi/kanban/task', 'Last modified {date,date} {date,time} by {user}', [
                     'date' => $model->updated_at,
-                    'user' => $model->updater->getId()
+                    'user' => $model->updater->name
                 ]); ?>
             </small>
         </h5>
