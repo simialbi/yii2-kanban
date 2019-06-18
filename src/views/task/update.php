@@ -68,8 +68,12 @@ Pjax::begin([
             ])->widget(DatePicker::class, [
                 'bsVersion' => '4',
                 'type' => DatePicker::TYPE_INPUT,
+                'options' => [
+                    'autocomplete' => 'off'
+                ],
                 'pluginOptions' => [
-                    'autoclose' => true
+                    'autoclose' => true,
+                    'startDate' => Yii::$app->formatter->asDate('now')
                 ]
             ]); ?>
             <?= $form->field($model, 'end_date', [
@@ -79,26 +83,82 @@ Pjax::begin([
             ])->widget(DatePicker::class, [
                 'bsVersion' => '4',
                 'type' => DatePicker::TYPE_INPUT,
+                'options' => [
+                    'autocomplete' => 'off'
+                ],
                 'pluginOptions' => [
-                    'autoclose' => true
+                    'autoclose' => true,
+                    'startDate' => Yii::$app->formatter->asDate('now')
                 ]
             ]); ?>
         </div>
         <div class="row">
-            <?php $descriptionInline = $form->field($model, 'card_show_checklist', [
-                'options' => ['class' => '']
-            ])->checkbox([
-                'inline' => true
-            ]); ?>
+            <?php $showDescription = $form->field($model, 'card_show_description', [
+                'options' => ['class' => ''],
+                'labelOptions' => [
+                    'class' => 'custom-control-label'
+                ],
+                'checkTemplate' => "<div class=\"custom-control custom-checkbox\">\n{input}\n{label}\n</div>"
+            ])->checkbox(['inline' => true, 'class' => 'custom-control-input']); ?>
             <?= $form->field($model, 'description', [
-                'template' => "<div class=\"d-flex justify-content-between\">{label}$descriptionInline</div>\n{input}\n{hint}\n{error}",
+                'template' => "<div class=\"d-flex justify-content-between\">{label}$showDescription</div>\n{input}\n{hint}\n{error}",
                 'options' => [
                     'class' => ['form-group', 'col-12']
                 ]
             ])->textarea();?>
         </div>
         <div class="row">
-            <!-- TODO: Checklist -->
+            <div class="form-group col-12 checklist">
+                <div class="d-flex justify-content-between">
+                    <?= Html::label(Yii::t('simialbi/kanban/task', 'Checklist')); ?>
+                    <?= $form->field($model, 'card_show_checklist', [
+                        'options' => ['class' => ''],
+                        'labelOptions' => [
+                            'class' => 'custom-control-label'
+                        ],
+                        'checkTemplate' => "<div class=\"custom-control custom-checkbox\">\n{input}\n{label}\n</div>"
+                    ])->checkbox(['inline' => true, 'class' => 'custom-control-input']); ?>
+                </div>
+                <?php foreach ($model->checklistElements as $checklistElement): ?>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <?= Html::hiddenInput('checklist[' . $checklistElement->id . '][is_done]', 0); ?>
+                                <?= Html::checkbox(
+                                    'checklist[' . $checklistElement->id . '][is_done]',
+                                    $checklistElement->is_done
+                                ); ?>
+                            </div>
+                        </div>
+                        <?= Html::input(
+                            'text',
+                            'checklist[' . $checklistElement->id . '][name]',
+                            Html::encode($checklistElement->name),
+                            [
+                                'class' => ['form-control'],
+                                'style' => [
+                                    'text-decoration' => $checklistElement->is_done ? 'line-through' : 'none'
+                                ]
+                            ]
+                        ); ?>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-danger remove-checklist-element">
+                                <?= FAS::i('trash-alt'); ?>
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <div class="input-group add-checklist-element mb-3">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">
+                            <?= Html::checkbox('checklist[new][][is_done]', false); ?>
+                        </div>
+                    </div>
+                    <?= Html::input('text', 'checklist[new][][name]', null, [
+                        'class' => ['form-control']
+                    ]); ?>
+                </div>
+            </div>
         </div>
         <div class="row">
             <!-- TODO: Attachments -->
@@ -121,9 +181,6 @@ Pjax::begin([
         <?= Html::submitButton(Yii::t('simialbi/kanban', 'Save'), [
             'type' => 'button',
             'class' => ['btn', 'btn-success'],
-            'data' => [
-                'dismiss' => 'modal'
-            ],
             'aria' => [
                 'label' => Yii::t('simialbi/kanban', 'Save')
             ]

@@ -13,7 +13,6 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\web\IdentityInterface;
 
 /**
  * Class Bucket
@@ -28,8 +27,8 @@ use yii\web\IdentityInterface;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
- * @property-read IdentityInterface $author
- * @property-read IdentityInterface $updater
+ * @property-read UserInterface $author
+ * @property-read UserInterface $updater
  * @property-read Board $board
  * @property-read Task[] $tasks
  */
@@ -51,6 +50,8 @@ class Bucket extends ActiveRecord
         return [
             [['id', 'board_id'], 'integer'],
             ['name', 'string', 'max' => 255],
+
+            ['board_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             [['board_id', 'name'], 'required']
         ];
@@ -102,7 +103,7 @@ class Bucket extends ActiveRecord
 
     /**
      * Get author
-     * @return IdentityInterface
+     * @return UserInterface
      */
     public function getAuthor()
     {
@@ -133,6 +134,6 @@ class Bucket extends ActiveRecord
      */
     public function getTasks()
     {
-        return $this->hasMany(Task::class, ['bucket_id' => 'id']);
+        return $this->hasMany(Task::class, ['bucket_id' => 'id'])->orderBy(['sort' => SORT_ASC]);
     }
 }

@@ -8,6 +8,7 @@ use yii\widgets\Pjax;
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Bucket */
 /* @var $task \simialbi\yii2\kanban\models\Task */
+/* @var $statuses array */
 
 ?>
 
@@ -62,7 +63,10 @@ use yii\widgets\Pjax;
     <?php ActiveForm::end(); ?>
 
     <?php foreach ($model->tasks as $task): ?>
-        <?= $this->render('/task/item', ['model' => $task]); ?>
+        <?= $this->render('/task/item', [
+            'model' => $task,
+            'statuses' => $statuses
+        ]); ?>
     <?php endforeach; ?>
 </div>
 <?php Pjax::end(); ?>

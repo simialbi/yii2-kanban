@@ -19,3 +19,51 @@ $bucket-width: 300px;
 .kanban-bucket {
     width: $bucket-width;
 }
+
+.kanban-task {
+    cursor: pointer;
+
+    &.status-done, &.status-0 {
+        background-color: var(--light);
+        text-decoration: line-through;
+
+        .kanban-task-done-link {
+            display: none !important;
+        }
+    }
+
+    &:hover {
+        .kanban-task-done-link {
+            opacity: 1;
+        }
+    }
+}
+
+.kanban-task-checkbox {
+    &, label {
+        cursor: pointer;
+    }
+
+    &:hover {
+        label {
+            &::before {
+                background-color: var(--light);
+            }
+
+            text-decoration: underline;
+        }
+    }
+}
+
+.kanban-task-done-link {
+    color: inherit;
+    opacity: 0;
+    -webkit-transition: opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out;
+    -moz-transition: opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out;
+    -o-transition: opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out;
+    transition: opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out;
+
+    &:hover {
+        color: var(--success);
+    }
+}

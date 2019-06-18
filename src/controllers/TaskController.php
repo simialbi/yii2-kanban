@@ -9,9 +9,11 @@ namespace simialbi\yii2\kanban\controllers;
 
 
 use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Task;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
@@ -34,7 +36,7 @@ class TaskController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create', 'update'],
+                        'actions' => ['create', 'update', 'set-status', 'set-end-date'],
                         'roles' => ['@']
                     ]
                 ]
@@ -54,12 +56,16 @@ class TaskController extends Controller
         $task = new Task(['bucket_id' => $bucketId]);
 
         if ($task->load(Yii::$app->request->post()) && $task->save()) {
-            return $this->renderAjax('/bucket/item', ['model' => $model]);
+            return $this->renderAjax('/bucket/item', [
+                'model' => $model,
+                'statuses' => $this->module->statuses
+            ]);
         }
 
         return $this->renderAjax('create', [
             'model' => $model,
-            'task' => $task
+            'task' => $task,
+            'statuses' => $this->module->statuses
         ]);
     }
 
@@ -67,10 +73,36 @@ class TaskController extends Controller
      * @param integer $id
      * @return string
      * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $checklistElements = Yii::$app->request->getBodyParam('checklist', []);
+            $newElements = ArrayHelper::remove($checklistElements, 'new', []);
+
+            ChecklistElement::deleteAll(['not', ['id' => array_keys($checklistElements)]]);
+
+            foreach ($checklistElements as $id => $checklistElement) {
+                $element = ChecklistElement::findOne($id);
+                if (!$element) {
+                    continue;
+                }
+
+                $element->setAttributes($checklistElement);
+                $element->save();
+            }
+            foreach ($newElements as $checklistElement) {
+                $element = new ChecklistElement($checklistElement);
+                $element->task_id = $model->id;
+
+                $element->save();
+            }
+
+            return $this->redirect(['plan/view', 'id' => $model->board->id]);
+        }
 
         $buckets = Bucket::find()
             ->select(['name', 'id'])
@@ -79,9 +111,61 @@ class TaskController extends Controller
             ->indexBy('id')
             ->column();
 
+        if ($model->start_date !== null) {
+            $model->start_date = Yii::$app->formatter->asDate($model->start_date);
+        }
+        if ($model->end_date !== null) {
+            $model->end_date = Yii::$app->formatter->asDate($model->end_date);
+        }
+
         return $this->renderAjax('update', [
             'model' => $model,
             'buckets' => $buckets,
+            'statuses' => $this->module->statuses
+        ]);
+    }
+
+    /**
+     * Set status of task and redirect back
+     *
+     * @param integer $id
+     * @param integer $status
+     *
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionSetStatus($id, $status)
+    {
+        $model = $this->findModel($id);
+
+        $model->status = $status;
+        $model->save();
+
+        return $this->render('item', [
+            'model' => $model,
+            'statuses' => $this->module->statuses
+        ]);
+    }
+
+    /**
+     * Set status of task and redirect back
+     *
+     * @param integer $id
+     * @param integer $date
+     *
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionSetEndDate($id, $date)
+    {
+        $model = $this->findModel($id);
+
+        $model->end_date = Yii::$app->formatter->asDate($date);
+        $model->save();
+
+        return $this->render('item', [
+            'model' => $model,
             'statuses' => $this->module->statuses
         ]);
     }

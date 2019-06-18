@@ -12,7 +12,6 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\web\IdentityInterface;
 
 /**
  * Class Board
@@ -28,8 +27,8 @@ use yii\web\IdentityInterface;
  * @property integer|string $updated_at
  *
  * @property-read string $visual
- * @property-read IdentityInterface $author
- * @property-read IdentityInterface $updater
+ * @property-read UserInterface $author
+ * @property-read UserInterface $updater
  * @property-read Bucket[] $buckets
  */
 class Board extends ActiveRecord
@@ -195,7 +194,7 @@ class Board extends ActiveRecord
 
     /**
      * Get author
-     * @return IdentityInterface
+     * @return UserInterface
      */
     public function getAuthor()
     {

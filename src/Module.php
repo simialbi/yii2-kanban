@@ -9,6 +9,8 @@ namespace simialbi\yii2\kanban;
 
 use simialbi\yii2\kanban\models\Task;
 use Yii;
+use yii\helpers\Url;
+use yii\web\View;
 
 class Module extends \simialbi\yii2\base\Module
 {
@@ -28,6 +30,16 @@ class Module extends \simialbi\yii2\base\Module
     public $statuses = [];
 
     /**
+     * @var string|null Set the user identity field containing the user name
+     */
+    public $userNameField;
+
+    /**
+     * @var string|null Set the user identity field containing the user's profile image
+     */
+    public $userImageField;
+
+    /**
      * {@inheritDoc}
      * @throws \ReflectionException
      */
@@ -44,5 +56,12 @@ class Module extends \simialbi\yii2\base\Module
                 Task::STATUS_DONE => Yii::t('simialbi/kanban/task', 'Done')
             ];
         }
+        $this->controllerMap['sort'] = [
+            'class' => 'arogachev\sortable\controllers\SortController'
+        ];
+        Yii::$app->view->registerJs(
+            "var kanbanBaseUrl = '" . Url::to(['/' . $this->id], '') . "';",
+            View::POS_HEAD
+        );
     }
 }

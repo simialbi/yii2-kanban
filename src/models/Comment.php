@@ -11,7 +11,6 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\web\IdentityInterface;
 
 /**
  * Class Comment
@@ -23,7 +22,7 @@ use yii\web\IdentityInterface;
  * @property integer $created_by
  * @property integer|string $created_at
  *
- * @property-read IdentityInterface $author
+ * @property-read UserInterface $author
  * @property-read Task $task
  * @property-read Bucket $bucket
  * @property-read Board $board
@@ -88,7 +87,7 @@ class Comment extends ActiveRecord
 
     /**
      * Get author
-     * @return IdentityInterface
+     * @return UserInterface
      */
     public function getAuthor()
     {
@@ -110,7 +109,7 @@ class Comment extends ActiveRecord
      */
     public function getBucket()
     {
-        return $this->hasOne(Bucket::class, ['id' => 'task_id'])->via('task');
+        return $this->hasOne(Bucket::class, ['id' => 'bucket_id'])->via('task');
     }
 
     /**
@@ -119,6 +118,6 @@ class Comment extends ActiveRecord
      */
     public function getBoard()
     {
-        return $this->hasOne(Board::class, ['id' => 'task_id'])->via('bucket');
+        return $this->hasOne(Board::class, ['id' => 'board_id'])->via('bucket');
     }
 }

@@ -12,7 +12,6 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\web\IdentityInterface;
 
 /**
  * Class Attachment
@@ -30,8 +29,8 @@ use yii\web\IdentityInterface;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
- * @property-read IdentityInterface $author
- * @property-read IdentityInterface $updater
+ * @property-read UserInterface $author
+ * @property-read UserInterface $updater
  * @property-read Task $task
  */
 class Attachment extends ActiveRecord
@@ -106,7 +105,7 @@ class Attachment extends ActiveRecord
 
     /**
      * Get author
-     * @return IdentityInterface
+     * @return UserInterface
      */
     public function getAuthor()
     {

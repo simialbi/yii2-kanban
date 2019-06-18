@@ -46,6 +46,8 @@ class ChecklistElement extends ActiveRecord
 
             ['is_done', 'default', 'value' => false],
 
+            ['task_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
             [['task_id', 'name', 'is_done'], 'required']
         ];
     }

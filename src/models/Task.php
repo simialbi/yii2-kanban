@@ -7,13 +7,12 @@
 
 namespace simialbi\yii2\kanban\models;
 
-
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\web\IdentityInterface;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class Task
@@ -34,8 +33,9 @@ use yii\web\IdentityInterface;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
- * @property-read IdentityInterface $author
- * @property-read IdentityInterface $updater
+ * @property-read string $checklistStats
+ * @property-read UserInterface $author
+ * @property-read UserInterface $updater
  * @property-read Bucket $bucket
  * @property-read Board $board
  * @property-read ChecklistElement[] $checklistElements
@@ -69,6 +69,8 @@ class Task extends ActiveRecord
             ['end_date', 'date', 'timestampAttribute' => 'end_date'],
             ['description', 'string'],
             [['card_show_description', 'card_show_checklist'], 'boolean'],
+
+            ['bucket_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['status', 'default', 'value' => self::STATUS_NOT_BEGUN],
             [['start_date', 'end_date', 'description'], 'default'],
@@ -131,9 +133,22 @@ class Task extends ActiveRecord
         ];
     }
 
+    public function getChecklistStats()
+    {
+        if (empty($this->checklistElements)) {
+            return '';
+        }
+
+        $grouped = ArrayHelper::index($this->checklistElements, null, 'is_done');
+        $done = count(ArrayHelper::getValue($grouped, '1', []));
+        $all = count($this->checklistElements);
+
+        return "$done/$all";
+    }
+
     /**
      * Get author
-     * @return IdentityInterface
+     * @return UserInterface
      */
     public function getAuthor()
     {
@@ -142,7 +157,7 @@ class Task extends ActiveRecord
 
     /**
      * Get user last updated
-     * @return mixed
+     * @return UserInterface
      */
     public function getUpdater()
     {
@@ -173,7 +188,7 @@ class Task extends ActiveRecord
      */
     public function getChecklistElements()
     {
-        return $this->hasMany(ChecklistElement::class, ['task_id' => 'id']);
+        return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])->orderBy(['sort' => SORT_ASC]);
     }
 
     /**

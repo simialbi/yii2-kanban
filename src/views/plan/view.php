@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
+/* @var $statuses array */
 
 KanbanAsset::register($this);
 
@@ -24,7 +25,10 @@ $this->params['breadcrumbs'] = [
         <div class="overflow-auto mt-5">
             <div class="d-flex flex-row">
                 <?php foreach ($model->buckets as $bucket): ?>
-                    <?= $this->render('/bucket/item', ['model' => $bucket]); ?>
+                    <?= $this->render('/bucket/item', [
+                        'model' => $bucket,
+                        'statuses' => $statuses
+                    ]); ?>
                 <?php endforeach; ?>
                 <?php Pjax::begin([
                     'id' => 'createBucketPjax',
@@ -49,6 +53,10 @@ Modal::begin([
     'id' => 'taskModal',
     'options' => [
         'class' => ['modal', 'remote', 'fade']
+    ],
+    'clientOptions' => [
+        'backdrop' => 'static',
+        'keyboard' => false
     ],
     'size' => Modal::SIZE_LARGE,
     'title' => null,

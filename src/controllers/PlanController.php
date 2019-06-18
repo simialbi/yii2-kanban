@@ -13,6 +13,12 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
+/**
+ * Class PlanController
+ * @package simialbi\yii2\kanban\controllers
+ *
+ * @property-read \simialbi\yii2\kanban\Module $module
+ */
 class PlanController extends Controller
 {
     /**
@@ -63,7 +69,8 @@ class PlanController extends Controller
         $model = $this->findModel($id);
 
         return $this->render('view', [
-            'model' => $model
+            'model' => $model,
+            'statuses' => $this->module->statuses
         ]);
     }
 
