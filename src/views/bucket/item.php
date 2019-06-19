@@ -10,7 +10,7 @@ use yii\widgets\Pjax;
 
 ?>
 
-<div class="kanban-bucket mr-4 d-flex flex-column">
+<div class="kanban-bucket mr-4 d-flex flex-column" data-id="<?= $model->id; ?>">
     <h5><?= Html::encode($model->name); ?></h5>
 
     <?php Pjax::begin([

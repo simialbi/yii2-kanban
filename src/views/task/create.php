@@ -1,6 +1,7 @@
 <?php
 
 use kartik\date\DatePicker;
+use rmrevin\yii\fontawesome\FAS;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\widgets\Pjax;
@@ -8,6 +9,7 @@ use yii\widgets\Pjax;
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Bucket */
 /* @var $task \simialbi\yii2\kanban\models\Task */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 /* @var $statuses array */
 
 ?>
@@ -37,6 +39,21 @@ use yii\widgets\Pjax;
         }
     ]); ?>
     <div class="card">
+        <?= Html::button('<span aria-hidden="true">' . FAS::i('times') . '</span>', [
+            'type' => 'button',
+            'class' => ['close', 'position-absolute'],
+            'style' => [
+                'font-size' => '1rem',
+                'right' => '.25rem'
+            ],
+            'onclick' => 'jQuery(this).closest(\'form\').remove()',
+            'data' => [
+                'dismiss' => 'card'
+            ],
+            'aria' => [
+                'label' => Yii::t('simialbi/kanban', 'Close')
+            ]
+        ]); ?>
         <div class="card-body">
             <?= $form->field($task, 'subject')->textInput(); ?>
             <?= $form->field($task, 'end_date', [
@@ -65,6 +82,7 @@ use yii\widgets\Pjax;
     <?php foreach ($model->tasks as $task): ?>
         <?= $this->render('/task/item', [
             'model' => $task,
+            'users' => $users,
             'statuses' => $statuses
         ]); ?>
     <?php endforeach; ?>

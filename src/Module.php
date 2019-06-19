@@ -56,9 +56,6 @@ class Module extends \simialbi\yii2\base\Module
                 Task::STATUS_DONE => Yii::t('simialbi/kanban/task', 'Done')
             ];
         }
-        $this->controllerMap['sort'] = [
-            'class' => 'arogachev\sortable\controllers\SortController'
-        ];
         Yii::$app->view->registerJs(
             "var kanbanBaseUrl = '" . Url::to(['/' . $this->id], '') . "';",
             View::POS_HEAD

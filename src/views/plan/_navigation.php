@@ -1,5 +1,6 @@
 <?php
 
+use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\Html;
 use yii\bootstrap4\Nav;
 
@@ -8,7 +9,7 @@ use yii\bootstrap4\Nav;
 
 ?>
 <div class="row">
-    <div class="col-12 col-md-4 d-flex flex-row align-items-center">
+    <div class="col-8 col-md-4 d-flex flex-row align-items-center">
         <?= Html::img($model->visual); ?>
         <div class="ml-3">
             <h2 class="mb-0"><?= Html::encode($model->name); ?></h2>
@@ -39,5 +40,10 @@ use yii\bootstrap4\Nav;
                 'class' => 'nav-pills'
             ]
         ]); ?>
+    </div>
+    <div class="col-4 flex-row align-items-end">
+        <?= HideSeek::widget([
+
+        ]);?>
     </div>
 </div>

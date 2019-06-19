@@ -5,6 +5,8 @@ use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Bucket */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $statuses array */
 
 ?>
 
@@ -14,7 +16,7 @@ use yii\widgets\Pjax;
     'enablePushState' => false,
     'clientOptions' => ['skipOuterContainers' => true]
 ]); ?>
-<div class="kanban-bucket">
+<div class="kanban-bucket" data-id="<?= $model->id; ?>">
     <?php $form = ActiveForm::begin([
         'action' => ['bucket/create', 'boardId' => $model->board_id],
         'id' => 'createBucketForm',
@@ -23,12 +25,13 @@ use yii\widgets\Pjax;
             return [
                 'labelOptions' => ['class' => 'sr-only'],
                 'inputOptions' => [
+                    'class' => ['form-control', 'form-control-sm'],
                     'placeholder' => $model->getAttributeLabel($attribute)
                 ]
             ];
         }
     ]); ?>
-    <?= $form->field($model, 'name')->textInput(); ?>
+    <?= $form->field($model, 'name')->textInput(['autofocus' => true]); ?>
     <?php ActiveForm::end(); ?>
 </div>
 <?php Pjax::end(); ?>

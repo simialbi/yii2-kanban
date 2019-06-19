@@ -31,10 +31,16 @@ window.sa.kanban = (function ($, baseUrl) {
             connectWith: '.kanban-tasks',
             update: function (event, ui) {
                 var $element = ui.item;
+                var $oldParent = ui.sender ? ui.sender.closest('.kanban-bucket') : $element.closest('.kanban-bucket');
                 var $newParent = $element.closest('.kanban-bucket');
                 var $before = $element.prev('.kanban-sortable');
                 var action = 'move-after';
                 var pk = null;
+                var promise;
+
+                if (ui.sender === null && ui.position.left !== ui.originalPosition.left) {
+                    return;
+                }
 
                 if (!$before.length) {
                     action = 'move-as-first';
@@ -42,12 +48,26 @@ window.sa.kanban = (function ($, baseUrl) {
                     pk = $before.data('id');
                 }
 
-                $.post(baseUrl + '/sort/' + action, {
-                    modelClass: 'simialbi\\yii2\\kanban\\models\\Task',
-                    modelPk: $element.data('id'),
-                    pk: pk
-                }, function (data) {
-                    console.log(data);
+                if ($oldParent.get(0) !== $newParent.get(0)) {
+                    promise = $.post(baseUrl + '/sort/change-parent', {
+                        modelClass: 'simialbi\\yii2\\kanban\\models\\Task',
+                        modelPk: $element.data('id'),
+                        bucket_id: $newParent.data('id')
+                    });
+                } else {
+                    var dfd = $.Deferred();
+                    promise = dfd.promise();
+                    dfd.resolve();
+                }
+
+                promise.done(function () {
+                    $.post(baseUrl + '/sort/' + action, {
+                        modelClass: 'simialbi\\yii2\\kanban\\models\\Task',
+                        modelPk: $element.data('id'),
+                        pk: pk
+                    }, function (data) {
+                        console.log(data);
+                    });
                 });
             }
         });
