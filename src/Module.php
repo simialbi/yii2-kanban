@@ -56,6 +56,13 @@ class Module extends \simialbi\yii2\base\Module
                 Task::STATUS_DONE => Yii::t('simialbi/kanban/task', 'Done')
             ];
         }
+        Yii::$app->assetManager->getBundle('yii\jui\JuiAsset')->js = [
+            'ui/data.js',
+            'ui/scroll-parent.js',
+            'ui/widget.js',
+            'ui/widgets/mouse.js',
+            'ui/widgets/sortable.js'
+        ];
         Yii::$app->view->registerJs(
             "var kanbanBaseUrl = '" . Url::to(['/' . $this->id], '') . "';",
             View::POS_HEAD

@@ -11,11 +11,10 @@ use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model Task */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 /* @var $statuses array */
 
 Pjax::begin([
-    'id' => 'taskPjax' . $model->id,
+//    'id' => 'taskPjax' . $model->id,
     'enablePushState' => false,
     'options' => [
         'class' => ['kanban-sortable'],
@@ -103,9 +102,9 @@ Pjax::begin([
                     'buttonOptions' => [
                         'class' => $class,
                         'label' => FAR::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate(
-                                $model->end_date,
-                                'short'
-                            )
+                            $model->end_date,
+                            'short'
+                        )
                     ],
                     'pluginEvents' => [
                         'changeDate' => new \yii\web\JsExpression('function (e) {
@@ -187,7 +186,7 @@ Pjax::begin([
                     ];
                 }
 
-                foreach ($users as $user) {
+                foreach ($model->board->assignees as $user) {
                     foreach ($model->assignees as $assignee) {
                         if ($user->getId() === $assignee->getId()) {
                             continue 2;

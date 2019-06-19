@@ -1,14 +1,11 @@
 <?php
 
 use simialbi\yii2\kanban\KanbanAsset;
-use yii\bootstrap4\Html;
 use yii\bootstrap4\Modal;
-use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
-/* @var $statuses array */
+/* @var $buckets string */
 
 KanbanAsset::register($this);
 
@@ -25,28 +22,7 @@ $this->params['breadcrumbs'] = [
         <?= $this->render('_navigation', ['model' => $model]); ?>
         <div class="overflow-auto mt-5">
             <div class="d-flex flex-row">
-                <?php foreach ($model->buckets as $bucket): ?>
-                    <?= $this->render('/bucket/item', [
-                        'model' => $bucket,
-                        'users' => $users,
-                        'statuses' => $statuses
-                    ]); ?>
-                <?php endforeach; ?>
-                <?php Pjax::begin([
-                    'id' => 'createBucketPjax',
-                    'formSelector' => '#createBucketForm',
-                    'enablePushState' => false,
-                    'clientOptions' => ['skipOuterContainers' => true]
-                ]); ?>
-                <div class="kanban-bucket">
-                    <h5>
-                        <?= Html::a(Yii::t('simialbi/kanban/plan', 'Create bucket'), [
-                            'bucket/create',
-                            'boardId' => $model->id
-                        ]); ?>
-                    </h5>
-                </div>
-                <?php Pjax::end(); ?>
+                <?= $buckets; ?>
             </div>
         </div>
     </div>

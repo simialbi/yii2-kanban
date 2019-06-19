@@ -32,6 +32,7 @@ use yii\db\Query;
  * @property-read UserInterface $updater
  * @property-read UserInterface[] $assignees
  * @property-read Bucket[] $buckets
+ * @property-read Task[] $tasks
  */
 class Board extends ActiveRecord
 {
@@ -239,5 +240,14 @@ class Board extends ActiveRecord
     public function getBuckets()
     {
         return $this->hasMany(Bucket::class, ['board_id' => 'id']);
+    }
+
+    /**
+     * Get associated tasks
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTasks()
+    {
+        return $this->hasMany(Task::class, ['id' => 'id'])->via('buckets');
     }
 }

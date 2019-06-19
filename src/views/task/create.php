@@ -82,7 +82,6 @@ use yii\widgets\Pjax;
     <?php foreach ($model->tasks as $task): ?>
         <?= $this->render('/task/item', [
             'model' => $task,
-            'users' => $users,
             'statuses' => $statuses
         ]); ?>
     <?php endforeach; ?>

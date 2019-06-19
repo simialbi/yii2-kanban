@@ -59,7 +59,6 @@ class TaskController extends Controller
         if ($task->load(Yii::$app->request->post()) && $task->save()) {
             return $this->renderAjax('/bucket/item', [
                 'model' => $model,
-                'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
                 'statuses' => $this->module->statuses
             ]);
         }
@@ -67,7 +66,6 @@ class TaskController extends Controller
         return $this->renderAjax('create', [
             'model' => $model,
             'task' => $task,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }
@@ -157,7 +155,6 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }
@@ -207,7 +204,6 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }
@@ -233,7 +229,6 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
     }
