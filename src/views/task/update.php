@@ -3,6 +3,7 @@
 use kartik\date\DatePicker;
 use rmrevin\yii\fontawesome\FAS;
 use yii\bootstrap4\ActiveForm;
+use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
 use yii\widgets\Pjax;
 
@@ -34,15 +35,20 @@ Pjax::begin([
         ]
     ]); ?>
     <div class="modal-header">
-        <h5 class="modal-title">
-            <?= Html::encode($model->subject); ?>
-            <small class="d-block text-muted">
-                <?= Yii::t('simialbi/kanban/task', 'Last modified {date,date} {date,time} by {user}', [
-                    'date' => $model->updated_at,
-                    'user' => $model->updater->name
-                ]); ?>
-            </small>
-        </h5>
+        <?= $form->field($model, 'subject', [
+            'options' => [
+                'class' => ['my-0', 'w-100']
+            ],
+            'labelOptions' => [
+                'class' => ['sr-only']
+            ],
+            'inputOptions' => [
+                'class' => new \yii\helpers\ReplaceArrayValue(['form-control'])
+            ]
+        ])->textInput()->hint(Yii::t('simialbi/kanban/task', 'Last modified {date,date} {date,time} by {user}', [
+            'date' => $model->updated_at,
+            'user' => $model->updater->name
+        ])); ?>
         <?= Html::button('<span aria-hidden="true">' . FAS::i('times') . '</span>', [
             'type' => 'button',
             'class' => ['close'],
@@ -56,8 +62,122 @@ Pjax::begin([
     </div>
     <div class="modal-body">
         <div class="row">
-            <!-- Todo Assignees -->
+            <div class="col-12">
+                <div class="kanban-task-assignees">
+                    <div class="dropdown">
+                        <a href="javascript:;" data-toggle="dropdown"
+                           class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
+                            <?php foreach ($model->assignees as $assignee): ?>
+                                <span class="kanban-user" data-id="<?= $assignee->getId(); ?>">
+                                    <?= Html::hiddenInput('assignees[]', $assignee->getId()); ?>
+                                    <?php if ($assignee->image): ?>
+                                        <?= Html::img($assignee->image, [
+                                            'class' => ['rounded-circle', 'mr-1'],
+                                            'title' => Html::encode($assignee->name),
+                                            'data' => [
+                                                'toggle' => 'tooltip'
+                                            ]
+                                        ]); ?>
+                                    <?php else: ?>
+                                        <span class="kanban-visualisation mr-1"
+                                              title="<?= Html::encode($assignee->name); ?>"
+                                              data-toggle="tooltip">
+                                            <?= strtoupper(substr($assignee->name, 0, 1)); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </a>
+                        <?php
+                        $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
+                        foreach ($model->board->assignees as $user) {
+                            $linkOptions = [
+                                'class' => ['align-items-center', 'd-none', 'remove-assignee'],
+                                'onclick' => sprintf(
+                                    'window.sa.kanban.removeAssignee.call(this, %u);',
+                                    $user->getId()
+                                ),
+                                'data' => [
+                                    'id' => $user->getId(),
+                                    'name' => $user->name,
+                                    'image' => $user->image
+                                ]
+                            ];
+                            foreach ($model->assignees as $assignee) {
+                                if ($assignee->getId() === $user->getId()) {
+                                    Html::removeCssClass($linkOptions, 'd-none');
+                                    Html::addCssClass($linkOptions, 'd-flex');
+                                    break;
+                                }
+                            }
+
+                            $items[] = [
+                                'label' => $this->render('_user', [
+                                    'user' => $user,
+                                    'assigned' => true
+                                ]),
+                                'linkOptions' => $linkOptions,
+                                'url' => 'javascript:;'
+                            ];
+                        }
+                        $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
+                        foreach ($model->board->assignees as $user) {
+                            $linkOptions = [
+                                'class' => ['align-items-center', 'd-flex', 'add-assignee'],
+                                'onclick' => sprintf(
+                                    'window.sa.kanban.addAssignee.call(this, %u);',
+                                    $user->getId()
+                                ),
+                                'data' => [
+                                    'id' => $user->getId(),
+                                    'name' => $user->name,
+                                    'image' => $user->image
+                                ]
+                            ];
+                            foreach ($model->assignees as $assignee) {
+                                if ($assignee->getId() === $user->getId()) {
+                                    Html::addCssClass($linkOptions, 'd-none');
+                                    Html::removeCssClass($linkOptions, 'd-flex');
+                                    break;
+                                }
+                            }
+
+                            $items[] = [
+                                'label' => $this->render('_user', [
+                                    'user' => $user,
+                                    'assigned' => false
+                                ]),
+                                'linkOptions' => $linkOptions,
+                                'url' => 'javascript:;'
+                            ];
+                        }
+
+//                        $items = [];
+//                        if (!empty($assignees)) {
+//                            $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
+//                        }
+//                        $items = array_merge($items, $assignees);
+//                        if (!empty($assignees) && !empty($newUsers)) {
+//                            $items[] = '-';
+//                        }
+//                        if (!empty($newUsers)) {
+//                            $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
+//                        }
+//                        $items = array_merge($items, $newUsers);
+                        ?>
+                        <?= Dropdown::widget([
+                            'items' => $items,
+                            'encodeLabels' => false,
+                            'options' => [
+                                'class' => ['w-100']
+                            ]
+                        ]); ?>
+                    </div>
+                </div>
+            </div>
         </div>
+
+
         <div class="row">
             <?= $form->field($model, 'bucket_id', [
                 'options' => [

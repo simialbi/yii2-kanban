@@ -1,7 +1,5 @@
 <?php
 
-use simialbi\yii2\kanban\models\Task;
-
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $tasksByUser array */
@@ -14,8 +12,11 @@ foreach ($tasksByUser as $userId => $tasks) {
     echo $this->render('/bucket/_item', [
         'statuses' => $statuses,
         'id' => $userId,
-        'title' => $user->name,
+        'boardId' => $model->id,
+        'title' => empty($userId) ? Yii::t('simialbi/kanban', 'Not assigned') : $user->name,
         'tasks' => $tasks,
-        'keyName' => 'userId'
+        'keyName' => 'userId',
+        'action' => 'change-assignee',
+        'sort' => false
     ]);
 }

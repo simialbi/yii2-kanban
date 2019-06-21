@@ -136,21 +136,6 @@ class Task extends ActiveRecord
     }
 
     /**
-     * {@inheritDoc}
-     * @throws \yii\db\Exception
-     */
-    public function afterSave($insert, $changedAttributes)
-    {
-        if ($insert) {
-            static::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
-                'task_id' => $this->id,
-                'user_id' => Yii::$app->user->id
-            ])->execute();
-        }
-        parent::afterSave($insert, $changedAttributes);
-    }
-
-    /**
      * Get checklist status information
      * @return string
      */

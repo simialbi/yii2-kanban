@@ -26,22 +26,16 @@ class Module extends \simialbi\yii2\base\Module
 
     /**
      * @var array Different progress possibilities
+     *
+     * > Notice: At least "Not started" and "Done" must be defined and "Not started" must
+     *   be mapped on key 10 and "Done" on key 0
      */
     public $statuses = [];
 
     /**
-     * @var string|null Set the user identity field containing the user name
-     */
-    public $userNameField;
-
-    /**
-     * @var string|null Set the user identity field containing the user's profile image
-     */
-    public $userImageField;
-
-    /**
      * {@inheritDoc}
      * @throws \ReflectionException
+     * @throws \yii\base\InvalidConfigException
      */
     public function init()
     {
@@ -55,6 +49,13 @@ class Module extends \simialbi\yii2\base\Module
                 Task::STATUS_IN_PROGRESS => Yii::t('simialbi/kanban/task', 'In progress'),
                 Task::STATUS_DONE => Yii::t('simialbi/kanban/task', 'Done')
             ];
+        } else {
+            if (!isset($this->statuses[Task::STATUS_NOT_BEGUN])) {
+                $this->statuses[Task::STATUS_NOT_BEGUN] = Yii::t('simialbi/kanban/task', 'Not started');
+            }
+            if (!isset($this->statuses[Task::STATUS_DONE])) {
+                $this->statuses[Task::STATUS_DONE] = Yii::t('simialbi/kanban/task', 'Done');
+            }
         }
         Yii::$app->assetManager->getBundle('yii\jui\JuiAsset')->js = [
             'ui/data.js',

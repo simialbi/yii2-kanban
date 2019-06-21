@@ -16,12 +16,53 @@ window.sa.kanban = (function ($, baseUrl) {
             initTask();
             initSortable();
             initChecklist();
+        },
+        addAssignee: function (id) {
+            var $this = $(this);
+            var $assignees = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
+            var name = $this.data('name'),
+                image = $this.data('image');
+            var img;
+            if (image) {
+                img = '<img src="' + image + '" class="rounded-circle mr-1" alt="' + name + '" title="' + name + '">';
+            } else {
+                img = '<span class="kanban-visualisation mr-1" title="' + name + '">' +
+                    name.substr(0, 1).toUpperCase() +
+                    '</span>';
+            }
+            var $assignee = $(
+                '<span class="kanban-user" data-id="' + id + '">' +
+                '<input type="hidden" name="assignees[]" value="' + id + '">' +
+                img +
+                '</span>'
+            );
+            $assignees.append($assignee);
+
+            $this.removeClass('d-flex').addClass('d-none');
+            $this.closest('.dropdown-menu').find('.remove-assignee[data-id="' + id + '"]')
+                .removeClass('d-none').addClass('d-flex');
+        },
+        removeAssignee: function (id) {
+            var $this = $(this);
+            var $assignees = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
+            var $assignee = $assignees.find('.kanban-user[data-id="' + id + '"');
+
+            $assignee.remove();
+            $this.removeClass('d-flex').addClass('d-none');
+            $this.closest('.dropdown-menu').find('.add-assignee[data-id="' + id + '"]')
+                .removeClass('d-none').addClass('d-flex');
         }
     };
 
     function initTask()
     {
-        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="tooltip"]').tooltip();
+        $('.kanban-task').on('click.sa.kanban', function (evt) {
+            var element = evt.target.tagName.toLowerCase();
+            if (element === 'div' || element === 'h6') {
+                $(this).find('.kanban-task-update-link').trigger('click');
+            }
+        });
     }
 
     function initSortable()
@@ -49,11 +90,32 @@ window.sa.kanban = (function ($, baseUrl) {
                 }
 
                 if ($oldParent.get(0) !== $newParent.get(0)) {
-                    promise = $.post(baseUrl + '/sort/change-parent', {
+                    var changeAction = $oldParent.data('action'),
+                        keyName = $oldParent.data('keyName'),
+                        sort = $oldParent.data('sort');
+                    var data = {
                         modelClass: 'simialbi\\yii2\\kanban\\models\\Task',
-                        modelPk: $element.data('id'),
-                        bucket_id: $newParent.data('id')
-                    });
+                        modelPk: $element.data('id')
+                    };
+                    data[keyName] = $newParent.data('id');
+                    promise = $.post(baseUrl + '/sort/' + changeAction, data);
+                    if (!sort) {
+                        // console.log($element);
+                        // return;
+                        promise.done(function () {
+                            var event = jQuery.Event('click');
+                            var container = '#' + $element.prop('id');
+
+                            event.currentTarget = document.createElement('a');
+                            event.currentTarget.href = baseUrl + '/task/view?id=' + $element.data('id');
+                            jQuery.pjax.click(event, container, {
+                                replace: false,
+                                push: false,
+                                skipOuterContainers: true
+                            });
+                        });
+                        return;
+                    }
                 } else {
                     var dfd = $.Deferred();
                     promise = dfd.promise();

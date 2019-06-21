@@ -248,6 +248,6 @@ class Board extends ActiveRecord
      */
     public function getTasks()
     {
-        return $this->hasMany(Task::class, ['id' => 'id'])->via('buckets');
+        return $this->hasMany(Task::class, ['bucket_id' => 'id'])->via('buckets');
     }
 }

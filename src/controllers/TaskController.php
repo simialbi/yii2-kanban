@@ -8,13 +8,17 @@
 namespace simialbi\yii2\kanban\controllers;
 
 
+use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Comment;
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\models\UserInterface;
 use Yii;
+use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
@@ -26,6 +30,8 @@ use yii\web\NotFoundHttpException;
  */
 class TaskController extends Controller
 {
+    use RenderingTrait;
+
     /**
      * {@inheritDoc}
      */
@@ -37,8 +43,20 @@ class TaskController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create', 'update', 'set-status', 'set-end-date', 'assign-user', 'expel-user'],
+                        'actions' => [
+                            'create',
+                            'update',
+                            'delete',
+                            'set-status',
+                            'set-end-date',
+                            'assign-user',
+                            'expel-user'
+                        ],
                         'roles' => ['@']
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['view']
                     ]
                 ]
             ]
@@ -46,26 +64,105 @@ class TaskController extends Controller
     }
 
     /**
-     * Create a new bucket
-     * @param integer $bucketId
+     * Render task item
+     *
+     * @param string $id
+     *
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionCreate($bucketId)
+    public function actionView($id)
     {
-        $model = $this->findBucketModel($bucketId);
-        $task = new Task(['bucket_id' => $bucketId]);
+        $model = $this->findModel($id);
+
+        return $this->renderAjax('item', [
+            'model' => $model,
+            'statuses' => $this->module->statuses
+        ]);
+    }
+
+    /**
+     * Create a new bucket
+     * @param integer $boardId
+     * @param integer|null $bucketId
+     * @param integer|null $userId
+     * @param integer|null $status
+     * @param integer|null $date
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionCreate($boardId, $bucketId = null, $userId = null, $status = null, $date = null)
+    {
+        $board = $this->findBoardModel($boardId);
+        $buckets = [];
+        if (isset($bucketId)) {
+            $task = new Task(['bucket_id' => $bucketId]);
+            $keyName = 'bucketId';
+            $id = $bucketId;
+            $group = 'bucket';
+        } elseif (isset($userId)) {
+            $task = new Task();
+
+            $buckets = Bucket::find()
+                ->select(['name', 'id'])
+                ->where(['board_id' => $board->id])
+                ->orderBy(['created_at' => SORT_ASC])
+                ->indexBy('id')
+                ->column();
+            $keyName = 'userId';
+            $id = $userId;
+            $group = 'assignee';
+
+            $task->on(Task::EVENT_AFTER_INSERT, function () use ($userId, $task) {
+                $task::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
+                    'task_id' => $task->id,
+                    'user_id' => $userId
+                ])->execute();
+            });
+        } elseif (isset($status)) {
+            $task = new Task(['status' => $status]);
+
+            $buckets = Bucket::find()
+                ->select(['name', 'id'])
+                ->where(['board_id' => $board->id])
+                ->orderBy(['created_at' => SORT_ASC])
+                ->indexBy('id')
+                ->column();
+            $keyName = 'status';
+            $id = $status;
+            $group = 'status';
+        } elseif (isset($date)) {
+            $task = new Task(['end_date' => empty($date) ? null : Yii::$app->formatter->asDate($date)]);
+
+            $buckets = Bucket::find()
+                ->select(['name', 'id'])
+                ->where(['board_id' => $board->id])
+                ->orderBy(['created_at' => SORT_ASC])
+                ->indexBy('id')
+                ->column();
+            $keyName = 'date';
+            $id = $date;
+            $group = 'date';
+        } else {
+            throw new BadRequestHttpException(Yii::t('yii', 'Missing required parameters: {params}', [
+                'params' => Yii::t('simialbi/kanban/task/notification', 'One of {params}', [
+                    'params' => 'bucketId, userId, status, date'
+                ])
+            ]));
+        }
 
         if ($task->load(Yii::$app->request->post()) && $task->save()) {
-            return $this->renderAjax('/bucket/item', [
-                'model' => $model,
-                'statuses' => $this->module->statuses
-            ]);
+            return $this->redirect(['plan/view', 'id' => $board->id, 'group' => $group]);
         }
 
         return $this->renderAjax('create', [
-            'model' => $model,
+            'board' => $board,
+            'id' => $id,
+            'keyName' => $keyName,
             'task' => $task,
+            'buckets' => $buckets,
             'statuses' => $this->module->statuses
         ]);
     }
@@ -83,6 +180,7 @@ class TaskController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $checklistElements = Yii::$app->request->getBodyParam('checklist', []);
             $newElements = ArrayHelper::remove($checklistElements, 'new', []);
+            $assignees = Yii::$app->request->getBodyParam('assignees', []);
             $comment = Yii::$app->request->getBodyParam('comment');
 
             ChecklistElement::deleteAll(['not', ['id' => array_keys($checklistElements)]]);
@@ -103,6 +201,23 @@ class TaskController extends Controller
                 $element->save();
             }
 
+            try {
+                $model::getDb()->createCommand()->delete(
+                    '{{%kanban_task_user_assignment}}',
+                    ['and', ['task_id' => $model->id], ['not', ['user_id' => $assignees]]]
+                )->execute();
+            } catch (Exception $e) {
+            }
+            foreach ($assignees as $assignee) {
+                try {
+                    $model::getDb()->createCommand()->insert(
+                        '{{%kanban_task_user_assignment}}',
+                        ['task_id' => $model->id, 'user_id' => $assignee]
+                    )->execute();
+                } catch (Exception $e) {
+                }
+            }
+
             if ($comment) {
                 $comment = new Comment([
                     'task_id' => $model->id,
@@ -112,7 +227,11 @@ class TaskController extends Controller
                 $comment->save();
             }
 
-            return $this->redirect(['plan/view', 'id' => $model->board->id]);
+            return $this->redirect([
+                'plan/view',
+                'id' => $model->board->id,
+                'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+            ]);
         }
 
         $buckets = Bucket::find()
@@ -134,6 +253,28 @@ class TaskController extends Controller
             'buckets' => $buckets,
             'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
+        ]);
+    }
+
+    /**
+     * Delete task
+     *
+     * @param integer $id
+     *
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     */
+    public function actionDelete($id)
+    {
+        $model = $this->findModel($id);
+
+        $model->delete();
+
+        return $this->redirect([
+            'plan/view',
+            'id' => $model->board->id,
+            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
         ]);
     }
 
@@ -263,6 +404,42 @@ class TaskController extends Controller
     protected function findBucketModel($id)
     {
         if (($model = Bucket::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+    }
+
+    /**
+     * Finds the model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Board the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findBoardModel($id)
+    {
+        if (($model = Board::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+    }
+
+    /**
+     * Finds the model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return UserInterface the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findUserModel($id)
+    {
+        if (($model = call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));

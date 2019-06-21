@@ -11,10 +11,13 @@ use yii\widgets\Pjax;
 <?php foreach ($model->buckets as $bucket): ?>
     <?= $this->render('/bucket/_item', [
         'statuses' => $statuses,
-        'id' => $id,
+        'id' => $bucket->id,
+        'boardId' => $model->id,
         'title' => $bucket->name,
         'tasks' => $bucket->tasks,
-        'keyName' => 'bucketId'
+        'keyName' => 'bucketId',
+        'action' => 'change-parent',
+        'sort' => true
     ]); ?>
 <?php endforeach; ?>
 <?php Pjax::begin([
