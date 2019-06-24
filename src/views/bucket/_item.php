@@ -31,7 +31,7 @@ use yii\widgets\Pjax;
     ]); ?>
     <?php Pjax::end(); ?>
 
-    <div class="kanban-tasks mt-5 flex-grow-1">
+    <div class="kanban-tasks mt-4 flex-grow-1">
         <?php foreach ($tasks as $task): ?>
             <?php if (is_array($task)): ?>
                 <?php $t = new \simialbi\yii2\kanban\models\Task(); ?>

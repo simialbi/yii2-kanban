@@ -15,21 +15,29 @@ class CalendarAsset extends AssetBundle
     /**
      * {@inheritDoc}
      */
-    public $sourcePath = '@bower/fullcalendar/dist/core';
+    public $sourcePath = '@bower/fullcalendar/dist';
 
     /**
      * {@inheritDoc}
      */
     public $css = [
-        'main.css'
+        'core/main.css',
+        'daygrid/main.css',
+        'timegrid/main.css',
+        'list/main.css',
+        'bootstrap/main.css'
     ];
 
     /**
      * {@inheritDoc}
      */
     public $js = [
-        'main.js',
-        'locales-all.js'
+        'core/main.js',
+        'daygrid/main.js',
+        'timegrid/main.js',
+        'list/main.js',
+        'bootstrap/main.js',
+        'core/locales-all.js'
     ];
 
     /**

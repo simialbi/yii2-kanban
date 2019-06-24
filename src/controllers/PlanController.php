@@ -7,9 +7,13 @@
 
 namespace simialbi\yii2\kanban\controllers;
 
+use rmrevin\yii\fontawesome\FAR;
+use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\kanban\models\Task;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
@@ -73,6 +77,8 @@ class PlanController extends Controller
 
         $bucketContent = $this->renderBucketContent($model, $group);
 
+        Url::remember(['plan/view', 'id' => $id, 'group' => $group], 'plan-view');
+
         return $this->render('view', [
             'model' => $model,
             'buckets' => $bucketContent
@@ -106,17 +112,33 @@ class PlanController extends Controller
                 ? Yii::$app->formatter->asDatetime($task->start_date, 'php:c')
                 : Yii::$app->formatter->asDatetime($task->end_date, 'php:c');
 
-            $calendarTasks[] = [
+            $calendarTask = [
                 'id' => $task->id,
                 'title' => $task->subject,
                 'start' => $startDate,
-                'end' => $endDate
+                'end' => $endDate,
+                'allDay' => true,
+                'classNames' => ['border-0'],
+                'url' => Url::to(['task/update', 'id' => $task->id])
             ];
+
+            if (strtotime($endDate) < time()) {
+                $calendarTask['title'] = FAR::i('calendar-alt') . ' ' . $calendarTask['title'];
+                $calendarTask['classNames'] = ['border-0', 'bg-danger'];
+            }
+            if ($task->status !== Task::STATUS_NOT_BEGUN && $task->status !== Task::STATUS_DONE) {
+                $calendarTask['title'] = FAS::i('star-half-alt') . ' ' . $calendarTask['title'];
+            }
+
+            $calendarTasks[] = $calendarTask;
         }
+
+        Url::remember(['plan/schedule', 'id' => $id], 'plan-view');
 
         return $this->render('schedule', [
             'model' => $model,
-            'tasks' => $calendarTasks
+            'otherTasks' => $this->renderBucketContent($model, 'schedule'),
+            'calendarTasks' => $calendarTasks
         ]);
     }
 

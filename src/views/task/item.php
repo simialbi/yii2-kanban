@@ -20,7 +20,14 @@ Pjax::begin([
     'options' => [
         'class' => ['kanban-sortable'],
         'data' => [
-            'id' => $model->id
+            'id' => $model->id,
+            'event' => \yii\helpers\Json::encode([
+                'id' => $model->id,
+                'title' => $model->subject,
+                'allDay' => true,
+                'classNames' => ['border-0'],
+                'url' => Url::to(['task/update', 'id' => $model->id])
+            ])
         ]
     ],
     'clientOptions' => [
@@ -91,22 +98,26 @@ Pjax::begin([
                 </small>
             <?php endif; ?>
             <?php if ($model->end_date): ?>
-                <?php $class = ['btn', 'btn-sm', 'mr-3', 'px-0']; ?>
+                <?php $options = [
+                    'label' => FAR::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate(
+                        $model->end_date,
+                        'short'
+                    ),
+                    'class' => ['btn', 'btn-sm', 'mr-3', 'px-0']
+                ]; ?>
                 <?php if ($model->end_date < time()): ?>
-                    <?php $class[] = 'btn-danger'; ?>
+                    <?php Html::addCssClass($options, ['btn-danger', 'px-1']); ?>
+                    <?php Html::removeCssClass($options, 'px-0'); ?>
                 <?php endif; ?>
                 <?= DatePicker::widget([
                     'model' => $model,
+                    'options' => [
+                        'id' => 'task-end_date-' . $model->id
+                    ],
                     'attribute' => 'end_date',
                     'bsVersion' => '4',
                     'type' => DatePicker::TYPE_BUTTON,
-                    'buttonOptions' => [
-                        'class' => $class,
-                        'label' => FAR::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate(
-                            $model->end_date,
-                            'short'
-                        )
-                    ],
+                    'buttonOptions' => $options,
                     'pluginEvents' => [
                         'changeDate' => new \yii\web\JsExpression('function (e) {
                         var event = jQuery.Event(\'click\');

@@ -18,6 +18,7 @@ use Yii;
 use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -49,6 +50,7 @@ class TaskController extends Controller
                             'delete',
                             'set-status',
                             'set-end-date',
+                            'set-dates',
                             'assign-user',
                             'expel-user'
                         ],
@@ -227,11 +229,7 @@ class TaskController extends Controller
                 $comment->save();
             }
 
-            return $this->redirect([
-                'plan/view',
-                'id' => $model->board->id,
-                'group' => Yii::$app->request->getQueryParam('group', 'bucket')
-            ]);
+            return $this->redirect(Url::previous('plan-view'));
         }
 
         $buckets = Bucket::find()
@@ -322,6 +320,31 @@ class TaskController extends Controller
             'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
             'statuses' => $this->module->statuses
         ]);
+    }
+
+    /**
+     * Change task dates
+     *
+     * @param integer $id
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionSetDates($id)
+    {
+        $model = $this->findModel($id);
+
+        $startDate = Yii::$app->request->getBodyParam('startDate');
+        $endDate = Yii::$app->request->getBodyParam('endDate');
+
+        if ($startDate) {
+            $model->start_date = Yii::$app->formatter->asDate($startDate);
+        }
+        if ($endDate) {
+            $model->end_date = Yii::$app->formatter->asDate($endDate);
+        }
+
+        $model->save();
+        Yii::$app->response->setStatusCode(204);
     }
 
     /**

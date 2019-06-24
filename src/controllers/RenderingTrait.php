@@ -68,6 +68,13 @@ trait RenderingTrait
                 ]);
                 break;
 
+            case 'schedule':
+                $bucketContent = $this->renderPartial('/bucket/_group_schedule', [
+                    'model' => $board,
+                    'statuses' => $this->module->statuses
+                ]);
+                break;
+
             case 'bucket':
             default:
                 $bucketContent = $this->renderPartial('/bucket/_group_bucket', [
