@@ -9,7 +9,7 @@ use yii\bootstrap4\Modal;
 
 KanbanAsset::register($this);
 
-$this->title = Yii::t('simialbi/kanban/plan', $model->name);
+$this->title = $model->name;
 $this->params['breadcrumbs'] = [
     [
         'label' => Yii::t('simialbi/kanban/plan', 'Kanban Hub'),

@@ -39,7 +39,7 @@ class PlanController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view']
+                        'actions' => ['index', 'view', 'schedule']
                     ]
                 ]
             ]
@@ -76,6 +76,47 @@ class PlanController extends Controller
         return $this->render('view', [
             'model' => $model,
             'buckets' => $bucketContent
+        ]);
+    }
+
+    /**
+     * Schedule view
+     * @param integer $id
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionSchedule($id)
+    {
+        $model = $this->findModel($id);
+
+        $tasks = $model->getTasks()
+            ->where(['not', ['start_date' => null]])
+            ->orWhere(['not', ['end_date' => null]])
+            ->all();
+        /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
+
+        $calendarTasks = [];
+        foreach ($tasks as $task) {
+            /* @var $task \simialbi\yii2\kanban\models\Task */
+            $startDate = (empty($task->start_date))
+                ? Yii::$app->formatter->asDatetime($task->end_date, 'php:c')
+                : Yii::$app->formatter->asDatetime($task->start_date, 'php:c');
+            $endDate = (empty($task->end_date))
+                ? Yii::$app->formatter->asDatetime($task->start_date, 'php:c')
+                : Yii::$app->formatter->asDatetime($task->end_date, 'php:c');
+
+            $calendarTasks[] = [
+                'id' => $task->id,
+                'title' => $task->subject,
+                'start' => $startDate,
+                'end' => $endDate
+            ];
+        }
+
+        return $this->render('schedule', [
+            'model' => $model,
+            'tasks' => $calendarTasks
         ]);
     }
 

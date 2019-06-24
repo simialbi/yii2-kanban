@@ -9,7 +9,7 @@ use yii\bootstrap4\Nav;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 
 $group = Yii::$app->request->getQueryParam('group', 'bucket');
-
+$action = Yii::$app->controller->action->id;
 ?>
 <div class="row">
     <div class="col-8 col-md-4 d-flex flex-row align-items-center">
@@ -26,17 +26,19 @@ $group = Yii::$app->request->getQueryParam('group', 'bucket');
                     'label' => Yii::t('simialbi/kanban/plan', 'Board'),
                     'url' => ['view', 'id' => $model->id],
                     'linkOptions' => [],
-                    'active' => true
+                    'active' => $action === 'view'
                 ],
                 [
                     'label' => Yii::t('simialbi/kanban/plan', 'Charts'),
                     'url' => ['chart', 'id' => $model->id],
-                    'linkOptions' => []
+                    'linkOptions' => [],
+                    'active' => $action === 'chart'
                 ],
                 [
                     'label' => Yii::t('simialbi/kanban/plan', 'Schedule'),
                     'url' => ['schedule', 'id' => $model->id],
-                    'linkOptions' => []
+                    'linkOptions' => [],
+                    'active' => $action === 'schedule'
                 ]
             ],
             'options' => [
@@ -53,33 +55,35 @@ $group = Yii::$app->request->getQueryParam('group', 'bucket');
                 'list' => '.kanban-tasks'
             ]
         ]);?>
-        <?= ButtonDropdown::widget([
-            'label' => Yii::t('simialbi/kanban/plan', 'Group by <b>{group}</b>', ['group' => $group]),
-            'encodeLabel' => false,
-            'dropdown' => [
-                'items' => [
-                    [
-                        'label' => Yii::t('simialbi/kanban/plan', 'Bucket'),
-                        'url' => ['plan/view', 'id' => $model->id, 'group' => 'bucket'],
-                        'active' => ($group === 'bucket')
-                    ],
-                    [
-                        'label' => Yii::t('simialbi/kanban/plan', 'Assigned to'),
-                        'url' => ['plan/view', 'id' => $model->id, 'group' => 'assignee'],
-                        'active' => ($group === 'assignee')
-                    ],
-                    [
-                        'label' => Yii::t('simialbi/kanban/plan', 'Status'),
-                        'url' => ['plan/view', 'id' => $model->id, 'group' => 'status'],
-                        'active' => ($group === 'status')
-                    ],
-                    [
-                        'label' => Yii::t('simialbi/kanban/plan', 'End date'),
-                        'url' => ['plan/view', 'id' => $model->id, 'group' => 'date'],
-                        'active' => ($group === 'date')
+        <?php if ($action === 'view'): ?>
+            <?= ButtonDropdown::widget([
+                'label' => Yii::t('simialbi/kanban/plan', 'Group by <b>{group}</b>', ['group' => $group]),
+                'encodeLabel' => false,
+                'dropdown' => [
+                    'items' => [
+                        [
+                            'label' => Yii::t('simialbi/kanban/plan', 'Bucket'),
+                            'url' => ['plan/view', 'id' => $model->id, 'group' => 'bucket'],
+                            'active' => ($group === 'bucket')
+                        ],
+                        [
+                            'label' => Yii::t('simialbi/kanban/plan', 'Assigned to'),
+                            'url' => ['plan/view', 'id' => $model->id, 'group' => 'assignee'],
+                            'active' => ($group === 'assignee')
+                        ],
+                        [
+                            'label' => Yii::t('simialbi/kanban/plan', 'Status'),
+                            'url' => ['plan/view', 'id' => $model->id, 'group' => 'status'],
+                            'active' => ($group === 'status')
+                        ],
+                        [
+                            'label' => Yii::t('simialbi/kanban/plan', 'End date'),
+                            'url' => ['plan/view', 'id' => $model->id, 'group' => 'date'],
+                            'active' => ($group === 'date')
+                        ]
                     ]
                 ]
-            ]
-        ]); ?>
+            ]); ?>
+        <?php endif; ?>
     </div>
 </div>
