@@ -160,7 +160,7 @@ class PlanController extends Controller
 
         $query = new Query();
         $query->select([
-            'value' => new Expression('SUM({{t}}.[[id]])'),
+            'value' => new Expression('COUNT({{t}}.[[id]])'),
             '{{t}}.[[status]]'
         ])
             ->from(['p' => $model::tableName()])
@@ -173,11 +173,60 @@ class PlanController extends Controller
             $item['status'] = ArrayHelper::getValue($this->module->statuses, $item['status'], $item['status']);
         }
 
+        $query = new Query();
+        $query->select([
+            'value' => new Expression('COUNT({{t}}.[[id]])'),
+            'bucket' => '{{b}}.[[name]]',
+            '{{t}}.[[status]]'
+        ])
+            ->from(['p' => $model::tableName()])
+            ->innerJoin(['b' => Bucket::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
+            ->innerJoin(['t' => Task::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
+            ->groupBy(['{{b}}.[[id]]', '{{t}}.[[status]]'])
+            ->where(['{{p}}.[[id]]' => $id]);
+        $rows = $query->all();
+        $byBucket = [];
+        foreach ($rows as $row) {
+            ArrayHelper::setValue($byBucket, [$row['bucket'], 'bucket'], $row['bucket']);
+            ArrayHelper::setValue($byBucket, [$row['bucket'], 'status_' . $row['status']], $row['value']);
+        }
+        $byBucket = array_values($byBucket);
+
+        $query = new Query();
+        $query->select([
+            'value' => new Expression('COUNT({{t}}.[[id]])'),
+            '{{u}}.[[user_id]]',
+            '{{t}}.[[status]]'
+        ])
+            ->from(['p' => $model::tableName()])
+            ->innerJoin(['b' => Bucket::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
+            ->innerJoin(['t' => Task::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
+            ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
+            ->groupBy(['{{u}}.[[user_id]]', '{{t}}.[[status]]'])
+            ->where(['{{p}}.[[id]]' => $id]);
+        $rows = $query->all();
+        $byAssignee = [];
+        foreach ($rows as $row) {
+            $userId = $row['user_id'] ?: '0';
+            $userName = ($row['user_id'])
+                ? ArrayHelper::getValue(
+                    call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $row['user_id']),
+                    'name',
+                    Yii::t('simialbi/kanban', 'Not assigned')
+                )
+                : Yii::t('simialbi/kanban', 'Not assigned');
+            ArrayHelper::setValue($byAssignee, [$userId, 'user'], $userName);
+            ArrayHelper::setValue($byAssignee, [$userId, 'status_' . $row['status']], $row['value']);
+        }
+        $byAssignee = array_values($byAssignee);
 
         return $this->render('chart', [
             'model' => $model,
             'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
-            'byStatus' => $byStatus
+            'statuses' => $this->module->statuses,
+            'byStatus' => $byStatus,
+            'byBucket' => $byBucket,
+            'byAssignee' => $byAssignee
         ]);
     }
 
