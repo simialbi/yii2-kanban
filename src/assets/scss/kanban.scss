@@ -23,6 +23,9 @@ $user-image-size: 32px;
 }
 
 .kanban-user {
+    display: block;
+    min-height: $user-image-size;
+
     > img {
         height: $user-image-size;
         object-fit: cover;
@@ -35,11 +38,16 @@ $user-image-size: 32px;
         border-radius: 50%;
         color: var(--white);
         display: inline-block;
+        font-weight: normal;
         height: $user-image-size;
         line-height: $user-image-size;
         text-align: center;
         width: $user-image-size;
     }
+}
+
+.kanban-user-more {
+    line-height: $user-image-size;
 }
 
 .kanban-task-modal {
@@ -87,25 +95,16 @@ $user-image-size: 32px;
     }
 }
 
-.kanban-task-assignees {
+.kanban-task-assignees, .kanban-plan-assignees {
     background: none transparent;
     padding: 0;
 
     .dropdown {
         .dropdown-toggle {
-            background-color: var(--white);
             padding: .5rem .75rem;
-            -webkit-transition: background-color .2s ease-in-out;
-            -moz-transition: background-color .2s ease-in-out;
-            -o-transition: background-color .2s ease-in-out;
-            transition: background-color .2s ease-in-out;
 
-            &:hover {
-                background-color: var(--light);
-
-                &::after {
-                    opacity: 1;
-                }
+            &:hover::after {
+                opacity: 1;
             }
 
             &::after {
@@ -121,6 +120,26 @@ $user-image-size: 32px;
                 -o-transition: opacity .2s ease-in-out;
                 transition: opacity .2s ease-in-out;
                 width: $user-image-size;
+            }
+        }
+
+        .dropdown-menu {
+            min-width: $bucket-width;
+        }
+    }
+}
+
+.kanban-task-assignees {
+    .dropdown {
+        .dropdown-toggle {
+            background-color: var(--white);
+            -webkit-transition: background-color .2s ease-in-out;
+            -moz-transition: background-color .2s ease-in-out;
+            -o-transition: background-color .2s ease-in-out;
+            transition: background-color .2s ease-in-out;
+
+            &:hover {
+                background-color: var(--light);
             }
         }
     }

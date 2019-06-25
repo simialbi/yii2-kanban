@@ -9,6 +9,7 @@ use yii\web\JsExpression;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $calendarTasks array */
 /* @var $otherTasks string */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 
 KanbanAsset::register($this);
 
@@ -21,8 +22,11 @@ $this->params['breadcrumbs'] = [
     $this->title
 ];
 ?>
-<div class="kanban-plan-view">
-    <?= $this->render('_navigation', ['model' => $model]); ?>
+<div class="kanban-plan-schedule">
+    <?= $this->render('_navigation', [
+        'model' => $model,
+        'users' => $users
+    ]); ?>
     <div class="mt-5 row">
         <div class="col-12 col-lg-9">
             <?= Calendar::widget([

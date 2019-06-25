@@ -10,9 +10,13 @@ namespace simialbi\yii2\kanban\controllers;
 use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\Task;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -38,12 +42,12 @@ class PlanController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create'],
+                        'actions' => ['create', 'assign-user', 'expel-user'],
                         'roles' => ['@']
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'schedule']
+                        'actions' => ['index', 'view', 'schedule', 'chart']
                     ]
                 ]
             ]
@@ -81,7 +85,8 @@ class PlanController extends Controller
 
         return $this->render('view', [
             'model' => $model,
-            'buckets' => $bucketContent
+            'buckets' => $bucketContent,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities'])
         ]);
     }
 
@@ -138,7 +143,41 @@ class PlanController extends Controller
         return $this->render('schedule', [
             'model' => $model,
             'otherTasks' => $this->renderBucketContent($model, 'schedule'),
-            'calendarTasks' => $calendarTasks
+            'calendarTasks' => $calendarTasks,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities'])
+        ]);
+    }
+
+    /**
+     * @param integer $id
+     *
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionChart($id)
+    {
+        $model = $this->findModel($id);
+
+        $query = new Query();
+        $query->select([
+            'value' => new Expression('SUM({{t}}.[[id]])'),
+            '{{t}}.[[status]]'
+        ])
+            ->from(['p' => $model::tableName()])
+            ->innerJoin(['b' => Bucket::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
+            ->innerJoin(['t' => Task::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
+            ->groupBy(['{{t}}.[[status]]'])
+            ->where(['{{p}}.[[id]]' => $id]);
+        $byStatus = $query->all();
+        foreach ($byStatus as &$item) {
+            $item['status'] = ArrayHelper::getValue($this->module->statuses, $item['status'], $item['status']);
+        }
+
+
+        return $this->render('chart', [
+            'model' => $model,
+            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
+            'byStatus' => $byStatus
         ]);
     }
 
@@ -165,6 +204,54 @@ class PlanController extends Controller
         return $this->render('create', [
             'model' => $model
         ]);
+    }
+
+    /**
+     * Assign user to plan
+     *
+     * @param integer $id
+     * @param integer|string $userId
+     *
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionAssignUser($id, $userId)
+    {
+        $model = $this->findModel($id);
+
+        $model::getDb()->createCommand()->insert('{{%kanban_board_user_assignment}}', [
+            'board_id' => $model->id,
+            'user_id' => $userId
+        ])->execute();
+
+        return $this->redirect(Url::previous('plan-view'));
+    }
+
+    /**
+     * Assign user to plan
+     *
+     * @param integer $id
+     * @param integer|string $userId
+     *
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionExpelUser($id, $userId)
+    {
+        $model = $this->findModel($id);
+
+        $model::getDb()->createCommand()->delete('{{%kanban_board_user_assignment}}', [
+            'board_id' => $model->id,
+            'user_id' => $userId
+        ])->execute();
+        $model::getDb()->createCommand()->delete('{{%kanban_task_user_assignment}}', [
+            'task_id' => ArrayHelper::getColumn($model->tasks, 'id'),
+            'user_id' => $userId
+        ])->execute();
+
+        return $this->redirect(Url::previous('plan-view'));
     }
 
     /**

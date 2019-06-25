@@ -6,6 +6,7 @@ use yii\bootstrap4\Modal;
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $buckets string */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 
 KanbanAsset::register($this);
 
@@ -19,7 +20,10 @@ $this->params['breadcrumbs'] = [
 ];
 ?>
     <div class="kanban-plan-view">
-        <?= $this->render('_navigation', ['model' => $model]); ?>
+        <?= $this->render('_navigation', [
+            'model' => $model,
+            'users' => $users
+        ]); ?>
         <div class="overflow-auto mt-5">
             <div class="d-flex flex-row">
                 <?= $buckets; ?>
