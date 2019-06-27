@@ -1,6 +1,7 @@
 <?php
 
 use kartik\date\DatePicker;
+use kartik\file\FileInput;
 use rmrevin\yii\fontawesome\FAS;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
@@ -292,7 +293,14 @@ Pjax::begin([
             </div>
         </div>
         <div class="row">
-            <!-- TODO: Attachments -->
+            <div class="form-group col-12">
+                <?= FileInput::widget([
+                    'name' => 'attachments[]',
+                    'options' => [
+                        'multiple' => true
+                    ]
+                ]); ?>
+            </div>
         </div>
         <div class="row">
             <div class="form-group col-12">

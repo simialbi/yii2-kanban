@@ -264,7 +264,7 @@ msgstr "Neuer Plan"
 
 msgctxt "simialbi/kanban/plan"
 msgid "Create bucket"
-msgstr "Neuen Bucket"
+msgstr "Neuen Bucket hinzufügen"
 
 msgctxt "simialbi/kanban/plan"
 msgid "Create plan"
