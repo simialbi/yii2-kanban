@@ -33,6 +33,9 @@ Pjax::begin([
             'inputOptions' => [
                 'class' => ['form-control', 'form-control-sm']
             ]
+        ],
+        'options' => [
+            'enctype' => 'multipart/form-data'
         ]
     ]); ?>
     <div class="modal-header">
@@ -294,14 +297,48 @@ Pjax::begin([
         </div>
         <div class="row">
             <div class="form-group col-12">
+                <?= Html::label(Yii::t('simialbi/kanban/task', 'Attachments'), 'task-attachments', [
+                    'class' => ['col-form-label-sm', 'py-0']
+                ]); ?>
                 <?= FileInput::widget([
                     'name' => 'attachments[]',
                     'options' => [
+                        'id' => 'task-attachments',
                         'multiple' => true
-                    ]
+                    ],
+                    'pluginOptions' => [
+                        'showPreview' => false,
+                        'showUpload' => false
+                    ],
+                    'bsVersion' => '4'
                 ]); ?>
             </div>
         </div>
+    <?php if ($model->attachments): ?>
+    </div>
+    <div class="list-group list-group-flush kanban-task-attachments">
+        <?php foreach ($model->attachments as $attachment): ?>
+            <div class="list-group-item list-group-item-action d-flex flex-row justify-content-between">
+                <a href="<?= $attachment->path; ?>" target="_blank"><?= Html::encode($attachment->name); ?></a>
+                <?= $form->field($attachment, 'card_show', [
+                    'options' => ['class' => 'ml-auto mr-3 kanban-attachment-show'],
+                    'labelOptions' => [
+                        'class' => 'custom-control-label'
+                    ],
+                    'checkTemplate' => "<div class=\"custom-control custom-checkbox\">\n{input}\n{label}\n</div>"
+                ])->checkbox([
+                    'inline' => true,
+                    'class' => 'custom-control-input',
+                    'id' => 'attachment-card_show-' . $attachment->id
+                ]); ?>
+                <?= Html::a(FAS::i('trash-alt'), ['attachment/delete', 'id' => $attachment->id], [
+                    'class' => ['remove-attachment']
+                ]); ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <div class="modal-body">
+    <?php endif; ?>
         <div class="row">
             <div class="form-group col-12">
                 <?= Html::label(Yii::t('simialbi/kanban/task', 'Comments'), 'comment', [

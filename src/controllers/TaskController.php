@@ -8,6 +8,7 @@
 namespace simialbi\yii2\kanban\controllers;
 
 
+use simialbi\yii2\kanban\models\Attachment;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\ChecklistElement;
@@ -18,10 +19,12 @@ use Yii;
 use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\FileHelper;
 use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 
 /**
  * Class TaskController
@@ -184,6 +187,7 @@ class TaskController extends Controller
             $newElements = ArrayHelper::remove($checklistElements, 'new', []);
             $assignees = Yii::$app->request->getBodyParam('assignees', []);
             $comment = Yii::$app->request->getBodyParam('comment');
+            $attachments = UploadedFile::getInstancesByName('attachments');
 
             ChecklistElement::deleteAll(['not', ['id' => array_keys($checklistElements)]]);
 
@@ -227,6 +231,25 @@ class TaskController extends Controller
                 ]);
 
                 $comment->save();
+            }
+            if (!empty($attachments)) {
+                $path = Yii::getAlias('@webroot/uploads');
+                if (FileHelper::createDirectory($path)) {
+                    foreach ($attachments as $uploadedFile) {
+                        $filePath = $path . DIRECTORY_SEPARATOR . $uploadedFile->baseName . '.' . $uploadedFile->extension;
+                        if (!$uploadedFile->saveAs($filePath)) {
+                            continue;
+                        }
+                        $attachment = new Attachment([
+                            'task_id' => $model->id,
+                            'name' => $uploadedFile->name,
+                            'mime_type' => $uploadedFile->type,
+                            'size' => $uploadedFile->size,
+                            'path' => $filePath
+                        ]);
+                        $attachment->save();
+                    }
+                }
             }
 
             return $this->redirect(Url::previous('plan-view'));

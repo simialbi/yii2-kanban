@@ -93,6 +93,16 @@ $user-image-size: 32px;
             }
         }
     }
+
+    .file-drop-zone .file-preview-thumbnails {
+        &::after {
+            clear: both;
+            content: "";
+            display: table;
+            height: 0;
+            width: 0;
+        }
+    }
 }
 
 .kanban-task-assignees, .kanban-plan-assignees {
@@ -205,6 +215,22 @@ $user-image-size: 32px;
 
         &:last-child {
             margin-bottom: 0;
+        }
+    }
+}
+
+.kanban-task-attachments {
+    .kanban-attachment-show {
+        opacity: 0;
+        -webkit-transition: opacity .2s ease-in-out;
+        -moz-transition: opacity .2s ease-in-out;
+        -o-transition: opacity .2s ease-in-out;
+        transition: opacity .2s ease-in-out;
+    }
+
+    .list-group-item:hover {
+        .kanban-attachment-show {
+            opacity: 1;
         }
     }
 }
