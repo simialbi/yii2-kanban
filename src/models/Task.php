@@ -49,6 +49,7 @@ class Task extends ActiveRecord
     const STATUS_DONE = 0;
     const STATUS_IN_PROGRESS = 5;
     const STATUS_NOT_BEGUN = 10;
+    const STATUS_LATE = 15;
 
     /**
      * {@inheritDoc}

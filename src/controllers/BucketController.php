@@ -7,7 +7,9 @@
 
 namespace simialbi\yii2\kanban\controllers;
 
+use simialbi\yii2\kanban\BucketEvent;
 use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\kanban\Module;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -54,6 +56,10 @@ class BucketController extends Controller
                 'statuses' => $this->module->statuses
             ]);
         }
+
+        $this->trigger(Module::EVENT_BUCKET_CREATED, new BucketEvent([
+            'bucket' => $model
+        ]));
 
         return $this->renderAjax('create', [
             'model' => $model

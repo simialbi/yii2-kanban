@@ -3,6 +3,7 @@
 use simialbi\yii2\chart\models\Legend;
 use simialbi\yii2\chart\models\series\ColumnSeries;
 use simialbi\yii2\chart\models\series\PieSeries;
+use simialbi\yii2\chart\models\style\Color;
 use simialbi\yii2\chart\widgets\LineChart;
 use simialbi\yii2\chart\widgets\PieChart;
 use simialbi\yii2\kanban\KanbanAsset;
@@ -14,6 +15,7 @@ use simialbi\yii2\kanban\KanbanAsset;
 /* @var $byStatus array */
 /* @var $byBucket array */
 /* @var $byAssignee array */
+/* @var $colors array */
 
 KanbanAsset::register($this);
 
@@ -35,6 +37,8 @@ $pieSeries = new PieSeries([
 $js = <<<JS
 {$pieSeries->varName}.labels.template.disabled = true;
 {$pieSeries->varName}.ticks.template.disabled = true;
+{$pieSeries->varName}.slices.template.propertyFields.fill = 'color';
+{$pieSeries->varName}.slices.template.propertyFields.stroke = 'color';
 JS;
 $pieSeries->appendix = new \yii\web\JsExpression($js);
 
@@ -46,9 +50,13 @@ foreach ($statuses as $status => $label) {
             'categoryX' => 'bucket'
         ],
         'stacked' => true,
-        'name' => $label
+        'name' => $label,
+        'fill' => new Color(['hex' => \yii\helpers\ArrayHelper::getValue($colors, $status)]),
+        'stroke' => new Color(['hex' => \yii\helpers\ArrayHelper::getValue($colors, $status)])
     ]);
-    $series->appendix = new \yii\web\JsExpression("{$series->varName}.columns.template.tooltipText = \"{name}: [bold]{valueY}[/]\";");
+    $series->appendix = new \yii\web\JsExpression(
+        "{$series->varName}.columns.template.tooltipText = \"{name}: [bold]{valueY}[/]\";\n"
+    );
     $columnSeries[] = $series;
 }
 
@@ -60,9 +68,11 @@ foreach ($statuses as $status => $label) {
             'categoryY' => 'user'
         ],
         'stacked' => true,
-        'name' => $label
+        'name' => $label,
+        'fill' => new Color(['hex' => \yii\helpers\ArrayHelper::getValue($colors, $status)]),
+        'stroke' => new Color(['hex' => \yii\helpers\ArrayHelper::getValue($colors, $status)])
     ]);
-    $series->appendix = new \yii\web\JsExpression("{$series->varName}.columns.template.tooltipText = \"{name}: [bold]{valueY}[/]\";");
+    $series->appendix = new \yii\web\JsExpression("{$series->varName}.columns.template.tooltipText = \"{name}: [bold]{valueX}[/]\";");
     $barSeries[] = $series;
 }
 ?>

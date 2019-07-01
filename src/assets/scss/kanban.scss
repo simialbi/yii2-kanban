@@ -220,7 +220,7 @@ $user-image-size: 32px;
 }
 
 .kanban-task-attachments {
-    .kanban-attachment-show {
+    .kanban-attachment-show .custom-control-label {
         opacity: 0;
         -webkit-transition: opacity .2s ease-in-out;
         -moz-transition: opacity .2s ease-in-out;
@@ -228,9 +228,8 @@ $user-image-size: 32px;
         transition: opacity .2s ease-in-out;
     }
 
-    .list-group-item:hover {
-        .kanban-attachment-show {
-            opacity: 1;
-        }
+    .list-group-item:hover .kanban-attachment-show .custom-control-label,
+    .custom-control-input:checked + .custom-control-label {
+        opacity: 1;
     }
 }

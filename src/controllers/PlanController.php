@@ -9,9 +9,11 @@ namespace simialbi\yii2\kanban\controllers;
 
 use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\kanban\BoardEvent;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\Module;
 use Yii;
 use yii\db\Expression;
 use yii\db\Query;
@@ -167,9 +169,27 @@ class PlanController extends Controller
             ->innerJoin(['b' => Bucket::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
             ->innerJoin(['t' => Task::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
             ->groupBy(['{{t}}.[[status]]'])
-            ->where(['{{p}}.[[id]]' => $id]);
+            ->where(['{{p}}.[[id]]' => $id])
+            ->andWhere([
+                'or',
+                ['{{t}}.[[end_date]]' => null],
+                ['>=', '{{t}}.[[end_date]]', Yii::$app->formatter->asTimestamp('today')],
+                ['{{t}}.[[status]]' => Task::STATUS_DONE]
+            ]);
+        $query2 = clone $query;
+        $query2
+            ->select([
+                'value' => new Expression('COUNT({{t}}.[[id]])'),
+                'status' => new Expression('15')
+            ])
+            ->where(['{{p}}.[[id]]' => $id])
+            ->andWhere(['not', ['{{t}}.[[end_date]]' => null]])
+            ->andWhere(['<', '{{t}}.[[end_date]]', Yii::$app->formatter->asTimestamp('today')])
+            ->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]]);
+        $query->union($query2);
         $byStatus = $query->all();
         foreach ($byStatus as &$item) {
+            $item['color'] = ArrayHelper::getValue($this->module->statusColors, $item['status']);
             $item['status'] = ArrayHelper::getValue($this->module->statuses, $item['status'], $item['status']);
         }
 
@@ -183,7 +203,25 @@ class PlanController extends Controller
             ->innerJoin(['b' => Bucket::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
             ->innerJoin(['t' => Task::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
             ->groupBy(['{{b}}.[[id]]', '{{t}}.[[status]]'])
-            ->where(['{{p}}.[[id]]' => $id]);
+            ->where(['{{p}}.[[id]]' => $id])
+            ->andWhere([
+                'or',
+                ['{{t}}.[[end_date]]' => null],
+                ['>=', '{{t}}.[[end_date]]', Yii::$app->formatter->asTimestamp('today')],
+                ['{{t}}.[[status]]' => Task::STATUS_DONE]
+            ]);
+        $query2 = clone $query;
+        $query2
+            ->select([
+                'value' => new Expression('COUNT({{t}}.[[id]])'),
+                'bucket' => '{{b}}.[[name]]',
+                'status' => new Expression('15')
+            ])
+            ->where(['{{p}}.[[id]]' => $id])
+            ->andWhere(['not', ['{{t}}.[[end_date]]' => null]])
+            ->andWhere(['<', '{{t}}.[[end_date]]', Yii::$app->formatter->asTimestamp('today')])
+            ->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]]);
+        $query->union($query2);
         $rows = $query->all();
         $byBucket = [];
         foreach ($rows as $row) {
@@ -203,7 +241,25 @@ class PlanController extends Controller
             ->innerJoin(['t' => Task::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
             ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
             ->groupBy(['{{u}}.[[user_id]]', '{{t}}.[[status]]'])
-            ->where(['{{p}}.[[id]]' => $id]);
+            ->where(['{{p}}.[[id]]' => $id])
+            ->andWhere([
+                'or',
+                ['{{t}}.[[end_date]]' => null],
+                ['>=', '{{t}}.[[end_date]]', Yii::$app->formatter->asTimestamp('today')],
+                ['{{t}}.[[status]]' => Task::STATUS_DONE]
+            ]);
+        $query2 = clone $query;
+        $query2
+            ->select([
+                'value' => new Expression('COUNT({{t}}.[[id]])'),
+                '{{u}}.[[user_id]]',
+                'status' => new Expression('15')
+            ])
+            ->where(['{{p}}.[[id]]' => $id])
+            ->andWhere(['not', ['{{t}}.[[end_date]]' => null]])
+            ->andWhere(['<', '{{t}}.[[end_date]]', Yii::$app->formatter->asTimestamp('today')])
+            ->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]]);
+        $query->union($query2);
         $rows = $query->all();
         $byAssignee = [];
         foreach ($rows as $row) {
@@ -226,7 +282,8 @@ class PlanController extends Controller
             'statuses' => $this->module->statuses,
             'byStatus' => $byStatus,
             'byBucket' => $byBucket,
-            'byAssignee' => $byAssignee
+            'byAssignee' => $byAssignee,
+            'colors' => $this->module->statusColors
         ]);
     }
 
@@ -246,6 +303,10 @@ class PlanController extends Controller
                 'Board <b>{board}</b> created',
                 ['board' => $model->name]
             ));
+
+            $this->trigger(Module::EVENT_BOARD_CREATED, new BoardEvent([
+                'board' => $model
+            ]));
 
             return $this->redirect(['view', 'id' => $model->id]);
         }

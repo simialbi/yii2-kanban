@@ -29,6 +29,7 @@ use yii\db\ActiveRecord;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
+ * @property-read string $icon
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
  * @property-read Task $task
@@ -101,6 +102,73 @@ class Attachment extends ActiveRecord
             'created_at' => Yii::t('simialbi/kanban/model/attachment', 'Created at'),
             'updated_at' => Yii::t('simialbi/kanban/model/attachment', 'Updated at'),
         ];
+    }
+
+    public function getIcon()
+    {
+        switch ($this->mime_type) {
+            case 'image/png':
+            case 'image/jpeg':
+            case 'image/gif':
+            case 'image/wbmp':
+            case 'image/bmp':
+                return 'image';
+
+            case 'application/msword':
+            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.template':
+            case 'application/vnd.ms-word.document.macroEnabled.12':
+            case 'application/vnd.ms-word.template.macroEnabled.12':
+                return 'file-word';
+
+            case 'application/msexcel':
+            case 'application/vnd.ms-excel':
+            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.template';
+            case 'application/vnd.ms-excel.sheet.macroEnabled.12';
+            case 'application/vnd.ms-excel.template.macroEnabled.12';
+            case 'application/vnd.ms-excel.addin.macroEnabled.12';
+            case 'application/vnd.ms-excel.sheet.binary.macroEnabled.12';
+                return 'file-excel';
+
+            case 'application/mspowerpoint':
+            case 'application/vnd.ms-powerpoint':
+            case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+            case 'application/vnd.openxmlformats-officedocument.presentationml.template':
+            case 'application/vnd.openxmlformats-officedocument.presentationml.slideshow':
+            case 'application/vnd.ms-powerpoint.addin.macroEnabled.12':
+            case 'application/vnd.ms-powerpoint.presentation.macroEnabled.12':
+            case 'application/vnd.ms-powerpoint.template.macroEnabled.12':
+            case 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12':
+                return 'file-powerpoint';
+
+            case 'application/pdf':
+                return 'file-pdf';
+
+            case 'application/json':
+            case 'application/javascript':
+            case 'application/xhtml+xml':
+            case 'application/xml':
+            case 'application/x-httpd-php':
+            case 'text/css':
+            case 'text/html':
+            case 'text/javascript':
+            case 'text/xml':
+                return 'file-code';
+
+            case 'video/mpeg':
+            case 'video/mp4':
+            case 'video/ogg':
+            case 'video/quicktime':
+            case 'video/vnd.vivo':
+            case 'video/webm':
+            case 'video/x-msvideo':
+            case 'video/x-sgi-movie':
+                return 'video';
+
+            default:
+                return 'file';
+        }
     }
 
     /**

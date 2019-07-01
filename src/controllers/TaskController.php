@@ -15,6 +15,8 @@ use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Comment;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\models\UserInterface;
+use simialbi\yii2\kanban\Module;
+use simialbi\yii2\kanban\TaskEvent;
 use Yii;
 use yii\db\Exception;
 use yii\filters\AccessControl;
@@ -159,6 +161,10 @@ class TaskController extends Controller
         }
 
         if ($task->load(Yii::$app->request->post()) && $task->save()) {
+            $this->trigger(Module::EVENT_TASK_CREATED, new TaskEvent([
+                'task' => $task
+            ]));
+
             return $this->redirect(['plan/view', 'id' => $board->id, 'group' => $group]);
         }
 
@@ -177,6 +183,7 @@ class TaskController extends Controller
      * @return string
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\Exception
      */
     public function actionUpdate($id)
     {
@@ -187,7 +194,7 @@ class TaskController extends Controller
             $newElements = ArrayHelper::remove($checklistElements, 'new', []);
             $assignees = Yii::$app->request->getBodyParam('assignees', []);
             $comment = Yii::$app->request->getBodyParam('comment');
-            $attachments = UploadedFile::getInstancesByName('attachments');
+            $newAttachments = UploadedFile::getInstancesByName('attachments');
 
             ChecklistElement::deleteAll(['not', ['id' => array_keys($checklistElements)]]);
 
@@ -203,6 +210,11 @@ class TaskController extends Controller
             foreach ($newElements as $checklistElement) {
                 $element = new ChecklistElement($checklistElement);
                 $element->task_id = $model->id;
+
+                $this->trigger(Module::EVENT_CHECKLIST_CREATED, new TaskEvent([
+                    'task' => $model,
+                    'data' => $element
+                ]));
 
                 $element->save();
             }
@@ -231,11 +243,16 @@ class TaskController extends Controller
                 ]);
 
                 $comment->save();
+
+                $this->trigger(Module::EVENT_COMMENT_CREATED, new TaskEvent([
+                    'task' => $model,
+                    'data' => $comment
+                ]));
             }
-            if (!empty($attachments)) {
+            if (!empty($newAttachments)) {
                 $path = Yii::getAlias('@webroot/uploads');
                 if (FileHelper::createDirectory($path)) {
-                    foreach ($attachments as $uploadedFile) {
+                    foreach ($newAttachments as $uploadedFile) {
                         $filePath = $path . DIRECTORY_SEPARATOR . $uploadedFile->baseName . '.' . $uploadedFile->extension;
                         if (!$uploadedFile->saveAs($filePath)) {
                             continue;
@@ -245,10 +262,32 @@ class TaskController extends Controller
                             'name' => $uploadedFile->name,
                             'mime_type' => $uploadedFile->type,
                             'size' => $uploadedFile->size,
-                            'path' => $filePath
+                            'path' => Yii::getAlias('@web/uploads/' . $uploadedFile->baseName . '.' . $uploadedFile->extension)
                         ]);
                         $attachment->save();
+
+                        $this->trigger(Module::EVENT_ATTACHMENT_ADDED, new TaskEvent([
+                            'task' => $model,
+                            'data' => $attachment
+                        ]));
                     }
+                }
+            }
+
+            Attachment::loadMultiple($model->attachments, Yii::$app->request->post());
+            foreach ($model->attachments as $attachment) {
+                $attachment->save();
+            }
+
+            if ($model->isAttributeChanged('status')) {
+                $this->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
+                    'task' => $model,
+                    'data' => $model->status
+                ]));
+                if ($model->status == Task::STATUS_DONE) {
+                    $this->trigger(Module::EVENT_TASK_COMPLETED, new TaskEvent([
+                        'task' => $model
+                    ]));
                 }
             }
 
@@ -314,6 +353,17 @@ class TaskController extends Controller
 
         $model->status = $status;
         $model->save();
+
+        $this->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
+            'task' => $model,
+            'data' => $status
+        ]));
+
+        if ($status == Task::STATUS_DONE) {
+            $this->trigger(Module::EVENT_TASK_COMPLETED, new TaskEvent([
+                'task' => $model
+            ]));
+        }
 
         return $this->renderAjax('item', [
             'model' => $model,
@@ -389,6 +439,11 @@ class TaskController extends Controller
             'user_id' => $userId
         ])->execute();
 
+        $this->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+            'task' => $model,
+            'data' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
+        ]));
+
         return $this->renderAjax('item', [
             'model' => $model,
             'statuses' => $this->module->statuses
@@ -413,6 +468,11 @@ class TaskController extends Controller
             'task_id' => $model->id,
             'user_id' => $userId
         ])->execute();
+
+        $this->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+            'task' => $model,
+            'data' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
+        ]));
 
         return $this->renderAjax('item', [
             'model' => $model,

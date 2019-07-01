@@ -59,7 +59,7 @@ window.sa.kanban = (function ($, baseUrl) {
         $('[data-toggle="tooltip"]').tooltip();
         $('.kanban-task').on('click.sa.kanban', function (evt) {
             var element = evt.target.tagName.toLowerCase();
-            if (element === 'div' || element === 'h6') {
+            if (element === 'div' || element === 'h6' || element === 'img') {
                 $(this).find('.kanban-task-update-link').trigger('click');
             }
         });

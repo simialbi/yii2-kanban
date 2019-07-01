@@ -43,6 +43,11 @@ class Module extends \simialbi\yii2\base\Module
     public $statuses = [];
 
     /**
+     * @var array Colors for statuses
+     */
+    public $statusColors = [];
+
+    /**
      * {@inheritDoc}
      * @throws \ReflectionException
      * @throws \yii\base\InvalidConfigException
@@ -57,7 +62,8 @@ class Module extends \simialbi\yii2\base\Module
             $this->statuses = [
                 Task::STATUS_NOT_BEGUN => Yii::t('simialbi/kanban/task', 'Not started'),
                 Task::STATUS_IN_PROGRESS => Yii::t('simialbi/kanban/task', 'In progress'),
-                Task::STATUS_DONE => Yii::t('simialbi/kanban/task', 'Done')
+                Task::STATUS_DONE => Yii::t('simialbi/kanban/task', 'Done'),
+                Task::STATUS_LATE => Yii::t('simialbi/kanban/task', 'Late')
             ];
         } else {
             if (!isset($this->statuses[Task::STATUS_NOT_BEGUN])) {
@@ -66,6 +72,17 @@ class Module extends \simialbi\yii2\base\Module
             if (!isset($this->statuses[Task::STATUS_DONE])) {
                 $this->statuses[Task::STATUS_DONE] = Yii::t('simialbi/kanban/task', 'Done');
             }
+            if (!isset($this->statuses[Task::STATUS_LATE])) {
+                $this->statuses[Task::STATUS_LATE] = Yii::t('simialbi/kanban/task', 'Late');
+            }
+        }
+        if (empty($this->statusColors)) {
+            $this->statusColors = [
+                Task::STATUS_NOT_BEGUN => '#c8c8c8',
+                Task::STATUS_IN_PROGRESS => '#408ab7',
+                Task::STATUS_DONE => '#64b564',
+                Task::STATUS_LATE => '#d63867'
+            ];
         }
         Yii::$app->assetManager->getBundle('yii\jui\JuiAsset')->js = [
             'ui/data.js',

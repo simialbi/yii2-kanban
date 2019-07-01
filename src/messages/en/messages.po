@@ -242,38 +242,6 @@ msgctxt "simialbi/kanban/model/task"
 msgid "Updated by"
 msgstr "Updated by"
 
-msgctxt "simialbi/kanban/plan/notification"
-msgid "Board <b>{board}</b> created"
-msgstr "Board <b>{board}</b> created"
-
-msgctxt "simialbi/kanban/task"
-msgid "Checklist"
-msgstr "Checklist"
-
-msgctxt "simialbi/kanban/task"
-msgid "Comments"
-msgstr "Comments"
-
-msgctxt "simialbi/kanban/task"
-msgid "Done"
-msgstr "Done"
-
-msgctxt "simialbi/kanban/task"
-msgid "In progress"
-msgstr "In progress"
-
-msgctxt "simialbi/kanban/task"
-msgid "Last modified {date,date} {date,time} by {user}"
-msgstr "Last modified {date,date} {date,time} by {user}"
-
-msgctxt "simialbi/kanban/task"
-msgid "Not started"
-msgstr "Not started"
-
-msgctxt "simialbi/kanban/task/notification"
-msgid "One of {params}"
-msgstr "One of {params}"
-
 msgctxt "simialbi/kanban/plan"
 msgid "Assigned to"
 msgstr "Assigned to"
@@ -319,6 +287,58 @@ msgid "Schedule"
 msgstr "Schedule"
 
 msgctxt "simialbi/kanban/plan"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "simialbi/kanban/plan/notification"
+msgid "Board <b>{board}</b> created"
+msgstr "Board <b>{board}</b> created"
+
+msgctxt "simialbi/kanban/task"
+msgid "Attachments"
+msgstr "Attachments"
+
+msgctxt "simialbi/kanban/task"
+msgid "Checklist"
+msgstr "Checklist"
+
+msgctxt "simialbi/kanban/task"
+msgid "Comments"
+msgstr "Comments"
+
+msgctxt "simialbi/kanban/task"
+msgid "Done"
+msgstr "Done"
+
+msgctxt "simialbi/kanban/task"
+msgid "In progress"
+msgstr "In progress"
+
+msgctxt "simialbi/kanban/task"
+msgid "Last modified {date,date} {date,time} by {user}"
+msgstr "Last modified {date,date} {date,time} by {user}"
+
+msgctxt "simialbi/kanban/task"
+msgid "Late"
+msgstr ""
+
+msgctxt "simialbi/kanban/task"
+msgid "Not started"
+msgstr "Not started"
+
+msgctxt "simialbi/kanban/task/notification"
+msgid "One of {params}"
+msgstr "One of {params}"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Assignee"
+msgstr "Assignee"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Bucket"
+msgstr "Bucket"
+
+msgctxt "simialbi/kanban/chart"
 msgid "Status"
 msgstr "Status"
 

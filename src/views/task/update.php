@@ -317,10 +317,12 @@ Pjax::begin([
     <?php if ($model->attachments): ?>
     </div>
     <div class="list-group list-group-flush kanban-task-attachments">
+        <?php $i = 0; ?>
         <?php foreach ($model->attachments as $attachment): ?>
             <div class="list-group-item list-group-item-action d-flex flex-row justify-content-between">
                 <a href="<?= $attachment->path; ?>" target="_blank"><?= Html::encode($attachment->name); ?></a>
-                <?= $form->field($attachment, 'card_show', [
+                <?= $form->field($attachment, "[$i]id")->hiddenInput()->label(false); ?>
+                <?= $form->field($attachment, "[$i]card_show", [
                     'options' => ['class' => 'ml-auto mr-3 kanban-attachment-show'],
                     'labelOptions' => [
                         'class' => 'custom-control-label'
@@ -328,12 +330,12 @@ Pjax::begin([
                     'checkTemplate' => "<div class=\"custom-control custom-checkbox\">\n{input}\n{label}\n</div>"
                 ])->checkbox([
                     'inline' => true,
-                    'class' => 'custom-control-input',
-                    'id' => 'attachment-card_show-' . $attachment->id
+                    'class' => 'custom-control-input'
                 ]); ?>
                 <?= Html::a(FAS::i('trash-alt'), ['attachment/delete', 'id' => $attachment->id], [
                     'class' => ['remove-attachment']
                 ]); ?>
+                <?php $i++; ?>
             </div>
         <?php endforeach; ?>
     </div>

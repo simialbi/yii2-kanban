@@ -295,6 +295,10 @@ msgid "Board <b>{board}</b> created"
 msgstr "Plan <b>{board}</b> erstellt"
 
 msgctxt "simialbi/kanban/task"
+msgid "Attachments"
+msgstr "Anlagen"
+
+msgctxt "simialbi/kanban/task"
 msgid "Checklist"
 msgstr "Checkliste"
 
@@ -315,10 +319,26 @@ msgid "Last modified {date,date} {date,time} by {user}"
 msgstr "Zuletzt geändert am {date,date} {date,time} von {user}"
 
 msgctxt "simialbi/kanban/task"
+msgid "Late"
+msgstr "Verspätet"
+
+msgctxt "simialbi/kanban/task"
 msgid "Not started"
 msgstr "Nicht begonnen"
 
 msgctxt "simialbi/kanban/task/notification"
 msgid "One of {params}"
 msgstr "Eines von {params}"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Assignee"
+msgstr "Mitglieder"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Bucket"
+msgstr "Bucket"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Status"
+msgstr "Status"
 
