@@ -7,6 +7,7 @@
 
 namespace simialbi\yii2\kanban\widgets;
 
+use simialbi\yii2\web\FullCalendarAsset;
 use simialbi\yii2\widgets\Widget;
 use Yii;
 use yii\bootstrap4\Html;
@@ -84,7 +85,7 @@ class Calendar extends Widget
     {
         $id = $this->options['id'];
         $view = $this->getView();
-        $asset = CalendarAsset::register($view);
+        $asset = FullCalendarAsset::register($view);
 
         $js = [];
 
