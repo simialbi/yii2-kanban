@@ -154,7 +154,9 @@ $action = Yii::$app->controller->action->id;
             ]); ?>
             <?php if ($action === 'view'): ?>
                 <?= ButtonDropdown::widget([
-                    'label' => Yii::t('simialbi/kanban/plan', 'Group by <b>{group}</b>', ['group' => $group]),
+                    'label' => Yii::t('simialbi/kanban/plan', 'Group by <b>{group}</b>', [
+                        'group' => Yii::t('simialbi/kanban/plan', $group)
+                    ]),
                     'encodeLabel' => false,
                     'dropdown' => [
                         'items' => [

@@ -279,6 +279,22 @@ msgid "Group by <b>{group}</b>"
 msgstr "Gruppieren nach <b>{group}</b>"
 
 msgctxt "simialbi/kanban/plan"
+msgid "bucket"
+msgstr "Bucket"
+
+msgctxt "simialbi/kanban/plan"
+msgid "assignee"
+msgstr "Zugewiesen zu"
+
+msgctxt "simialbi/kanban/plan"
+msgid "status"
+msgstr "Status"
+
+msgctxt "simialbi/kanban/plan"
+msgid "date"
+msgstr "Fälligkeitsdatum"
+
+msgctxt "simialbi/kanban/plan"
 msgid "Kanban Hub"
 msgstr "Kanban Hub"
 
