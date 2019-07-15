@@ -60,10 +60,28 @@ class ToDo extends Widget
         Html::addCssClass($options, ['widget' => 'list-group']);
         $html = Html::beginTag('div', $options);
 
-        $options = $this->itemOptions;
-        Html::addCssClass($options, ['widget' => 'list-group-item list-group-item-action']);
         foreach ($tasks->all() as $task) {
+            $options = $this->itemOptions;
+            Html::addCssClass($options, ['widget' => 'list-group-item list-group-item-action']);
             $options['href'] = Url::to(['/schedule/plan/view', 'id' => $task->board->id]);
+
+            $content = Html::tag('h6', $task->subject, ['class' => ['m-0']]);
+            $small = $task->board->name;
+            if ($task->getChecklistElements()->count()) {
+                $small .= '&nbsp;&bull;&nbsp;' . $task->getChecklistStats();
+            }
+            if ($task->end_date) {
+                if ($task->end_date < time()) {
+                    Html::addCssClass($options, 'list-group-item-danger');
+                }
+                $small .= '&nbsp;&bull;&nbsp;' . FAR::i('calendar') . ' ';
+                $small .= Yii::$app->formatter->asDate($task->end_date, 'short');
+            }
+            if ($task->getComments()->count()) {
+                $small .= '&nbsp;&bull;&nbsp;' . FAR::i('sticky-note');
+            }
+            $content .= Html::tag('small', $small);
+
             $html .= Html::beginTag('a', $options);
             $html .= Html::beginTag('div', [
                 'class' => ['custom-control', 'custom-checkbox']
@@ -76,20 +94,6 @@ class ToDo extends Widget
                     'task-id' => $task->id
                 ]
             ]);
-
-            $content = Html::tag('h6', $task->subject, ['class' => ['m-0']]);
-            $small = $task->board->name;
-            if ($task->getChecklistElements()->count()) {
-                $small .= '&nbsp;&bull;&nbsp;' . $task->getChecklistStats();
-            }
-            if ($task->end_date) {
-                $small .= '&nbsp;&bull;&nbsp;' . FAR::i('calendar') . ' ';
-                $small .= Yii::$app->formatter->asDate($task->end_date, 'short');
-            }
-            if ($task->getComments()->count()) {
-                $small .= '&nbsp;&bull;&nbsp;' . FAR::i('sticky-note');
-            }
-            $content .= Html::tag('small', $small);
 
             $html .= Html::label($content, 'sa-kanban-status-' . $task->id, [
                 'class' => ['custom-control-label']
