@@ -321,7 +321,6 @@ Pjax::begin([
         <?php foreach ($model->attachments as $attachment): ?>
             <div class="list-group-item list-group-item-action d-flex flex-row justify-content-between">
                 <a href="<?= $attachment->path; ?>" target="_blank"><?= Html::encode($attachment->name); ?></a>
-                <?= $form->field($attachment, "[$i]id")->hiddenInput()->label(false); ?>
                 <?= $form->field($attachment, "[$i]card_show", [
                     'options' => ['class' => 'ml-auto mr-3 kanban-attachment-show'],
                     'labelOptions' => [
@@ -351,10 +350,11 @@ Pjax::begin([
                 ]); ?>
             </div>
             <?php if (count($model->comments)): ?>
-                <div class="kanban-task-comments col-12">
+                <div class="kanban-task-comments mt-4 col-12">
+                    <?php $i = 0; ?>
                     <?php foreach ($model->comments as $comment): ?>
                         <div class="kanban-task-comment media">
-                            <div class="kanban-user mr-3">
+                            <div class="kanban-user mr-3<?php if ($i++ !== 0): ?> mt-2<?php endif; ?>">
                                 <?php if ($comment->author->image): ?>
                                     <?= Html::img($comment->author->image, [
                                         'class' => ['rounded-circle'],

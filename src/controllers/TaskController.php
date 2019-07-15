@@ -249,6 +249,12 @@ class TaskController extends Controller
                     'data' => $comment
                 ]));
             }
+
+            Attachment::loadMultiple($model->attachments, Yii::$app->request->post());
+            foreach ($model->attachments as $attachment) {
+                $attachment->save();
+            }
+
             if (!empty($newAttachments)) {
                 $path = Yii::getAlias('@webroot/uploads');
                 if (FileHelper::createDirectory($path)) {
@@ -272,11 +278,6 @@ class TaskController extends Controller
                         ]));
                     }
                 }
-            }
-
-            Attachment::loadMultiple($model->attachments, Yii::$app->request->post());
-            foreach ($model->attachments as $attachment) {
-                $attachment->save();
             }
 
             if ($model->isAttributeChanged('status')) {
