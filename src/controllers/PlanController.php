@@ -304,7 +304,7 @@ class PlanController extends Controller
                 ['board' => $model->name]
             ));
 
-            $this->trigger(Module::EVENT_BOARD_CREATED, new BoardEvent([
+            $this->module->trigger(Module::EVENT_BOARD_CREATED, new BoardEvent([
                 'board' => $model
             ]));
 

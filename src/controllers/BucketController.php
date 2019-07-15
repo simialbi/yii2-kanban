@@ -63,7 +63,7 @@ class BucketController extends Controller
             ]);
         }
 
-        $this->trigger(Module::EVENT_BUCKET_CREATED, new BucketEvent([
+        $this->module->trigger(Module::EVENT_BUCKET_CREATED, new BucketEvent([
             'bucket' => $model
         ]));
 

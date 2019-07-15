@@ -161,7 +161,7 @@ class TaskController extends Controller
         }
 
         if ($task->load(Yii::$app->request->post()) && $task->save()) {
-            $this->trigger(Module::EVENT_TASK_CREATED, new TaskEvent([
+            $this->module->trigger(Module::EVENT_TASK_CREATED, new TaskEvent([
                 'task' => $task
             ]));
 
@@ -211,7 +211,7 @@ class TaskController extends Controller
                 $element = new ChecklistElement($checklistElement);
                 $element->task_id = $model->id;
 
-                $this->trigger(Module::EVENT_CHECKLIST_CREATED, new TaskEvent([
+                $this->module->trigger(Module::EVENT_CHECKLIST_CREATED, new TaskEvent([
                     'task' => $model,
                     'data' => $element
                 ]));
@@ -244,7 +244,7 @@ class TaskController extends Controller
 
                 $comment->save();
 
-                $this->trigger(Module::EVENT_COMMENT_CREATED, new TaskEvent([
+                $this->module->trigger(Module::EVENT_COMMENT_CREATED, new TaskEvent([
                     'task' => $model,
                     'data' => $comment
                 ]));
@@ -266,7 +266,7 @@ class TaskController extends Controller
                         ]);
                         $attachment->save();
 
-                        $this->trigger(Module::EVENT_ATTACHMENT_ADDED, new TaskEvent([
+                        $this->module->trigger(Module::EVENT_ATTACHMENT_ADDED, new TaskEvent([
                             'task' => $model,
                             'data' => $attachment
                         ]));
@@ -280,12 +280,12 @@ class TaskController extends Controller
             }
 
             if ($model->isAttributeChanged('status')) {
-                $this->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
+                $this->module->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
                     'task' => $model,
                     'data' => $model->status
                 ]));
                 if ($model->status == Task::STATUS_DONE) {
-                    $this->trigger(Module::EVENT_TASK_COMPLETED, new TaskEvent([
+                    $this->module->trigger(Module::EVENT_TASK_COMPLETED, new TaskEvent([
                         'task' => $model
                     ]));
                 }
@@ -357,13 +357,13 @@ class TaskController extends Controller
         $model->status = $status;
         $model->save();
 
-        $this->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
+        $this->module->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
             'task' => $model,
             'data' => $status
         ]));
 
         if ($status == Task::STATUS_DONE) {
-            $this->trigger(Module::EVENT_TASK_COMPLETED, new TaskEvent([
+            $this->module->trigger(Module::EVENT_TASK_COMPLETED, new TaskEvent([
                 'task' => $model
             ]));
         }
@@ -442,7 +442,7 @@ class TaskController extends Controller
             'user_id' => $userId
         ])->execute();
 
-        $this->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+        $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
             'data' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
         ]));
@@ -472,7 +472,7 @@ class TaskController extends Controller
             'user_id' => $userId
         ])->execute();
 
-        $this->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+        $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
             'data' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
         ]));
