@@ -133,9 +133,10 @@ class PlanController extends Controller
 //                $calendarTask['title'] = FAR::i('calendar-alt') . ' ' . $calendarTask['title'];
                 $calendarTask['classNames'] = ['border-0', 'bg-danger'];
             }
-//            if ($task->status !== Task::STATUS_NOT_BEGUN && $task->status !== Task::STATUS_DONE) {
+            if ($task->status !== Task::STATUS_NOT_BEGUN && $task->status !== Task::STATUS_DONE) {
 //                $calendarTask['title'] = FAS::i('star-half-alt') . ' ' . $calendarTask['title'];
-//            }
+                $calendarTask['classNames'] = ['border-0', 'bg-dark'];
+            }
 
             $calendarTasks[] = $calendarTask;
         }
