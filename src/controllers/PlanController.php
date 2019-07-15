@@ -202,7 +202,7 @@ class PlanController extends Controller
             ->from(['p' => $model::tableName()])
             ->innerJoin(['b' => Bucket::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
             ->innerJoin(['t' => Task::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
-            ->groupBy(['{{b}}.[[id]]', '{{t}}.[[status]]'])
+            ->groupBy(['{{b}}.[[id]]', '{{b}}.[[name]]', '{{t}}.[[status]]'])
             ->where(['{{p}}.[[id]]' => $id])
             ->andWhere([
                 'or',

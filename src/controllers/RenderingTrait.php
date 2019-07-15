@@ -33,8 +33,8 @@ trait RenderingTrait
                     ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
                     ->innerJoin(['b' => Bucket::tableName()], '{{b}}.[[id]] = {{t}}.[[bucket_id]]')
                     ->innerJoin(['p' => Board::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
-                    ->where(['{{p}}.[[id]]' => $board->id])
-                    ->groupBy(['user_id', 'id']);
+                    ->where(['{{p}}.[[id]]' => $board->id]);
+//                    ->groupBy(['{{u}}.[[user_id]]', '{{t}}.[[id]]']);
                 $tasks = ArrayHelper::index($query->all(), null, 'user_id');
 
                 $bucketContent = $this->renderPartial('/bucket/_group_assignee', [
@@ -45,7 +45,7 @@ trait RenderingTrait
                 break;
 
             case 'status':
-                $tasks = ArrayHelper::index($board->getTasks()->groupBy(['status', 'id'])->all(), null, 'status');
+                $tasks = ArrayHelper::index($board->getTasks()->all(), null, 'status');
 
                 $bucketContent = $this->renderPartial('/bucket/_group_status', [
                     'model' => $board,
@@ -56,7 +56,7 @@ trait RenderingTrait
 
             case 'date':
                 $tasks = ArrayHelper::index(
-                    $board->getTasks()->groupBy(['end_date', 'id'])->orderBy(['end_date' => SORT_ASC])->all(),
+                    $board->getTasks()->orderBy(['end_date' => SORT_ASC])->all(),
                     null,
                     'end_date'
                 );
