@@ -15,7 +15,7 @@ use yii\widgets\Pjax;
 /* @var $statuses array */
 
 Pjax::begin([
-//    'id' => 'taskPjax' . $model->id,
+    'id' => 'taskPjax' . $model->hash,
     'enablePushState' => false,
     'options' => [
         'class' => ['kanban-sortable'],

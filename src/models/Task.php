@@ -34,6 +34,7 @@ use yii\helpers\ArrayHelper;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *
+ * @property-read string $hash
  * @property-read string $checklistStats
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
@@ -46,6 +47,11 @@ use yii\helpers\ArrayHelper;
  */
 class Task extends ActiveRecord
 {
+    /**
+     * @var string Hash
+     */
+    private $_hash;
+
     const STATUS_DONE = 0;
     const STATUS_IN_PROGRESS = 5;
     const STATUS_NOT_BEGUN = 10;
@@ -134,6 +140,23 @@ class Task extends ActiveRecord
             'created_at' => Yii::t('simialbi/kanban/model/task', 'Created at'),
             'updated_at' => Yii::t('simialbi/kanban/model/task', 'Updated at'),
         ];
+    }
+
+    /**
+     * Generate unique hash per task
+     * @return string
+     */
+    public function getHash()
+    {
+        if (!$this->_hash) {
+            $string = $this->id . $this->bucket_id . $this->board->id . $this->status . $this->end_date . $this->subject;
+            foreach ($this->assignees as $assignee) {
+                $string .= $assignee->getId();
+            }
+            $this->_hash = md5($string);
+        }
+
+        return $this->_hash;
     }
 
     /**
