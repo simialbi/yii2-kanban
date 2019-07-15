@@ -8,7 +8,7 @@ use yii\bootstrap4\Html;
 /* @var $assigned boolean */
 
 ?>
-<span class="kanban-user">
+<span class="kanban-user text-truncate">
     <?php if ($user->image): ?>
         <?= Html::img($user->image, ['class' => ['rounded-circle', 'mr-3']]); ?>
     <?php else: ?>
