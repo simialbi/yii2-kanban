@@ -18,6 +18,7 @@ class Module extends \simialbi\yii2\base\Module
     const EVENT_BUCKET_CREATED = 'bucketCreated';
     const EVENT_TASK_CREATED = 'taskCreated';
     const EVENT_TASK_ASSIGNED = 'taskAssigned';
+    const EVENT_TASK_UNASSIGNED = 'taskUnassigned';
     const EVENT_TASK_STATUS_CHANGED = 'taskStatusChanged';
     const EVENT_TASK_COMPLETED = 'taskCompleted';
     const EVENT_CHECKLIST_CREATED = 'checklistCreated';

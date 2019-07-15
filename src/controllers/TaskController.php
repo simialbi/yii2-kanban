@@ -473,7 +473,7 @@ class TaskController extends Controller
             'user_id' => $userId
         ])->execute();
 
-        $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+        $this->module->trigger(Module::EVENT_TASK_UNASSIGNED, new TaskEvent([
             'task' => $model,
             'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
         ]));
