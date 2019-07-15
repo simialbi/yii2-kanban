@@ -55,6 +55,7 @@ class BucketController extends Controller
                 'statuses' => $this->module->statuses,
                 'id' => $model->id,
                 'boardId' => $model->board_id,
+                'title' => $model->name,
                 'tasks' => $model->tasks,
                 'keyName' => 'bucketId',
                 'action' => 'change-parent',
