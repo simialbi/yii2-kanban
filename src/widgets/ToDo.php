@@ -8,10 +8,12 @@
 namespace simialbi\yii2\kanban\widgets;
 
 
+use rmrevin\yii\fontawesome\FAR;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\widgets\Widget;
 use Yii;
 use yii\bootstrap4\Html;
+use yii\helpers\Url;
 
 /**
  *
@@ -39,6 +41,7 @@ class ToDo extends Widget
 
     /**
      * {@inheritDoc}
+     * @throws \yii\base\InvalidConfigException
      */
     public function run()
     {
@@ -60,7 +63,7 @@ class ToDo extends Widget
         $options = $this->itemOptions;
         Html::addCssClass($options, ['widget' => 'list-group-item list-group-item-action']);
         foreach ($tasks->all() as $task) {
-            $options['href'] = ['plan/view', 'id' => $task->id];
+            $options['href'] = Url::to(['/schedule/plan/view', 'id' => $task->board->id]);
             $html .= Html::beginTag('a', $options);
             $html .= Html::beginTag('div', [
                 'class' => ['custom-control', 'custom-checkbox']
@@ -73,13 +76,52 @@ class ToDo extends Widget
                     'task-id' => $task->id
                 ]
             ]);
-            $html .= Html::label($task->subject, 'sa-kanban-status-' . $task->id);
+
+            $content = Html::tag('h6', $task->subject, ['class' => ['m-0']]);
+            $small = $task->board->name;
+            if ($task->getChecklistElements()->count()) {
+                $small .= '&nbsp;&bull;&nbsp;' . $task->getChecklistStats();
+            }
+            if ($task->end_date) {
+                $small .= '&nbsp;&bull;&nbsp;' . FAR::i('calendar') . ' ';
+                $small .= Yii::$app->formatter->asDate($task->end_date, 'short');
+            }
+            if ($task->getComments()->count()) {
+                $small .= '&nbsp;&bull;&nbsp;' . FAR::i('sticky-note');
+            }
+            $content .= Html::tag('small', $small);
+
+            $html .= Html::label($content, 'sa-kanban-status-' . $task->id, [
+                'class' => ['custom-control-label']
+            ]);
             $html .= Html::endTag('div');
             $html .= Html::endTag('a');
         }
 
         $html .= Html::endTag('div');
 
+        $this->registerPlugin();
+
         return $html;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function registerPlugin($pluginName = null)
+    {
+        $id = $this->options['id'];
+        $url = Url::to(['/schedule/task/set-status']);
+        $js = <<<JS
+jQuery('#$id input[type="checkbox"]').on('change', function () {
+	var that = jQuery(this);
+	var id = that.data('taskId');
+	$.get('$url?id=' + id + '&status=0', function () {
+		that.closest('.list-group-item').remove();
+	});
+});
+JS;
+
+        $this->view->registerJs($js);
     }
 }
