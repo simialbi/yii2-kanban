@@ -51,9 +51,14 @@ class BucketController extends Controller
         $model = new Bucket(['board_id' => $boardId]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->renderAjax('item', [
-                'model' => $model,
-                'statuses' => $this->module->statuses
+            return $this->renderAjax('_item', [
+                'statuses' => $this->module->statuses,
+                'id' => $model->id,
+                'boardId' => $model->board_id,
+                'tasks' => $model->tasks,
+                'keyName' => 'bucketId',
+                'action' => 'change-parent',
+                'sort' => true
             ]);
         }
 

@@ -107,6 +107,9 @@ $attachments = $model->getAttachments()->where(['card_show' => true])->all();
                         <?php
                         $items = [];
                         foreach ($statuses as $status => $label) {
+                            if ($status === Task::STATUS_LATE) {
+                                continue;
+                            }
                             $items[] = [
                                 'label' => $label,
                                 'url' => ['task/set-status', 'id' => $model->id, 'status' => $status]

@@ -308,6 +308,9 @@ class TaskController extends Controller
             $model->end_date = Yii::$app->formatter->asDate($model->end_date);
         }
 
+        $statuses = $this->module->statuses;
+        unset($statuses[Task::STATUS_LATE]);
+
         return $this->renderAjax('update', [
             'model' => $model,
             'buckets' => $buckets,
