@@ -8,6 +8,7 @@
 namespace simialbi\yii2\kanban;
 
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\models\UserInterface;
 use yii\base\Event;
 
 /**
@@ -19,4 +20,9 @@ class TaskEvent extends Event
      * @var Task The board which triggered the event
      */
     public $task;
+
+    /**
+     * @var UserInterface|null The user which is important with this event
+     */
+    public $user;
 }

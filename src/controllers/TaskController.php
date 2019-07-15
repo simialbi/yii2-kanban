@@ -444,7 +444,7 @@ class TaskController extends Controller
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
-            'data' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
+            'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
         ]));
 
         return $this->renderAjax('item', [
@@ -474,7 +474,7 @@ class TaskController extends Controller
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
-            'data' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
+            'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
         ]));
 
         return $this->renderAjax('item', [

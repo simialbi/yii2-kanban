@@ -50,7 +50,7 @@ class SortController extends \arogachev\sortable\controllers\SortController
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $this->_model,
-            'data' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
+            'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
         ]));
     }
 
