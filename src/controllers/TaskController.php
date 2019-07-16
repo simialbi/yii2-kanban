@@ -232,6 +232,10 @@ class TaskController extends Controller
                         '{{%kanban_task_user_assignment}}',
                         ['task_id' => $model->id, 'user_id' => $assignee]
                     )->execute();
+                    $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+                        'task' => $model,
+                        'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $assignee)
+                    ]));
                 } catch (Exception $e) {
                 }
             }
@@ -316,7 +320,7 @@ class TaskController extends Controller
             'model' => $model,
             'buckets' => $buckets,
             'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
-            'statuses' => $this->module->statuses
+            'statuses' => $statuses
         ]);
     }
 
