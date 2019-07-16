@@ -7,8 +7,6 @@
 
 namespace simialbi\yii2\kanban\controllers;
 
-use rmrevin\yii\fontawesome\FAR;
-use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\BoardEvent;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
@@ -132,6 +130,9 @@ class PlanController extends Controller
             if (strtotime($endDate) < time()) {
 //                $calendarTask['title'] = FAR::i('calendar-alt') . ' ' . $calendarTask['title'];
                 $calendarTask['classNames'] = ['border-0', 'bg-danger'];
+            }
+            if ($task->status === Task::STATUS_DONE) {
+                $calendarTask['classNames'] = ['border-0', 'bg-success'];
             }
             if ($task->status !== Task::STATUS_NOT_BEGUN && $task->status !== Task::STATUS_DONE) {
 //                $calendarTask['title'] = FAS::i('star-half-alt') . ' ' . $calendarTask['title'];

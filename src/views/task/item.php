@@ -142,23 +142,26 @@ $attachments = $model->getAttachments()->where(['card_show' => true])->all();
                         'bsVersion' => '4',
                         'type' => DatePicker::TYPE_BUTTON,
                         'buttonOptions' => $options,
+                        'pluginOptions' => [
+                            'todayHighlight' => true
+                        ],
                         'pluginEvents' => [
                             'changeDate' => new \yii\web\JsExpression('function (e) {
-                            var event = jQuery.Event(\'click\');
-                            var container = \'#\' + jQuery(this).closest(\'[data-pjax-container]\').prop(\'id\');
-                            
-                            event.currentTarget = document.createElement(\'a\');
-                            event.currentTarget.href = \'' . Url::to([
-                                    'task/set-end-date',
-                                    'id' => $model->id
-                                ]) . '&date=\' + (e.date.getTime() / 1000)
-                            jQuery.pjax.click(event, container, {
-                                replace: false,
-                                push: false,
-                                skipOuterContainers: true
-                            });
-                            jQuery(this).kvDatepicker(\'hide\');
-                        }')
+                                var event = jQuery.Event(\'click\');
+                                var container = \'#\' + jQuery(this).closest(\'[data-pjax-container]\').prop(\'id\');
+                                
+                                event.currentTarget = document.createElement(\'a\');
+                                event.currentTarget.href = \'' . Url::to([
+                                        'task/set-end-date',
+                                        'id' => $model->id
+                                    ]) . '&date=\' + (e.date.getTime() / 1000)
+                                jQuery.pjax.click(event, container, {
+                                    replace: false,
+                                    push: false,
+                                    skipOuterContainers: true
+                                });
+                                jQuery(this).kvDatepicker(\'hide\');
+                            }')
                         ]
                     ]); ?>
                 <?php endif; ?>

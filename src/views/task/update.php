@@ -205,6 +205,7 @@ Pjax::begin([
                 ],
                 'pluginOptions' => [
                     'autoclose' => true,
+                    'todayHighlight' => true,
                     'startDate' => Yii::$app->formatter->asDate('now')
                 ]
             ]); ?>
@@ -220,6 +221,7 @@ Pjax::begin([
                 ],
                 'pluginOptions' => [
                     'autoclose' => true,
+                    'todayHighlight' => true,
                     'startDate' => Yii::$app->formatter->asDate('now')
                 ]
             ]); ?>
@@ -237,7 +239,7 @@ Pjax::begin([
                 'options' => [
                     'class' => ['form-group', 'col-12']
                 ]
-            ])->textarea();?>
+            ])->textarea(['rows' => 10]);?>
         </div>
         <div class="row">
             <div class="form-group col-12 checklist">
