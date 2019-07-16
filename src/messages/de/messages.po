@@ -312,7 +312,7 @@ msgstr "Plan <b>{board}</b> erstellt"
 
 msgctxt "simialbi/kanban/task"
 msgid "Attachments"
-msgstr "Anlagen"
+msgstr "Anhänge"
 
 msgctxt "simialbi/kanban/task"
 msgid "Checklist"

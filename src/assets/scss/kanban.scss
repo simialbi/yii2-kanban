@@ -22,6 +22,29 @@ $user-image-size: 32px;
     width: $bucket-width;
 }
 
+.kanban-bucket-more > .btn {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    opacity: 0;
+    -webkit-transition: opacity .2s ease-in-out;
+    -moz-transition: opacity .2s ease-in-out;
+    -o-transition: opacity .2s ease-in-out;
+    transition: opacity .2s ease-in-out;
+
+    &:focus {
+        opacity: 1;
+    }
+}
+
+.kanban-bucket-header {
+    &:hover {
+        .kanban-bucket-more > .btn {
+            opacity: 1;
+        }
+    }
+}
+
 .kanban-user {
     display: block;
     min-height: $user-image-size;

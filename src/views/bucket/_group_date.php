@@ -18,6 +18,7 @@ foreach ($tasksByDate as $date => $tasks) {
         'tasks' => $tasks,
         'keyName' => 'date',
         'action' => 'change-date',
-        'sort' => false
+        'sort' => false,
+        'renderContext' => false
     ]);
 }

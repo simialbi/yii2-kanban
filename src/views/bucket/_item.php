@@ -12,13 +12,21 @@ use yii\widgets\Pjax;
 /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
 /* @var $statuses array */
 /* @var $sort boolean */
+/* @var $renderContext boolean */
 
 ?>
 
 <div class="kanban-bucket mr-4 d-flex flex-column" data-id="<?= $id; ?>"
      data-sort="<?= $sort ? 'true' : 'false'; ?>" data-action="<?= $action; ?>"
      data-key-name="<?= \yii\helpers\Inflector::camel2id($keyName, '_'); ?>">
-    <h5><?= $title; ?></h5>
+    <?php if ($renderContext): ?>
+        <?= $this->render('_header', [
+            'id' => $id,
+            'title' => $title
+        ]); ?>
+    <?php else: ?>
+        <h5><?= $title; ?></h5>
+    <?php endif; ?>
 
     <?php Pjax::begin([
         'id' => 'createTaskPjax' . \yii\helpers\Inflector::slug($title),

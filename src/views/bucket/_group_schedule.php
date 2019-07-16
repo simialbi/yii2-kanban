@@ -19,7 +19,8 @@ foreach ($model->buckets as $bucket) {
         'tasks' => $tasks,
         'keyName' => 'bucketId',
         'action' => 'change-parent',
-        'sort' => true
+        'sort' => true,
+        'renderContext' => false
     ]), [
         'class' => ['mb-5']
     ]);

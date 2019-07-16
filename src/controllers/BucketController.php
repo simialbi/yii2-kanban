@@ -13,6 +13,7 @@ use simialbi\yii2\kanban\Module;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 
 /**
  * Class BucketController
@@ -33,7 +34,7 @@ class BucketController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create'],
+                        'actions' => ['create', 'update', 'delete'],
                         'roles' => ['@']
                     ]
                 ]
@@ -70,5 +71,69 @@ class BucketController extends Controller
         return $this->renderAjax('create', [
             'model' => $model
         ]);
+    }
+
+    /**
+     * Update bucket
+     *
+     * @param integer $id
+     *
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->renderAjax('_header', [
+                'id' => $model->id,
+                'title' => $model->name
+            ]);
+        }
+
+        return $this->renderAjax('update', [
+            'model' => $model
+        ]);
+    }
+
+    /**
+     * Delete bucket
+     *
+     * @param integer $id
+     *
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     */
+    public function actionDelete($id)
+    {
+        $model = $this->findModel($id);
+
+        $model->delete();
+
+        return $this->redirect([
+            'plan/view',
+            'id' => $model->board->id,
+            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+        ]);
+    }
+
+    /**
+     * Finds the Event model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Bucket the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Bucket::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
     }
 }

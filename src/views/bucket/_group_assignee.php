@@ -24,6 +24,7 @@ foreach ($tasksByUser as $userId => $tasks) {
         'tasks' => $tasks,
         'keyName' => 'userId',
         'action' => 'change-assignee',
-        'sort' => false
+        'sort' => false,
+        'renderContext' => false
     ]);
 }

@@ -16,6 +16,7 @@ foreach ($tasksByStatus as $status => $tasks) {
         'tasks' => $tasks,
         'keyName' => 'status',
         'action' => 'change-status',
-        'sort' => false
+        'sort' => false,
+        'renderContext' => false
     ]);
 }

@@ -54,6 +54,36 @@ window.sa.kanban = (function ($, baseUrl) {
         }
     };
 
+    function addChecklistElement()
+    {
+        var $this = $(this);
+        var $checklist = $(this).closest('.checklist');
+
+        if ($this.closest('.add-checklist-element').length) {
+            var $addElement = $this.closest('.add-checklist-element').clone(),
+                $inputGroup = $this.closest('.input-group'),
+                $buttonDelete = $(
+                    '<button class="btn btn-outline-danger remove-checklist-element">' +
+                    '<i class="fas fa-trash-alt"></i>' +
+                    '</button>'
+                );
+            $this.closest('.add-checklist-element').removeClass('add-checklist-element');
+            $this.attr('placeholder', $this.val());
+
+            $inputGroup.append($('<div class="input-group-append" />').append($buttonDelete));
+
+            $addElement.find('input[type="text"]').val('');
+
+            $checklist.append($addElement);
+        } else {
+            if ($this.val() === '') {
+                $this.val($this.attr('placeholder'));
+            } else {
+                $this.attr('placeholder', $this.val());
+            }
+        }
+    }
+
     function initTask()
     {
         $('[data-toggle="tooltip"]').tooltip();
@@ -137,41 +167,20 @@ window.sa.kanban = (function ($, baseUrl) {
 
     function initChecklist()
     {
-        $(document).on('change.sa.kanban', '.checklist input[type="text"]', function (evt) {
+        $(document).on('keydown.sa.kanban', '.checklist input[type="text"]', function (evt) {
             var $this = $(this);
-            var $checklist = $(this).closest('.checklist');
-
-            if ($this.closest('.add-checklist-element').length) {
-                if (evt.type === 'keyup') {
-                    if (evt.which === 13) {
-                        evt.preventDefault();
-                    } else {
-                        return;
-                    }
-                }
-
-                var $addElement = $this.closest('.add-checklist-element').clone(),
-                    $inputGroup = $this.closest('.input-group'),
-                    $buttonDelete = $(
-                        '<button class="btn btn-outline-danger remove-checklist-element">' +
-                        '<i class="fas fa-trash-alt"></i>' +
-                        '</button>'
-                    );
-                $this.closest('.add-checklist-element').removeClass('add-checklist-element');
-                $this.attr('placeholder', $this.val());
-
-                $inputGroup.append($('<div class="input-group-append" />').append($buttonDelete));
-
-                $addElement.find('input[type="text"]').val('');
-
-                $checklist.append($addElement);
-            } else {
-                if ($this.val() === '') {
-                    $this.val($this.attr('placeholder'));
-                } else {
-                    $this.attr('placeholder', $this.val());
-                }
+            var code = evt.keyCode || evt.which;
+            if ($this.val() === '') {
+                return;
             }
+            if (parseInt(code) === 9 || parseInt(code) === 13) {
+                evt.preventDefault();
+                addChecklistElement.apply(this);
+                $('.add-checklist-element input[type="text"]').focus();
+            }
+        });
+        $(document).on('change.sa.kanban', '.checklist input[type="text"]', function () {
+            addChecklistElement.apply(this);
         });
         $(document).on('click.sa.kanban', '.checklist .remove-checklist-element', function () {
             $(this).closest('.input-group').remove();

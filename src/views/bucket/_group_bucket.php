@@ -17,7 +17,8 @@ use yii\widgets\Pjax;
         'tasks' => $bucket->tasks,
         'keyName' => 'bucketId',
         'action' => 'change-parent',
-        'sort' => true
+        'sort' => true,
+        'renderContext' => true
     ]); ?>
 <?php endforeach; ?>
 <?php Pjax::begin([
