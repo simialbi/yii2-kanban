@@ -296,7 +296,9 @@ class TaskController extends Controller
                 }
             }
 
-            return $this->redirect(Url::previous('plan-view'));
+            $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->board->id];
+
+            return $this->redirect($previous);
         }
 
         $buckets = Bucket::find()
