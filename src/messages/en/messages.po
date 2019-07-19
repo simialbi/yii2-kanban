@@ -38,6 +38,10 @@ msgctxt "simialbi/kanban"
 msgid "Save"
 msgstr "Save"
 
+msgctxt "simialbi/kanban"
+msgid "Show done ({cnt,number,integer})"
+msgstr "Show done ({cnt,number,integer})"
+
 msgctxt "simialbi/kanban/model/attachment"
 msgid "Created at"
 msgstr "Created at"
@@ -336,7 +340,7 @@ msgstr "Last modified {date,date} {date,time} by {user}"
 
 msgctxt "simialbi/kanban/task"
 msgid "Late"
-msgstr ""
+msgstr "Late"
 
 msgctxt "simialbi/kanban/task"
 msgid "Not started"

@@ -38,6 +38,10 @@ msgctxt "simialbi/kanban"
 msgid "Save"
 msgstr "Speichern"
 
+msgctxt "simialbi/kanban"
+msgid "Show done ({cnt,number,integer})"
+msgstr "Erledigte anzeigen ({cnt,number,integer})"
+
 msgctxt "simialbi/kanban/model/attachment"
 msgid "Created at"
 msgstr "Erstellt am"
