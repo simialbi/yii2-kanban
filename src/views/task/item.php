@@ -124,12 +124,12 @@ $attachments = $model->getAttachments()->where(['card_show' => true])->all();
                 <?php if ($model->end_date): ?>
                     <?php $options = [
                         'label' => FAR::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate(
-                                $model->end_date,
-                                'short'
-                            ),
+                            $model->end_date,
+                            'short'
+                        ),
                         'class' => ['btn', 'btn-sm', 'mr-3', 'px-0']
                     ]; ?>
-                    <?php if ($model->end_date < time()): ?>
+                    <?php if ($model->end_date < time() && $model->status !== $model::STATUS_DONE): ?>
                         <?php Html::addCssClass($options, ['btn-danger', 'px-1']); ?>
                         <?php Html::removeCssClass($options, 'px-0'); ?>
                     <?php endif; ?>
