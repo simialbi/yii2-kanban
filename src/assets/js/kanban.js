@@ -1,6 +1,8 @@
 /* global jQuery, yii, kanbanBaseUrl: false */
 window.sa = {};
 window.sa.kanban = (function ($, baseUrl) {
+    var activeBucket;
+
     var pub = {
         isActive: true,
 
@@ -100,18 +102,18 @@ window.sa.kanban = (function ($, baseUrl) {
         $('.kanban-tasks').sortable({
             items: '> .kanban-sortable',
             connectWith: '.kanban-tasks',
-            update: function (event, ui) {
+            start: function (event, ui) {
                 var $element = ui.item;
-                var $oldParent = ui.sender ? ui.sender.closest('.kanban-bucket') : $element.closest('.kanban-bucket');
+                activeBucket = $element.closest('.kanban-bucket');
+            },
+            stop: function (event, ui) {
+                var $element = ui.item;
+                var $oldParent = activeBucket;
                 var $newParent = $element.closest('.kanban-bucket');
                 var $before = $element.prev('.kanban-sortable');
                 var action = 'move-after';
                 var pk = null;
                 var promise;
-
-                if (ui.sender === null && ui.position.left !== ui.originalPosition.left) {
-                    return;
-                }
 
                 if (!$before.length) {
                     action = 'move-as-first';
