@@ -10,13 +10,14 @@ use yii\widgets\Pjax;
 /* @var $title string */
 /* @var $keyName string */
 /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
+/* @var $completedTasks \simialbi\yii2\kanban\models\Task[] */
 /* @var $statuses array */
 /* @var $sort boolean */
 /* @var $renderContext boolean */
 
 ?>
 
-<div class="kanban-bucket mr-4 d-flex flex-column" data-id="<?= $id; ?>"
+<div class="kanban-bucket mr-4 d-flex flex-column flex-shrink-0" data-id="<?= $id; ?>"
      data-sort="<?= $sort ? 'true' : 'false'; ?>" data-action="<?= $action; ?>"
      data-key-name="<?= \yii\helpers\Inflector::camel2id($keyName, '_'); ?>">
     <?php if ($renderContext): ?>
@@ -52,4 +53,26 @@ use yii\widgets\Pjax;
             ]); ?>
         <?php endforeach; ?>
     </div>
+
+    <?php if (!empty($completedTasks)): ?>
+        <a href="#collapse-<?= $id; ?>" data-toggle="collapse" aria-controls="collapse-<?= $id; ?>"
+           aria-expanded="false">
+            <?= Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
+                'cnt' => count($completedTasks)
+            ]) ?>
+        </a>
+        <div class="kanban-tasks-mt-4 collapse flex-grow-0" id="collapse-<?= $id; ?>">
+            <?php foreach ($completedTasks as $task): ?>
+                <?php if (is_array($task)): ?>
+                    <?php $t = new \simialbi\yii2\kanban\models\Task(); ?>
+                    <?php $t->setAttributes($task); ?>
+                    <?php $task = $t; ?>
+                <?php endif; ?>
+                <?= $this->render('/task/item', [
+                    'model' => $task,
+                    'statuses' => $statuses
+                ]); ?>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 </div>

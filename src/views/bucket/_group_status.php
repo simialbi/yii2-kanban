@@ -14,6 +14,7 @@ foreach ($tasksByStatus as $status => $tasks) {
         'boardId' => $model->id,
         'title' => ArrayHelper::getValue($statuses, $status, $status),
         'tasks' => $tasks,
+        'completedTasks' => [],
         'keyName' => 'status',
         'action' => 'change-status',
         'sort' => false,

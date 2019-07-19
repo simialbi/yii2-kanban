@@ -31,6 +31,8 @@ use yii\db\ActiveRecord;
  * @property-read UserInterface $updater
  * @property-read Board $board
  * @property-read Task[] $tasks
+ * @property-read Task[] $openTasks
+ * @property-read Task[] $finishedTasks
  */
 class Bucket extends ActiveRecord
 {
@@ -135,5 +137,27 @@ class Bucket extends ActiveRecord
     public function getTasks()
     {
         return $this->hasMany(Task::class, ['bucket_id' => 'id'])->orderBy(['sort' => SORT_ASC]);
+    }
+
+    /**
+     * Get associated open tasks
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOpenTasks()
+    {
+        return $this->hasMany(Task::class, ['bucket_id' => 'id'])
+            ->where(['not', ['status' => Task::STATUS_DONE]])
+            ->orderBy(['sort' => SORT_ASC]);
+    }
+
+    /**
+     * Get associated finished tasks
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFinishedTasks()
+    {
+        return $this->hasMany(Task::class, ['bucket_id' => 'id'])
+            ->where(['status' => Task::STATUS_DONE])
+            ->orderBy(['sort' => SORT_ASC]);
     }
 }

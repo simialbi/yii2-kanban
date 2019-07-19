@@ -17,6 +17,7 @@ foreach ($model->buckets as $bucket) {
         'boardId' => $model->id,
         'title' => $bucket->name,
         'tasks' => $tasks,
+        'completedTasks' => [],
         'keyName' => 'bucketId',
         'action' => 'change-parent',
         'sort' => true,

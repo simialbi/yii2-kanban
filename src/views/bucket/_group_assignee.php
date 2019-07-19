@@ -1,10 +1,11 @@
 <?php
 
+use yii\helpers\ArrayHelper;
+
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $tasksByUser array */
 /* @var $statuses array */
-
 
 
 foreach ($tasksByUser as $userId => $tasks) {
@@ -21,7 +22,8 @@ foreach ($tasksByUser as $userId => $tasks) {
                 'assigned' => false,
                 'user' => $user
             ]),
-        'tasks' => $tasks,
+        'tasks' => ArrayHelper::getValue($tasks, 0, []),
+        'completedTasks' => ArrayHelper::getValue($tasks, 1, []),
         'keyName' => 'userId',
         'action' => 'change-assignee',
         'sort' => false,

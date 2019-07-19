@@ -14,11 +14,12 @@ use yii\widgets\Pjax;
         'id' => $bucket->id,
         'boardId' => $model->id,
         'title' => $bucket->name,
-        'tasks' => $bucket->tasks,
+        'tasks' => $bucket->openTasks,
+        'completedTasks' => $bucket->finishedTasks,
         'keyName' => 'bucketId',
         'action' => 'change-parent',
         'sort' => true,
-        'renderContext' => true
+        'renderContext' => true,
     ]); ?>
 <?php endforeach; ?>
 <?php Pjax::begin([

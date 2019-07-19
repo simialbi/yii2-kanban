@@ -72,7 +72,8 @@ use yii\widgets\Pjax;
             'bsVersion' => '4',
             'type' => DatePicker::TYPE_INPUT,
             'pluginOptions' => [
-                'autoclose' => true
+                'autoclose' => true,
+                'todayHighlight' => true
             ],
             'options' => [
                 'readonly' => true
