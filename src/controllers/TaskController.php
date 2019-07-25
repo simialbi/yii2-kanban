@@ -196,7 +196,11 @@ class TaskController extends Controller
             $comment = Yii::$app->request->getBodyParam('comment');
             $newAttachments = UploadedFile::getInstancesByName('attachments');
 
-            ChecklistElement::deleteAll(['not', ['id' => array_keys($checklistElements)]]);
+            ChecklistElement::deleteAll([
+                'and',
+                ['task_id' => $model->id],
+                ['not', ['id' => array_keys($checklistElements)]]
+            ]);
 
             foreach ($checklistElements as $id => $checklistElement) {
                 $element = ChecklistElement::findOne($id);
