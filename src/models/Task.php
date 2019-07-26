@@ -149,7 +149,7 @@ class Task extends ActiveRecord
     public function getHash()
     {
         if (!$this->_hash) {
-            $string = $this->id . $this->bucket_id . $this->board->id . $this->status . $this->end_date . $this->subject;
+            $string = $this->id . $this->bucket_id . $this->status . $this->end_date . $this->subject;
             foreach ($this->assignees as $assignee) {
                 $string .= $assignee->getId();
             }
