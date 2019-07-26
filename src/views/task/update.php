@@ -322,7 +322,7 @@ Pjax::begin([
         <?php $i = 0; ?>
         <?php foreach ($model->attachments as $attachment): ?>
             <div class="list-group-item list-group-item-action d-flex flex-row justify-content-between">
-                <a href="<?= $attachment->path; ?>" target="_blank"><?= Html::encode($attachment->name); ?></a>
+                <a href="<?= $attachment->path; ?>" target="_blank" data-pjax="0"><?= Html::encode($attachment->name); ?></a>
                 <?= $form->field($attachment, "[$i]card_show", [
                     'options' => ['class' => 'ml-auto mr-3 kanban-attachment-show'],
                     'labelOptions' => [
