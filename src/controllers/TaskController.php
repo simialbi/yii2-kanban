@@ -84,7 +84,8 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'statuses' => $this->module->statuses
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 
@@ -325,7 +326,7 @@ class TaskController extends Controller
         return $this->renderAjax('update', [
             'model' => $model,
             'buckets' => $buckets,
-            'users' => Yii::$app->getModule('schedule')->users,
+            'users' => $this->module->users,
             'statuses' => $statuses
         ]);
     }
@@ -381,7 +382,8 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'statuses' => $this->module->statuses
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 
@@ -404,8 +406,8 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'users' => Yii::$app->getModule('schedule')->users,
-            'statuses' => $this->module->statuses
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 
@@ -460,7 +462,8 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'statuses' => $this->module->statuses
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 
@@ -490,7 +493,8 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'statuses' => $this->module->statuses
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 

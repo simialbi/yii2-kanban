@@ -56,7 +56,8 @@ class ChecklistElementController extends Controller
 
         return $this->renderAjax('/task/item', [
             'model' => $model->task,
-            'statuses' => $this->module->statuses
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 

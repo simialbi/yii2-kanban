@@ -54,6 +54,7 @@ class BucketController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->renderAjax('_item', [
                 'statuses' => $this->module->statuses,
+                'users' => $this->module->users,
                 'id' => $model->id,
                 'boardId' => $model->board_id,
                 'title' => $model->name,

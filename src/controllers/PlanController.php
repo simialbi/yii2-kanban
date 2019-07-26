@@ -49,7 +49,17 @@ class PlanController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'schedule', 'chart']
+                        'actions' => ['index', 'schedule', 'chart']
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['view'],
+                        'matchCallback' => function () {
+                            return ArrayHelper::keyExists(
+                                Yii::$app->request->getQueryParam('id'),
+                                ArrayHelper::index(Board::findByUserId(Yii::$app->user->id), 'id')
+                            );
+                        }
                     ]
                 ]
             ]
@@ -80,13 +90,15 @@ class PlanController extends Controller
     public function actionView($id, $group = 'bucket')
     {
         $model = $this->findModel($id);
+        $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
 
-        $bucketContent = $this->renderBucketContent($model, $group);
+        $bucketContent = $this->renderBucketContent($model, $group, $readonly);
 
         Url::remember(['plan/view', 'id' => $id, 'group' => $group], 'plan-view');
 
         return $this->render('view', [
             'model' => $model,
+            'readonly' => $readonly,
             'buckets' => $bucketContent,
             'users' => Yii::$app->getModule('schedule')->users
         ]);

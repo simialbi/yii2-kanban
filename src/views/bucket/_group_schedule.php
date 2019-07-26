@@ -5,6 +5,8 @@ use yii\bootstrap4\Html;
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $statuses array */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $readonly boolean */
 
 foreach ($model->buckets as $bucket) {
     $tasks = $bucket->getTasks()
@@ -12,7 +14,9 @@ foreach ($model->buckets as $bucket) {
         ->orderBy(['sort' => SORT_ASC])
         ->all();
     echo Html::tag('div', $this->render('/bucket/_item', [
+        'readonly' => $readonly,
         'statuses' => $statuses,
+        'users' => $users,
         'id' => $bucket->id,
         'boardId' => $model->id,
         'title' => $bucket->name,

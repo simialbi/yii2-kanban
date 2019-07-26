@@ -9,6 +9,7 @@ use yii\bootstrap4\Nav;
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $readonly boolean */
 
 $group = Yii::$app->request->getQueryParam('group', 'bucket');
 $action = Yii::$app->controller->action->id;
@@ -59,7 +60,7 @@ $action = Yii::$app->controller->action->id;
             <?php if ($action === 'view'): ?>
                 <div class="kanban-plan-assignees d-none d-md-block">
                     <div class="dropdown mr-auto">
-                        <a href="javascript:;" data-toggle="dropdown"
+                        <a href="javascript:;"<?php if (!$readonly): ?> data-toggle="dropdown"<?php endif; ?>
                            class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
                             <?php $i = 0; ?>
                             <?php foreach ($model->assignees as $assignee): ?>
@@ -96,59 +97,61 @@ $action = Yii::$app->controller->action->id;
                             <?php endif; ?>
                         </a>
                         <?php
-                        $assignees = [];
-                        $newUsers = [];
-                        foreach ($model->assignees as $assignee) {
-                            $assignees[] = [
-                                'label' => $this->render('/task/_user', [
-                                    'user' => $assignee,
-                                    'assigned' => true
-                                ]),
-                                'linkOptions' => [
-                                    'class' => ['d-flex', 'align-items-center']
-                                ],
-                                'url' => ['plan/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
-                            ];
-                        }
-
-                        foreach ($users as $user) {
+                        if (!$readonly) {
+                            $assignees = [];
+                            $newUsers = [];
                             foreach ($model->assignees as $assignee) {
-                                if ($user->getId() === $assignee->getId()) {
-                                    continue 2;
-                                }
+                                $assignees[] = [
+                                    'label' => $this->render('/task/_user', [
+                                        'user' => $assignee,
+                                        'assigned' => true
+                                    ]),
+                                    'linkOptions' => [
+                                        'class' => ['d-flex', 'align-items-center']
+                                    ],
+                                    'url' => ['plan/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
+                                ];
                             }
-                            $newUsers[] = [
-                                'label' => $this->render('/task/_user', [
-                                    'user' => $user,
-                                    'assigned' => false
-                                ]),
-                                'linkOptions' => [
-                                    'class' => ['d-flex', 'align-items-center']
-                                ],
-                                'url' => ['plan/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
-                            ];
-                        }
 
-                        $items = [];
-                        if (!empty($assignees)) {
-                            $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
+                            foreach ($users as $user) {
+                                foreach ($model->assignees as $assignee) {
+                                    if ($user->getId() === $assignee->getId()) {
+                                        continue 2;
+                                    }
+                                }
+                                $newUsers[] = [
+                                    'label' => $this->render('/task/_user', [
+                                        'user' => $user,
+                                        'assigned' => false
+                                    ]),
+                                    'linkOptions' => [
+                                        'class' => ['d-flex', 'align-items-center']
+                                    ],
+                                    'url' => ['plan/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
+                                ];
+                            }
+
+                            $items = [];
+                            if (!empty($assignees)) {
+                                $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
+                            }
+                            $items = array_merge($items, $assignees);
+                            if (!empty($assignees) && !empty($newUsers)) {
+                                $items[] = '-';
+                            }
+                            if (!empty($newUsers)) {
+                                $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
+                            }
+                            $items = array_merge($items, $newUsers);
+                            echo Dropdown::widget([
+                                'items' => $items,
+                                'encodeLabels' => false,
+                                'options' => [
+                                    'class' => ['w-100']
+                                ]
+                            ]);
                         }
-                        $items = array_merge($items, $assignees);
-                        if (!empty($assignees) && !empty($newUsers)) {
-                            $items[] = '-';
-                        }
-                        if (!empty($newUsers)) {
-                            $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
-                        }
-                        $items = array_merge($items, $newUsers);
                         ?>
-                        <?= Dropdown::widget([
-                            'items' => $items,
-                            'encodeLabels' => false,
-                            'options' => [
-                                'class' => ['w-100']
-                            ]
-                        ]); ?>
                     </div>
                 </div>
             <?php endif; ?>

@@ -136,35 +136,49 @@ class Bucket extends ActiveRecord
      */
     public function getTasks()
     {
-        return $this->hasMany(Task::class, ['bucket_id' => 'id'])->orderBy(['sort' => SORT_ASC]);
+        return $this->hasMany(Task::class, ['bucket_id' => 'id'])
+            ->orderBy([Task::tableName() . '.[[sort]]' => SORT_ASC]);
     }
 
     /**
      * Get associated open tasks
+     * @param bool $onlyOwn
      * @return \yii\db\ActiveQuery
      */
-    public function getOpenTasks()
+    public function getOpenTasks($onlyOwn = false)
     {
-        return $this->hasMany(Task::class, ['bucket_id' => 'id'])
+        $query = $this->hasMany(Task::class, ['bucket_id' => 'id'])
             ->where(['not', ['status' => Task::STATUS_DONE]])
-            ->orderBy(['sort' => SORT_ASC])
+            ->orderBy([Task::tableName() . '.[[sort]]' => SORT_ASC])
             ->with('attachments')
             ->with('assignments')
             ->with('comments')
             ->with('checklistElements');
+        if ($onlyOwn) {
+            $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+        }
+
+        return $query;
     }
 
     /**
      * Get associated finished tasks
+     * @param bool $onlyOwn
      * @return \yii\db\ActiveQuery
      */
-    public function getFinishedTasks()
+    public function getFinishedTasks($onlyOwn = false)
     {
-        return $this->hasMany(Task::class, ['bucket_id' => 'id'])
+        $query = $this->hasMany(Task::class, ['bucket_id' => 'id'])
             ->where(['status' => Task::STATUS_DONE])
-            ->orderBy(['sort' => SORT_ASC])
+            ->orderBy([Task::tableName() . '.[[sort]]' => SORT_ASC])
             ->with('attachments')
+            ->with('assignments')
             ->with('comments')
             ->with('checklistElements');
+        if ($onlyOwn) {
+            $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+        }
+
+        return $query;
     }
 }

@@ -7,10 +7,10 @@
 
 namespace simialbi\yii2\kanban\controllers;
 
-
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\Task;
+use Yii;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -22,9 +22,10 @@ trait RenderingTrait
      *
      * @param Board $board
      * @param string $group
+     * @param boolean $readonly
      * @return string rendered content
      */
-    public function renderBucketContent($board, $group = 'bucket')
+    public function renderBucketContent($board, $group = 'bucket', $readonly = false)
     {
         $if = 'IF';
         if (Task::getDb()->driverName === 'mssql' || Task::getDb()->driverName === 'sqlsrv' ||
@@ -46,13 +47,19 @@ trait RenderingTrait
                     ->innerJoin(['b' => Bucket::tableName()], '{{b}}.[[id]] = {{t}}.[[bucket_id]]')
                     ->innerJoin(['p' => Board::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
                     ->where(['{{p}}.[[id]]' => $board->id]);
-//                    ->groupBy(['{{u}}.[[user_id]]', '{{t}}.[[id]]']);
+
+                if ($readonly) {
+                    $query->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+                }
+
                 $tasks = ArrayHelper::index($query->all(), null, ['user_id', 'is_done']);
 
                 $bucketContent = $this->renderPartial('/bucket/_group_assignee', [
                     'model' => $board,
                     'tasksByUser' => $tasks,
-                    'statuses' => $this->module->statuses
+                    'statuses' => $this->module->statuses,
+                    'users' => $this->module->users,
+                    'readonly' => $readonly
                 ]);
                 break;
 
@@ -66,7 +73,9 @@ trait RenderingTrait
                 $bucketContent = $this->renderPartial('/bucket/_group_status', [
                     'model' => $board,
                     'tasksByStatus' => $tasks,
-                    'statuses' => $this->module->statuses
+                    'statuses' => $this->module->statuses,
+                    'users' => $this->module->users,
+                    'readonly' => $readonly
                 ]);
                 break;
 
@@ -87,14 +96,18 @@ trait RenderingTrait
                 $bucketContent = $this->renderPartial('/bucket/_group_date', [
                     'model' => $board,
                     'tasksByDate' => $tasks,
-                    'statuses' => $this->module->statuses
+                    'statuses' => $this->module->statuses,
+                    'users' => $this->module->users,
+                    'readonly' => $readonly
                 ]);
                 break;
 
             case 'schedule':
                 $bucketContent = $this->renderPartial('/bucket/_group_schedule', [
                     'model' => $board,
-                    'statuses' => $this->module->statuses
+                    'statuses' => $this->module->statuses,
+                    'users' => $this->module->users,
+                    'readonly' => $readonly
                 ]);
                 break;
 
@@ -102,7 +115,9 @@ trait RenderingTrait
             default:
                 $bucketContent = $this->renderPartial('/bucket/_group_bucket', [
                     'model' => $board,
-                    'statuses' => $this->module->statuses
+                    'statuses' => $this->module->statuses,
+                    'users' => $this->module->users,
+                    'readonly' => $readonly
                 ]);
                 break;
         }

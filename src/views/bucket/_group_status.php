@@ -6,10 +6,14 @@ use yii\helpers\ArrayHelper;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $tasksByStatus array */
 /* @var $statuses array */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $readonly boolean */
 
 foreach ($tasksByStatus as $status => $tasks) {
     echo $this->render('/bucket/_item', [
+        'readonly' => $readonly,
         'statuses' => $statuses,
+        'users' => $users,
         'id' => $status,
         'boardId' => $model->id,
         'title' => ArrayHelper::getValue($statuses, $status, $status),

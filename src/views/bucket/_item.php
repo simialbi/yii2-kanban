@@ -12,8 +12,10 @@ use yii\widgets\Pjax;
 /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
 /* @var $completedTasks \simialbi\yii2\kanban\models\Task[] */
 /* @var $statuses array */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 /* @var $sort boolean */
 /* @var $renderContext boolean */
+/* @var $readonly boolean */
 
 ?>
 
@@ -35,9 +37,11 @@ use yii\widgets\Pjax;
         'enablePushState' => false,
         'clientOptions' => ['skipOuterContainers' => true]
     ]); ?>
+    <?php if (!$readonly): ?>
     <?= Html::a('+', ['task/create', 'boardId' => $boardId, $keyName => $id], [
         'class' => ['btn', 'btn-primary', 'btn-block']
     ]); ?>
+    <?php endif; ?>
     <?php Pjax::end(); ?>
 
     <div class="kanban-tasks mt-4 flex-grow-1">
@@ -49,7 +53,8 @@ use yii\widgets\Pjax;
             <?php endif; ?>
             <?= $this->render('/task/item', [
                 'model' => $task,
-                'statuses' => $statuses
+                'statuses' => $statuses,
+                'users' => $users
             ]); ?>
         <?php endforeach; ?>
     </div>
@@ -70,7 +75,8 @@ use yii\widgets\Pjax;
                 <?php endif; ?>
                 <?= $this->render('/task/item', [
                     'model' => $task,
-                    'statuses' => $statuses
+                    'statuses' => $statuses,
+                    'users' => $users
                 ]); ?>
             <?php endforeach; ?>
         </div>

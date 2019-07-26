@@ -6,14 +6,18 @@ use yii\helpers\ArrayHelper;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $tasksByUser array */
 /* @var $statuses array */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $readonly boolean */
 
 
 foreach ($tasksByUser as $userId => $tasks) {
     /* @var $user \simialbi\yii2\kanban\models\UserInterface */
-    $user = ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $userId);
+    $user = ArrayHelper::getValue($users, $userId);
 
     echo $this->render('/bucket/_item', [
+        'readonly' => $readonly,
         'statuses' => $statuses,
+        'users' => $users,
         'id' => $userId,
         'boardId' => $model->id,
         'title' => empty($userId)

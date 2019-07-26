@@ -12,6 +12,7 @@ use yii\widgets\Pjax;
 /* @var $model \simialbi\yii2\kanban\models\Task */
 /* @var $buckets array */
 /* @var $statuses array */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 
 Pjax::begin([
     'id' => 'taskUpdatePjax',
@@ -94,7 +95,7 @@ Pjax::begin([
                         </a>
                         <?php
                         $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
-                        foreach ($model->board->assignees as $user) {
+                        foreach ($users as $user) {
                             $linkOptions = [
                                 'class' => ['align-items-center', 'd-none', 'remove-assignee'],
                                 'onclick' => sprintf(
@@ -125,7 +126,7 @@ Pjax::begin([
                             ];
                         }
                         $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
-                        foreach ($model->board->assignees as $user) {
+                        foreach ($users as $user) {
                             $linkOptions = [
                                 'class' => ['align-items-center', 'd-flex', 'add-assignee'],
                                 'onclick' => sprintf(
@@ -155,19 +156,6 @@ Pjax::begin([
                                 'url' => 'javascript:;'
                             ];
                         }
-
-//                        $items = [];
-//                        if (!empty($assignees)) {
-//                            $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
-//                        }
-//                        $items = array_merge($items, $assignees);
-//                        if (!empty($assignees) && !empty($newUsers)) {
-//                            $items[] = '-';
-//                        }
-//                        if (!empty($newUsers)) {
-//                            $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
-//                        }
-//                        $items = array_merge($items, $newUsers);
                         ?>
                         <?= Dropdown::widget([
                             'items' => $items,

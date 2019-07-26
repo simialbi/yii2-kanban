@@ -246,7 +246,8 @@ class Task extends ActiveRecord
      */
     public function getChecklistElements()
     {
-        return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])->orderBy(['sort' => SORT_ASC]);
+        return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])
+            ->orderBy([ChecklistElement::tableName() . '.[[sort]]' => SORT_ASC]);
     }
 
     /**

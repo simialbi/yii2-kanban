@@ -145,9 +145,11 @@ class Board extends ActiveRecord
 
         $query = static::find()
             ->alias('b')
-            ->leftJoin(['ua' => '{{%kanban_board_user_assignment}}'], '{{ua}}.[[board_id]] = {{b}}.[[id]]')
+            ->joinWith('assignments ba')
+            ->joinWith('buckets.tasks.assignments ta')
             ->where(['{{b}}.[[is_public]]' => 1])
-            ->orWhere(['{{ua}}.[[user_id]]' => $id]);
+            ->orWhere(['{{ba}}.[[user_id]]' => $id])
+            ->orWhere(['{{ta}}.[[user_id]]' => $id]);
 
         return $query->all();
     }

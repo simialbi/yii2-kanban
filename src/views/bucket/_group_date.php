@@ -6,6 +6,8 @@ use yii\helpers\ArrayHelper;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $tasksByDate array */
 /* @var $statuses array */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $readonly boolean */
 
 foreach ($tasksByDate as $date => $tasks) {
     if (empty($date)) {
@@ -13,7 +15,9 @@ foreach ($tasksByDate as $date => $tasks) {
     }
 
     echo $this->render('/bucket/_item', [
+        'readonly' => $readonly,
         'statuses' => $statuses,
+        'users' => $users,
         'id' => $date === null ? '' : $date,
         'boardId' => $model->id,
         'title' => Yii::$app->formatter->asDate($date),

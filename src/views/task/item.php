@@ -13,6 +13,7 @@ use yii\widgets\Pjax;
 /* @var $this \yii\web\View */
 /* @var $model Task */
 /* @var $statuses array */
+/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 
 Pjax::begin([
     'id' => 'taskPjax' . $model->hash,
@@ -274,7 +275,7 @@ $attachments = $model->getAttachments()->where(['card_show' => true])->all();
                         ];
                     }
 
-                    foreach ($model->board->assignees as $user) {
+                    foreach ($users as $user) {
                         foreach ($model->assignees as $assignee) {
                             if ($user->getId() === $assignee->getId()) {
                                 continue 2;
