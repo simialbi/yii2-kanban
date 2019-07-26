@@ -13,6 +13,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\web\UploadedFile;
 
 /**
  * Class Board
@@ -53,6 +54,11 @@ class Board extends ActiveRecord
     ];
 
     /**
+     * @var UploadedFile
+     */
+    public $uploadedFile;
+
+    /**
      * @var string Visualisation
      */
     private $_visual;
@@ -73,7 +79,8 @@ class Board extends ActiveRecord
         return [
             ['id', 'integer'],
             ['name', 'string', 'max' => 255],
-            ['image', 'file', 'mimeTypes' => 'image/*'],
+            ['uploadedFile', 'file', 'mimeTypes' => 'image/*'],
+            ['image', 'string', 'max' => 255],
             ['is_public', 'boolean'],
 
             ['is_public', 'default', 'value' => true],

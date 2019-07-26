@@ -22,7 +22,7 @@ $this->params['breadcrumbs'] = [
     <div class="mt-3">
         <?php $form = ActiveForm::begin([]); ?>
         <?= $form->field($model, 'name')->textInput(); ?>
-        <?= $form->field($model, 'image')->fileInput(); ?>
+        <?= $form->field($model, 'uploadedFile')->fileInput(); ?>
         <?= $form->field($model, 'is_public')->checkbox(); ?>
 
         <div class="form-group">

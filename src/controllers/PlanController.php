@@ -17,9 +17,11 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\FileHelper;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 
 /**
  * Class PlanController
@@ -292,6 +294,7 @@ class PlanController extends Controller
     /**
      * Create new board
      * @return string|\yii\web\Response
+     * @throws \yii\base\Exception
      */
     public function actionCreate()
     {
@@ -300,6 +303,19 @@ class PlanController extends Controller
         ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $image = UploadedFile::getInstance($model, 'uploadedFile');
+
+            if ($image) {
+                $path = Yii::getAlias('@webroot/uploads');
+                if (FileHelper::createDirectory($path)) {
+                    $filePath = $path . DIRECTORY_SEPARATOR . $image->baseName . '.' . $image->extension;
+                    if ($image->saveAs($filePath)) {
+                        $model->image = Yii::getAlias('@web/uploads/' . $image->baseName . '.' . $image->extension);
+                        $model->save();
+                    }
+                }
+            }
+
             Yii::$app->session->addFlash('success', Yii::t(
                 'simialbi/kanban/plan/notification',
                 'Board <b>{board}</b> created',
