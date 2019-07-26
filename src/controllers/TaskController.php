@@ -238,7 +238,7 @@ class TaskController extends Controller
                     )->execute();
                     $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
                         'task' => $model,
-                        'user' => ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $assignee)
+                        'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $assignee)
                     ]));
                 } catch (Exception $e) {
                 }
@@ -325,7 +325,7 @@ class TaskController extends Controller
         return $this->renderAjax('update', [
             'model' => $model,
             'buckets' => $buckets,
-            'users' => Yii::$app->cache->get('kanban-users'),
+            'users' => Yii::$app->getModule('schedule')->users,
             'statuses' => $statuses
         ]);
     }
@@ -404,7 +404,7 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'users' => Yii::$app->cache->get('kanban-users'),
+            'users' => Yii::$app->getModule('schedule')->users,
             'statuses' => $this->module->statuses
         ]);
     }
@@ -455,7 +455,7 @@ class TaskController extends Controller
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
-            'user' => ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $userId)
+            'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $userId)
         ]));
 
         return $this->renderAjax('item', [
@@ -485,7 +485,7 @@ class TaskController extends Controller
 
         $this->module->trigger(Module::EVENT_TASK_UNASSIGNED, new TaskEvent([
             'task' => $model,
-            'user' => ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $userId)
+            'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $userId)
         ]));
 
         return $this->renderAjax('item', [

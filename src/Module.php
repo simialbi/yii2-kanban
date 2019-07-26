@@ -50,6 +50,11 @@ class Module extends \simialbi\yii2\base\Module
     public $statusColors = [];
 
     /**
+     * @var array User-cache
+     */
+    public $users = [];
+
+    /**
      * {@inheritDoc}
      * @throws \ReflectionException
      * @throws \yii\base\InvalidConfigException
@@ -87,10 +92,7 @@ class Module extends \simialbi\yii2\base\Module
             ];
         }
 
-        Yii::$app->cache->getOrSet('kanban-users', function () {
-            $identities = call_user_func([Yii::$app->user->identityClass, 'findIdentities']);
-            return ArrayHelper::index($identities, 'id');
-        }, 60);
+        $this->users = ArrayHelper::index(call_user_func([Yii::$app->user->identityClass, 'findIdentities']), 'id');
 
         Yii::$app->assetManager->getBundle('yii\jui\JuiAsset')->js = [
             'ui/data.js',

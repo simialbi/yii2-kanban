@@ -10,7 +10,7 @@ use yii\helpers\ArrayHelper;
 
 foreach ($tasksByUser as $userId => $tasks) {
     /* @var $user \simialbi\yii2\kanban\models\UserInterface */
-    $user = ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $userId);
+    $user = ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $userId);
 
     echo $this->render('/bucket/_item', [
         'statuses' => $statuses,

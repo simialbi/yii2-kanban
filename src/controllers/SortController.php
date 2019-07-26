@@ -50,7 +50,7 @@ class SortController extends \arogachev\sortable\controllers\SortController
         }
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $this->_model,
-            'user' => ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $userId)
+            'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $userId)
         ]));
     }
 

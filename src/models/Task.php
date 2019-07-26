@@ -182,7 +182,7 @@ class Task extends ActiveRecord
      */
     public function getAuthor()
     {
-        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->created_by);
     }
 
     /**
@@ -191,7 +191,7 @@ class Task extends ActiveRecord
      */
     public function getUpdater()
     {
-        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->updated_by);
     }
 
     /**
@@ -200,7 +200,7 @@ class Task extends ActiveRecord
      */
     public function getAssignees()
     {
-        $allAssignees = Yii::$app->cache->get('kanban-users');
+        $allAssignees = Yii::$app->getModule('schedule')->users;
 
         $assignees = [];
         foreach ($this->assignments as $assignment) {

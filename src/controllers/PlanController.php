@@ -88,7 +88,7 @@ class PlanController extends Controller
         return $this->render('view', [
             'model' => $model,
             'buckets' => $bucketContent,
-            'users' => Yii::$app->cache->get('kanban-users')
+            'users' => Yii::$app->getModule('schedule')->users
         ]);
     }
 
@@ -150,7 +150,7 @@ class PlanController extends Controller
             'model' => $model,
             'otherTasks' => $this->renderBucketContent($model, 'schedule'),
             'calendarTasks' => $calendarTasks,
-            'users' => Yii::$app->cache->get('kanban-users')
+            'users' => Yii::$app->getModule('schedule')->users
         ]);
     }
 
@@ -164,7 +164,7 @@ class PlanController extends Controller
     {
         $model = $this->findModel($id);
 
-        $allUsers = Yii::$app->cache->get('kanban-users');
+        $allUsers = Yii::$app->getModule('schedule')->users;
 
         $query = new Query();
         $query->select([
@@ -284,7 +284,7 @@ class PlanController extends Controller
 
         return $this->render('chart', [
             'model' => $model,
-            'users' => Yii::$app->cache->get('kanban-users'),
+            'users' => Yii::$app->getModule('schedule')->users,
             'statuses' => $this->module->statuses,
             'byStatus' => $byStatus,
             'byBucket' => $byBucket,

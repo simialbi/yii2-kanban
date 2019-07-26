@@ -109,7 +109,7 @@ class Bucket extends ActiveRecord
      */
     public function getAuthor()
     {
-        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->created_by);
     }
 
     /**
@@ -118,7 +118,7 @@ class Bucket extends ActiveRecord
      */
     public function getUpdater()
     {
-        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->updated_by);
     }
 
     /**
