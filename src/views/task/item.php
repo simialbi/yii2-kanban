@@ -35,12 +35,11 @@ Pjax::begin([
         'skipOuterContainers' => false
     ]
 ]);
-$attachments = $model->getAttachments()->where(['card_show' => true])->all();
 ?>
     <div class="kanban-task card mb-2 status-<?= $model->status; ?>">
-        <?php foreach ($attachments as $attachment): ?>
+        <?php foreach ($model->attachments as $attachment): ?>
             <?php /* @var $attachment \simialbi\yii2\kanban\models\Attachment */ ?>
-            <?php if (preg_match('#^image/#', $attachment->mime_type)): ?>
+            <?php if ($attachment->card_show && preg_match('#^image/#', $attachment->mime_type)): ?>
                 <?= Html::img($attachment->path, [
                     'class' => ['card-img-top'],
                     'alt' => $attachment->name
@@ -87,15 +86,17 @@ $attachments = $model->getAttachments()->where(['card_show' => true])->all();
                     </a>
                 <?php endforeach; ?>
             <?php endif; ?>
-            <?php foreach ($attachments as $attachment): ?>
-                <?= Html::a(FAR::i($attachment->icon, ['class' => 'fa-fw']) . ' ' . $attachment->name, $attachment->path, [
-                    'class' => ['d-block', 'text-muted', 'text-truncate'],
-                    'style' => [
-                        'max-width' => '100%'
-                    ],
-                    'data' => ['pjax' => '0'],
-                    'target' => '_blank'
-                ]); ?>
+            <?php foreach ($model->attachments as $attachment): ?>
+                <?php if ($attachment->card_show): ?>
+                    <?= Html::a(FAR::i($attachment->icon, ['class' => 'fa-fw']) . ' ' . $attachment->name, $attachment->path, [
+                        'class' => ['d-block', 'text-muted', 'text-truncate'],
+                        'style' => [
+                            'max-width' => '100%'
+                        ],
+                        'data' => ['pjax' => '0'],
+                        'target' => '_blank'
+                    ]); ?>
+                <?php endif; ?>
             <?php endforeach; ?>
             <div class="kanban-task-info d-flex flex-row align-items-center">
                 <?php if ($model->status === Task::STATUS_IN_PROGRESS): ?>
