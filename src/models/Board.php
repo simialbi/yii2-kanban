@@ -12,7 +12,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\web\UploadedFile;
 
 /**
@@ -32,6 +32,7 @@ use yii\web\UploadedFile;
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
  * @property-read UserInterface[] $assignees
+ * @property-read BoardUserAssignment[] $assignments
  * @property-read Bucket[] $buckets
  * @property-read Task[] $tasks
  */
@@ -209,7 +210,7 @@ class Board extends ActiveRecord
      */
     public function getAuthor()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->created_by);
     }
 
     /**
@@ -218,7 +219,7 @@ class Board extends ActiveRecord
      */
     public function getUpdater()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->updated_by);
     }
 
     /**
@@ -227,17 +228,26 @@ class Board extends ActiveRecord
      */
     public function getAssignees()
     {
+        $allAssignees = Yii::$app->cache->get('kanban-users');
+
         $assignees = [];
-
-        $query = new Query();
-        $query->from('{{%kanban_board_user_assignment}}')
-            ->where(['board_id' => $this->id]);
-
-        foreach ($query->all() as $item) {
-            $assignees[] = call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $item['user_id']);
+        foreach ($this->assignments as $assignment) {
+            $item = ArrayHelper::getValue($allAssignees, $assignment->user_id);
+            if ($item) {
+                $assignees[] = $item;
+            }
         }
 
         return $assignees;
+    }
+
+    /**
+     * Get assigned user id's
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssignments()
+    {
+        return $this->hasMany(BoardUserAssignment::class, ['board_id' => 'id']);
     }
 
     /**

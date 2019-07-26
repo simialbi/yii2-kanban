@@ -12,7 +12,6 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -39,6 +38,7 @@ use yii\helpers\ArrayHelper;
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
  * @property-read UserInterface[] $assignees
+ * @property-read TaskUserAssignment[] $assignments
  * @property-read Bucket $bucket
  * @property-read Board $board
  * @property-read ChecklistElement[] $checklistElements
@@ -182,7 +182,7 @@ class Task extends ActiveRecord
      */
     public function getAuthor()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->created_by);
     }
 
     /**
@@ -191,7 +191,7 @@ class Task extends ActiveRecord
      */
     public function getUpdater()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->updated_by);
     }
 
     /**
@@ -200,17 +200,26 @@ class Task extends ActiveRecord
      */
     public function getAssignees()
     {
+        $allAssignees = Yii::$app->cache->get('kanban-users');
+
         $assignees = [];
-
-        $query = new Query();
-        $query->from('{{%kanban_task_user_assignment}}')
-            ->where(['task_id' => $this->id]);
-
-        foreach ($query->all() as $item) {
-            $assignees[] = call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $item['user_id']);
+        foreach ($this->assignments as $assignment) {
+            $item = ArrayHelper::getValue($allAssignees, $assignment->user_id);
+            if ($item) {
+                $assignees[] = $item;
+            }
         }
 
         return $assignees;
+    }
+
+    /**
+     * Get assigned user id's
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssignments()
+    {
+        return $this->hasMany(TaskUserAssignment::class, ['task_id' => 'id']);
     }
 
     /**

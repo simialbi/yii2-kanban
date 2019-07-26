@@ -19,16 +19,15 @@ $this->params['breadcrumbs'] = [$this->title];
         <?php $i = 0; ?>
         <?php foreach ($boards as $board): ?>
             <div class="kanban-board card mb-3<?php if (++$i % 3 !== 0):?> mr-2<?php endif; ?>">
-                <div class="row no-gutters">
-                    <div class="col-3 col-md-4">
-                        <?= Html::img($board->visual, [
-                            'style' => [
-                                'height' => '100%',
-                                'width' => '100%',
-                                'object-fit' => 'cover',
-                                'object-position' => 'center'
-                            ]
-                        ]); ?>
+                <div class="row no-gutters flex-grow-1">
+                    <div class="kanban-board-image col-3 col-md-4 d-flex justify-content-center align-items-center">
+                        <?php if ($board->image): ?>
+                            <?= Html::img($board->image, ['class' => ['img-fluid']]); ?>
+                        <?php else: ?>
+                            <span class="kanban-visualisation modulo-<?= $board->id % 10; ?>">
+                                <?= substr($board->name, 0, 1); ?>
+                            </span>
+                        <?php endif; ?>
                     </div>
                     <div class="col-9 col-md-8">
                         <div class="card-body">

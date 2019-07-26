@@ -1,6 +1,9 @@
 $bucket-width: 300px;
 $bucket-max-height: 370px;
+$kanban-board-image-min-width: 150px;
 $user-image-size: 32px;
+
+$visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #28A745, #20C997, #17A2B8;
 
 .kanban-board {
     -webkit-transition: all .2s ease-in-out;
@@ -15,6 +18,31 @@ $user-image-size: 32px;
 
     &:hover {
         border-color: var(--dark);
+    }
+}
+
+.kanban-board-image {
+    min-width: $kanban-board-image-min-width;
+
+    .kanban-visualisation {
+        align-items: center;
+        color: var(--white);
+        display: flex;
+        font-size: 1.25rem;
+        font-weight: bold;
+        height: 100%;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+
+        @for $i from 1 through 10 {
+            &.modulo-#{$i} {
+                background-color: nth($visual-colors, $i);
+            }
+        }
+    }
+    > img {
+        padding: 1rem;
     }
 }
 

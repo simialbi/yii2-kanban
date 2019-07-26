@@ -238,7 +238,7 @@ class TaskController extends Controller
                     )->execute();
                     $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
                         'task' => $model,
-                        'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $assignee)
+                        'user' => ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $assignee)
                     ]));
                 } catch (Exception $e) {
                 }
@@ -325,7 +325,7 @@ class TaskController extends Controller
         return $this->renderAjax('update', [
             'model' => $model,
             'buckets' => $buckets,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
+            'users' => Yii::$app->cache->get('kanban-users'),
             'statuses' => $statuses
         ]);
     }
@@ -404,7 +404,7 @@ class TaskController extends Controller
 
         return $this->renderAjax('item', [
             'model' => $model,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
+            'users' => Yii::$app->cache->get('kanban-users'),
             'statuses' => $this->module->statuses
         ]);
     }
@@ -455,7 +455,7 @@ class TaskController extends Controller
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
-            'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
+            'user' => ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $userId)
         ]));
 
         return $this->renderAjax('item', [
@@ -485,7 +485,7 @@ class TaskController extends Controller
 
         $this->module->trigger(Module::EVENT_TASK_UNASSIGNED, new TaskEvent([
             'task' => $model,
-            'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
+            'user' => ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $userId)
         ]));
 
         return $this->renderAjax('item', [

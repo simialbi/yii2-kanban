@@ -11,6 +11,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class Comment
@@ -91,7 +92,7 @@ class Comment extends ActiveRecord
      */
     public function getAuthor()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->created_by);
+        return cArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->created_by);
     }
 
     /**

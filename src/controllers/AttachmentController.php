@@ -75,7 +75,7 @@ class AttachmentController extends Controller
         return $this->renderAjax('/task/update', [
             'model' => $task,
             'buckets' => $buckets,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
+            'users' => Yii::$app->cache->get('kanban-users'),
             'statuses' => $this->module->statuses
         ]);
     }

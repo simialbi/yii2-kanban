@@ -88,7 +88,7 @@ class PlanController extends Controller
         return $this->render('view', [
             'model' => $model,
             'buckets' => $bucketContent,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities'])
+            'users' => Yii::$app->cache->get('kanban-users')
         ]);
     }
 
@@ -150,7 +150,7 @@ class PlanController extends Controller
             'model' => $model,
             'otherTasks' => $this->renderBucketContent($model, 'schedule'),
             'calendarTasks' => $calendarTasks,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities'])
+            'users' => Yii::$app->cache->get('kanban-users')
         ]);
     }
 
@@ -163,6 +163,8 @@ class PlanController extends Controller
     public function actionChart($id)
     {
         $model = $this->findModel($id);
+
+        $allUsers = Yii::$app->cache->get('kanban-users');
 
         $query = new Query();
         $query->select([
@@ -270,7 +272,7 @@ class PlanController extends Controller
             $userId = $row['user_id'] ?: '0';
             $userName = ($row['user_id'])
                 ? ArrayHelper::getValue(
-                    call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $row['user_id']),
+                    ArrayHelper::getValue($allUsers, $row['user_id'], []),
                     'name',
                     Yii::t('simialbi/kanban', 'Not assigned')
                 )
@@ -282,7 +284,7 @@ class PlanController extends Controller
 
         return $this->render('chart', [
             'model' => $model,
-            'users' => call_user_func([Yii::$app->user->identityClass, 'findIdentities']),
+            'users' => Yii::$app->cache->get('kanban-users'),
             'statuses' => $this->module->statuses,
             'byStatus' => $byStatus,
             'byBucket' => $byBucket,

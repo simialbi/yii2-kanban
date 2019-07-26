@@ -9,6 +9,7 @@ namespace simialbi\yii2\kanban;
 
 use simialbi\yii2\kanban\models\Task;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\View;
 
@@ -85,6 +86,12 @@ class Module extends \simialbi\yii2\base\Module
                 Task::STATUS_LATE => '#d63867'
             ];
         }
+
+        Yii::$app->cache->getOrSet('kanban-users', function () {
+            $identities = call_user_func([Yii::$app->user->identityClass, 'findIdentities']);
+            return ArrayHelper::index($identities, 'id');
+        }, 60);
+
         Yii::$app->assetManager->getBundle('yii\jui\JuiAsset')->js = [
             'ui/data.js',
             'ui/scroll-parent.js',

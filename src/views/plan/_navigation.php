@@ -15,7 +15,15 @@ $action = Yii::$app->controller->action->id;
 ?>
 <div class="row">
     <div class="col-8 col-lg-7 d-flex flex-row align-items-center">
-        <?= Html::img($model->visual); ?>
+        <div class="kanban-board-image align-self-stretch d-flex justify-content-center align-items-center">
+            <?php if ($model->image): ?>
+                <?= Html::img($model->image, ['class' => ['img-fluid']]); ?>
+            <?php else: ?>
+                <span class="kanban-visualisation modulo-<?= $model->id % 10; ?>">
+                    <?= substr($model->name, 0, 1); ?>
+                </span>
+            <?php endif; ?>
+        </div>
         <div class="ml-3">
             <h2 class="mb-0"><?= Html::encode($model->name); ?></h2>
             <small class="text-muted"><?= Yii::$app->formatter->asDatetime($model->updated_at); ?></small>

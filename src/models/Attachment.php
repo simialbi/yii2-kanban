@@ -12,6 +12,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class Attachment
@@ -177,7 +178,7 @@ class Attachment extends ActiveRecord
      */
     public function getAuthor()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->created_by);
     }
 
     /**
@@ -186,7 +187,7 @@ class Attachment extends ActiveRecord
      */
     public function getUpdater()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->updated_by);
     }
 
     /**

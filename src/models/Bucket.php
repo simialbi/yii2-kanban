@@ -7,12 +7,12 @@
 
 namespace simialbi\yii2\kanban\models;
 
-
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class Bucket
@@ -109,7 +109,7 @@ class Bucket extends ActiveRecord
      */
     public function getAuthor()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->created_by);
     }
 
     /**
@@ -118,7 +118,7 @@ class Bucket extends ActiveRecord
      */
     public function getUpdater()
     {
-        return call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $this->updated_by);
     }
 
     /**
@@ -147,7 +147,11 @@ class Bucket extends ActiveRecord
     {
         return $this->hasMany(Task::class, ['bucket_id' => 'id'])
             ->where(['not', ['status' => Task::STATUS_DONE]])
-            ->orderBy(['sort' => SORT_ASC]);
+            ->orderBy(['sort' => SORT_ASC])
+            ->with('attachments')
+            ->with('assignments')
+            ->with('comments')
+            ->with('checklistElements');
     }
 
     /**
@@ -158,6 +162,9 @@ class Bucket extends ActiveRecord
     {
         return $this->hasMany(Task::class, ['bucket_id' => 'id'])
             ->where(['status' => Task::STATUS_DONE])
-            ->orderBy(['sort' => SORT_ASC]);
+            ->orderBy(['sort' => SORT_ASC])
+            ->with('attachments')
+            ->with('comments')
+            ->with('checklistElements');
     }
 }

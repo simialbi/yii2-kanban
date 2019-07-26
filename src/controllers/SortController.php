@@ -11,6 +11,7 @@ use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\Module;
 use simialbi\yii2\kanban\TaskEvent;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * {@inheritDoc}
@@ -47,10 +48,9 @@ class SortController extends \arogachev\sortable\controllers\SortController
                 'user_id' => $userId
             ])->execute();
         }
-
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $this->_model,
-            'user' => call_user_func([Yii::$app->user->identityClass, 'findIdentity'], $userId)
+            'user' => ArrayHelper::getValue(Yii::$app->cache->get('kanban-users'), $userId)
         ]));
     }
 
