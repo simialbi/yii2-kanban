@@ -42,6 +42,18 @@ msgctxt "simialbi/kanban"
 msgid "Show done ({cnt,number,integer})"
 msgstr "Show done ({cnt,number,integer})"
 
+msgctxt "simialbi/kanban/chart"
+msgid "Assignee"
+msgstr "Assignee"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Bucket"
+msgstr "Bucket"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Status"
+msgstr "Status"
+
 msgctxt "simialbi/kanban/model/attachment"
 msgid "Created at"
 msgstr "Created at"
@@ -190,6 +202,38 @@ msgctxt "simialbi/kanban/model/comment"
 msgid "Text"
 msgstr "Text"
 
+msgctxt "simialbi/kanban/model/link"
+msgid "Created at"
+msgstr "Created at"
+
+msgctxt "simialbi/kanban/model/link"
+msgid "Created by"
+msgstr "Created by"
+
+msgctxt "simialbi/kanban/model/link"
+msgid "Id"
+msgstr "Id"
+
+msgctxt "simialbi/kanban/model/link"
+msgid "Show on card"
+msgstr "@@Show on card@@"
+
+msgctxt "simialbi/kanban/model/link"
+msgid "Task"
+msgstr "Task"
+
+msgctxt "simialbi/kanban/model/link"
+msgid "URL"
+msgstr "URL"
+
+msgctxt "simialbi/kanban/model/link"
+msgid "Updated at"
+msgstr "Updated at"
+
+msgctxt "simialbi/kanban/model/link"
+msgid "Updated by"
+msgstr "Updated by"
+
 msgctxt "simialbi/kanban/model/task"
 msgid "Bucket"
 msgstr "Bucket"
@@ -221,6 +265,10 @@ msgstr "Show checklist on card"
 msgctxt "simialbi/kanban/model/task"
 msgid "Show description on card"
 msgstr "Show description on card"
+
+msgctxt "simialbi/kanban/model/task"
+msgid "Show links on card"
+msgstr "Show links on card"
 
 msgctxt "simialbi/kanban/model/task"
 msgid "Sort"
@@ -283,22 +331,6 @@ msgid "Group by <b>{group}</b>"
 msgstr "Group by <b>{group}</b>"
 
 msgctxt "simialbi/kanban/plan"
-msgid "bucket"
-msgstr "bucket"
-
-msgctxt "simialbi/kanban/plan"
-msgid "assignee"
-msgstr "assignee"
-
-msgctxt "simialbi/kanban/plan"
-msgid "status"
-msgstr "status"
-
-msgctxt "simialbi/kanban/plan"
-msgid "date"
-msgstr "end date"
-
-msgctxt "simialbi/kanban/plan"
 msgid "Kanban Hub"
 msgstr "Kanban Hub"
 
@@ -309,6 +341,22 @@ msgstr "Schedule"
 msgctxt "simialbi/kanban/plan"
 msgid "Status"
 msgstr "Status"
+
+msgctxt "simialbi/kanban/plan"
+msgid "assignee"
+msgstr "assignee"
+
+msgctxt "simialbi/kanban/plan"
+msgid "bucket"
+msgstr "bucket"
+
+msgctxt "simialbi/kanban/plan"
+msgid "date"
+msgstr "end date"
+
+msgctxt "simialbi/kanban/plan"
+msgid "status"
+msgstr "status"
 
 msgctxt "simialbi/kanban/plan/notification"
 msgid "Board <b>{board}</b> created"
@@ -343,22 +391,14 @@ msgid "Late"
 msgstr "Late"
 
 msgctxt "simialbi/kanban/task"
+msgid "Links"
+msgstr "Links"
+
+msgctxt "simialbi/kanban/task"
 msgid "Not started"
 msgstr "Not started"
 
 msgctxt "simialbi/kanban/task/notification"
 msgid "One of {params}"
 msgstr "One of {params}"
-
-msgctxt "simialbi/kanban/chart"
-msgid "Assignee"
-msgstr "Assignee"
-
-msgctxt "simialbi/kanban/chart"
-msgid "Bucket"
-msgstr "Bucket"
-
-msgctxt "simialbi/kanban/chart"
-msgid "Status"
-msgstr "Status"
 

@@ -18,6 +18,7 @@ window.sa.kanban = (function ($, baseUrl) {
             initTask();
             initSortable();
             initChecklist();
+            initLinks();
         },
         addAssignee: function (id) {
             var $this = $(this);
@@ -55,6 +56,37 @@ window.sa.kanban = (function ($, baseUrl) {
                 .removeClass('is-assigned').css('display', '');
         }
     };
+
+    function addLinkElement()
+    {
+        var $this = $(this);
+        var $linklist = $(this).closest('.linklist');
+
+        if ($this.closest('.add-linklist-element').length) {
+            var $addElement = $this.closest('.add-linklist-element').clone(),
+                $inputGroup = $this.closest('.input-group'),
+                $buttonDelete = $(
+                    '<button class="btn btn-outline-danger remove-linklist-element">' +
+                    '<i class="fas fa-trash-alt"></i>' +
+                    '</button>'
+                );
+            $this.closest('.add-linklist-element').removeClass('add-linklist-element');
+            $this.attr('placeholder', $this.val());
+            $this.removeAttr('id');
+
+            $inputGroup.append($('<div class="input-group-append" />').append($buttonDelete));
+
+            $addElement.find('input[type="text"]').val('');
+
+            $linklist.append($addElement);
+        } else {
+            if ($this.val() === '') {
+                $this.val($this.attr('placeholder'));
+            } else {
+                $this.attr('placeholder', $this.val());
+            }
+        }
+    }
 
     function addChecklistElement()
     {
@@ -164,6 +196,40 @@ window.sa.kanban = (function ($, baseUrl) {
                     });
                 });
             }
+        });
+    }
+
+    function initLinks()
+    {
+        $(document).on('keydown.sa.kanban', '.linklist input[type="text"]', function (evt) {
+            var $this = $(this);
+            var $form = $this.closest('form');
+            var code = evt.keyCode || evt.which;
+            if ($this.val() === '') {
+                return;
+            }
+            if (parseInt(code) === 9 || parseInt(code) === 13) {
+                evt.preventDefault();
+                if ($this.val().match(/^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+)(?::\d{1,5})?(?:$|[?\/#])/i)) {
+                    $this.removeClass('is-invalid');
+                    addLinkElement.apply(this);
+                    $('.add-linklist-element input[type="text"]').focus();
+                } else {
+                    $this.addClass('is-invalid');
+                }
+            }
+        });
+        $(document).on('change.sa.kanban', '.linklist input[type="text"]', function () {
+            var $this = $(this);
+            if ($this.val().match(/^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+)(?::\d{1,5})?(?:$|[?\/#])/i)) {
+                $this.removeClass('is-invalid');
+                addLinkElement.apply(this);
+            } else {
+                $this.addClass('is-invalid');
+            }
+        });
+        $(document).on('click.sa.kanban', '.linklist .remove-linklist-element', function () {
+            $(this).closest('.input-group').remove();
         });
     }
 

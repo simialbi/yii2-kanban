@@ -109,7 +109,7 @@ class Bucket extends ActiveRecord
      */
     public function getAuthor()
     {
-        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
     }
 
     /**
@@ -118,7 +118,7 @@ class Bucket extends ActiveRecord
      */
     public function getUpdater()
     {
-        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->updated_by);
     }
 
     /**
@@ -153,7 +153,8 @@ class Bucket extends ActiveRecord
             ->with('attachments')
             ->with('assignments')
             ->with('comments')
-            ->with('checklistElements');
+            ->with('checklistElements')
+            ->with('links');
         if ($onlyOwn) {
             $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
         }
@@ -174,7 +175,8 @@ class Bucket extends ActiveRecord
             ->with('attachments')
             ->with('assignments')
             ->with('comments')
-            ->with('checklistElements');
+            ->with('checklistElements')
+            ->with('links');
         if ($onlyOwn) {
             $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
         }

@@ -100,7 +100,7 @@ class PlanController extends Controller
             'model' => $model,
             'readonly' => $readonly,
             'buckets' => $bucketContent,
-            'users' => Yii::$app->getModule('schedule')->users
+            'users' => $this->module->users
         ]);
     }
 
@@ -181,7 +181,7 @@ class PlanController extends Controller
     {
         $model = $this->findModel($id);
 
-        $allUsers = Yii::$app->getModule('schedule')->users;
+        $allUsers = $this->module->users;
 
         $query = new Query();
         $query->select([
@@ -301,7 +301,7 @@ class PlanController extends Controller
 
         return $this->render('chart', [
             'model' => $model,
-            'users' => Yii::$app->getModule('schedule')->users,
+            'users' => $this->module->users,
             'statuses' => $this->module->statuses,
             'byStatus' => $byStatus,
             'byBucket' => $byBucket,

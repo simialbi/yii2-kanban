@@ -7,7 +7,6 @@
 
 namespace simialbi\yii2\kanban\migrations;
 
-
 use yii\db\Migration;
 
 class m190614_125145_init extends Migration

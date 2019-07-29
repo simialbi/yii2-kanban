@@ -27,6 +27,7 @@ use yii\helpers\ArrayHelper;
  * @property string $description
  * @property boolean $card_show_description
  * @property boolean $card_show_checklist
+ * @property boolean $card_show_links
  * @property integer $sort
  * @property integer $created_by
  * @property integer $updated_by
@@ -42,6 +43,7 @@ use yii\helpers\ArrayHelper;
  * @property-read Bucket $bucket
  * @property-read Board $board
  * @property-read ChecklistElement[] $checklistElements
+ * @property-read Link[] $links
  * @property-read Attachment[] $attachments
  * @property-read Comment[] $comments
  */
@@ -77,13 +79,13 @@ class Task extends ActiveRecord
             ['start_date', 'date', 'timestampAttribute' => 'start_date'],
             ['end_date', 'date', 'timestampAttribute' => 'end_date'],
             ['description', 'string'],
-            [['card_show_description', 'card_show_checklist'], 'boolean'],
+            [['card_show_description', 'card_show_checklist', 'card_show_links'], 'boolean'],
 
             ['bucket_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['status', 'default', 'value' => self::STATUS_NOT_BEGUN],
             [['start_date', 'end_date', 'description'], 'default'],
-            [['card_show_description', 'card_show_checklist'], 'default', 'value' => false],
+            [['card_show_description', 'card_show_checklist', 'card_show_links'], 'default', 'value' => false],
 
             [['bucket_id', 'subject', 'status', 'card_show_description', 'card_show_checklist'], 'required']
         ];
@@ -134,6 +136,7 @@ class Task extends ActiveRecord
             'description' => Yii::t('simialbi/kanban/model/task', 'Description'),
             'card_show_description' => Yii::t('simialbi/kanban/model/task', 'Show description on card'),
             'card_show_checklist' => Yii::t('simialbi/kanban/model/task', 'Show checklist on card'),
+            'card_show_links' => Yii::t('simialbi/kanban/model/task', 'Show links on card'),
             'sort' => Yii::t('simialbi/kanban/model/task', 'Sort'),
             'created_by' => Yii::t('simialbi/kanban/model/task', 'Created by'),
             'updated_by' => Yii::t('simialbi/kanban/model/task', 'Updated by'),
@@ -182,7 +185,7 @@ class Task extends ActiveRecord
      */
     public function getAuthor()
     {
-        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
     }
 
     /**
@@ -191,7 +194,7 @@ class Task extends ActiveRecord
      */
     public function getUpdater()
     {
-        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->updated_by);
     }
 
     /**
@@ -200,7 +203,7 @@ class Task extends ActiveRecord
      */
     public function getAssignees()
     {
-        $allAssignees = Yii::$app->getModule('schedule')->users;
+        $allAssignees = Yii::$app->controller->module->users;
 
         $assignees = [];
         foreach ($this->assignments as $assignment) {
@@ -248,6 +251,15 @@ class Task extends ActiveRecord
     {
         return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])
             ->orderBy([ChecklistElement::tableName() . '.[[sort]]' => SORT_ASC]);
+    }
+
+    /**
+     * Get associated links
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLinks()
+    {
+        return $this->hasMany(Link::class, ['task_id' => 'id']);
     }
 
     /**

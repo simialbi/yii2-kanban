@@ -212,7 +212,7 @@ class Board extends ActiveRecord
      */
     public function getAuthor()
     {
-        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
     }
 
     /**
@@ -221,7 +221,7 @@ class Board extends ActiveRecord
      */
     public function getUpdater()
     {
-        return ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->updated_by);
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->updated_by);
     }
 
     /**
@@ -230,7 +230,7 @@ class Board extends ActiveRecord
      */
     public function getAssignees()
     {
-        $allAssignees = Yii::$app->getModule('schedule')->users;
+        $allAssignees = Yii::$app->controller->module->users;
 
         $assignees = [];
         foreach ($this->assignments as $assignment) {

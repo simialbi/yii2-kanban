@@ -92,7 +92,7 @@ class Comment extends ActiveRecord
      */
     public function getAuthor()
     {
-        return cArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $this->created_by);
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
     }
 
     /**

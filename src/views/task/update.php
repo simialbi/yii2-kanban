@@ -347,6 +347,47 @@ Pjax::begin([
     <div class="modal-body">
     <?php endif; ?>
         <div class="row">
+            <div class="form-group col-12 linklist">
+                <div class="d-flex justify-content-between">
+                    <?= Html::label(Yii::t('simialbi/kanban/task', 'Links'), 'add-link', [
+                        'class' => ['col-form-label-sm', 'py-0']
+                    ]); ?>
+                    <?= $form->field($model, 'card_show_links', [
+                        'options' => ['class' => ''],
+                        'labelOptions' => [
+                            'class' => 'custom-control-label'
+                        ],
+                        'checkTemplate' => "<div class=\"custom-control custom-checkbox\">\n{input}\n{label}\n</div>"
+                    ])->checkbox(['inline' => true, 'class' => 'custom-control-input']); ?>
+                </div>
+                <?php foreach ($model->links as $link): ?>
+                    <div class="input-group input-group-sm mb-1">
+                        <?= Html::input(
+                            'text',
+                            'link[' . $link->id . '][url]',
+                            $link->url,
+                            [
+                                'class' => ['form-control'],
+                                'placeholder' => Html::encode($link->url)
+                            ]
+                        ); ?>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-danger remove-linklist-element">
+                                <?= FAS::i('trash-alt'); ?>
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <div class="input-group input-group-sm add-linklist-element mb-1">
+                    <?= Html::input('text', 'link[new][][url]', null, [
+                        'id' => 'add-link',
+                        'class' => ['form-control']
+                    ]); ?>
+                </div>
+                <div class="invalid-feedback"></div>
+            </div>
+        </div>
+        <div class="row">
             <div class="form-group col-12">
                 <?= Html::label(Yii::t('simialbi/kanban/task', 'Comments'), 'comment', [
                     'class' => ['col-form-label-sm', 'py-0']

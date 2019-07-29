@@ -87,6 +87,13 @@ Pjax::begin([
                     </a>
                 <?php endforeach; ?>
             <?php endif; ?>
+            <?php if ($model->card_show_links && count($model->links)): ?>
+                <?php foreach ($model->links as $link): ?>
+                    <a class="kanban-task-link text-truncate" href="<?= $link->url ?>" target="_blank">
+                        <?= $link->url; ?>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
             <?php foreach ($model->attachments as $attachment): ?>
                 <?php if ($attachment->card_show): ?>
                     <?= Html::a(FAR::i($attachment->icon, ['class' => 'fa-fw']) . ' ' . $attachment->name, $attachment->path, [

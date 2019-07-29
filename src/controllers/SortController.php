@@ -15,6 +15,8 @@ use yii\helpers\ArrayHelper;
 
 /**
  * {@inheritDoc}
+ *
+ * @property-read \simialbi\yii2\kanban\Module $module
  */
 class SortController extends \arogachev\sortable\controllers\SortController
 {
@@ -50,7 +52,7 @@ class SortController extends \arogachev\sortable\controllers\SortController
         }
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $this->_model,
-            'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $userId)
+            'user' => ArrayHelper::getValue($this->module->users, $userId)
         ]));
     }
 

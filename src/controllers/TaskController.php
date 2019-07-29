@@ -13,6 +13,7 @@ use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Comment;
+use simialbi\yii2\kanban\models\Link;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\models\UserInterface;
 use simialbi\yii2\kanban\Module;
@@ -175,7 +176,7 @@ class TaskController extends Controller
                     )->execute();
                     $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
                         'task' => $task,
-                        'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $assignee)
+                        'user' => ArrayHelper::getValue($this->module->users, $assignee)
                     ]));
                 } catch (Exception $e) {
                 }
@@ -208,10 +209,12 @@ class TaskController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $checklistElements = Yii::$app->request->getBodyParam('checklist', []);
-            $newElements = ArrayHelper::remove($checklistElements, 'new', []);
+            $newChecklistElements = ArrayHelper::remove($checklistElements, 'new', []);
             $assignees = Yii::$app->request->getBodyParam('assignees', []);
             $comment = Yii::$app->request->getBodyParam('comment');
             $newAttachments = UploadedFile::getInstancesByName('attachments');
+            $links = Yii::$app->request->getBodyParam('link', []);
+            $newLinkElements =  ArrayHelper::remove($links, 'new', []);
 
             ChecklistElement::deleteAll([
                 'and',
@@ -228,7 +231,7 @@ class TaskController extends Controller
                 $element->setAttributes($checklistElement);
                 $element->save();
             }
-            foreach ($newElements as $checklistElement) {
+            foreach ($newChecklistElements as $checklistElement) {
                 $element = new ChecklistElement($checklistElement);
                 $element->task_id = $model->id;
 
@@ -255,7 +258,7 @@ class TaskController extends Controller
                     )->execute();
                     $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
                         'task' => $model,
-                        'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $assignee)
+                        'user' => ArrayHelper::getValue($this->module->users, $assignee)
                     ]));
                 } catch (Exception $e) {
                 }
@@ -273,6 +276,27 @@ class TaskController extends Controller
                     'task' => $model,
                     'data' => $comment
                 ]));
+            }
+
+            Link::deleteAll([
+                'and',
+                ['task_id' => $model->id],
+                ['not', ['id' => array_keys($links)]]
+            ]);
+            foreach ($links as $id => $link) {
+                $element = Link::findOne($id);
+                if (!$element) {
+                    continue;
+                }
+
+                $element->setAttributes($link);
+                $element->save();
+            }
+            foreach ($newLinkElements as $link) {
+                $element = new Link($link);
+                $element->task_id = $model->id;
+
+                $element->save();
             }
 
             Attachment::loadMultiple($model->attachments, Yii::$app->request->post());
@@ -473,7 +497,7 @@ class TaskController extends Controller
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
-            'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $userId)
+            'user' => ArrayHelper::getValue($this->module->users, $userId)
         ]));
 
         return $this->renderAjax('item', [
@@ -504,7 +528,7 @@ class TaskController extends Controller
 
         $this->module->trigger(Module::EVENT_TASK_UNASSIGNED, new TaskEvent([
             'task' => $model,
-            'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $userId)
+            'user' => ArrayHelper::getValue($this->module->users, $userId)
         ]));
 
         return $this->renderAjax('item', [
