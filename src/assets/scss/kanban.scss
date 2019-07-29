@@ -102,7 +102,7 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     line-height: $user-image-size;
 }
 
-.kanban-task-modal {
+#createTaskForm, #taskModalForm {
     .kanban-task-assignees {
         .dropdown {
             .dropdown-toggle {
@@ -285,5 +285,31 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     .list-group-item:hover .kanban-attachment-show .custom-control-label,
     .custom-control-input:checked + .custom-control-label {
         opacity: 1;
+    }
+}
+
+.kanban-assignees {
+    .add-assignee {
+        display: flex !important;
+
+        &.is-assigned {
+            display: none !important;
+        }
+
+        &[style="display: none;"] {
+            display: none !important;
+        }
+    }
+
+    .remove-assignee {
+        display: none !important;
+
+        &.is-assigned {
+            display: flex !important;
+
+            &[style="display: none;"] {
+                display: none !important;
+            }
+        }
     }
 }

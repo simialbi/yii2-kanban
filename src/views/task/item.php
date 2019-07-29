@@ -3,6 +3,7 @@
 use kartik\date\DatePicker;
 use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\hideseek\HideSeek;
 use simialbi\yii2\kanban\models\Task;
 use yii\bootstrap4\ButtonDropdown;
 use yii\bootstrap4\Dropdown;
@@ -237,7 +238,7 @@ Pjax::begin([
             </div>
         </div>
         <?php if (count($model->assignees)): ?>
-            <div class="kanban-task-assignees card-footer">
+            <div class="kanban-task-assignees kanban-assignees card-footer">
                 <div class="dropdown">
                     <a href="javascript:;" data-toggle="dropdown"
                        class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
@@ -270,7 +271,7 @@ Pjax::begin([
                                 'assigned' => true
                             ]),
                             'linkOptions' => [
-                                'class' => ['d-flex', 'align-items-center']
+                                'class' => ['align-items-center', 'remove-assignee', 'is-assigned']
                             ],
                             'url' => ['task/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
                         ];
@@ -288,7 +289,7 @@ Pjax::begin([
                                 'assigned' => false
                             ]),
                             'linkOptions' => [
-                                'class' => ['d-flex', 'align-items-center']
+                                'class' => ['align-items-center', 'add-assignee']
                             ],
                             'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
                         ];
@@ -306,12 +307,23 @@ Pjax::begin([
                         $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
                     }
                     $items = array_merge($items, $newUsers);
+                    array_unshift($items, HideSeek::widget([
+                        'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
+                        'options' => [
+                            'id' => 'kanban-footer-task-assignees-' . $model->hash,
+                            'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                        ],
+                        'clientOptions' => [
+                            'list' => '.kanban-footer-task-assignees-' . $model->hash,
+                            'ignore' => '.search-field,.dropdown-header,.dropdown-divider'
+                        ]
+                    ]));
                     ?>
                     <?= Dropdown::widget([
                         'items' => $items,
                         'encodeLabels' => false,
                         'options' => [
-                            'class' => ['w-100']
+                            'class' => ['kanban-footer-task-assignees-' . $model->hash, 'w-100']
                         ]
                     ]); ?>
                 </div>

@@ -9,10 +9,14 @@ use yii\bootstrap4\Html;
 /* @var $readonly boolean */
 
 foreach ($model->buckets as $bucket) {
-    $tasks = $bucket->getTasks()
+    $query = $bucket->getTasks()
         ->where(['start_date' => null, 'end_date' => null])
-        ->orderBy(['sort' => SORT_ASC])
-        ->all();
+        ->orderBy(['sort' => SORT_ASC]);
+
+    if ($readonly) {
+        $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+    }
+
     echo Html::tag('div', $this->render('/bucket/_item', [
         'readonly' => $readonly,
         'statuses' => $statuses,
@@ -20,7 +24,7 @@ foreach ($model->buckets as $bucket) {
         'id' => $bucket->id,
         'boardId' => $model->id,
         'title' => $bucket->name,
-        'tasks' => $tasks,
+        'tasks' => $query->all(),
         'completedTasks' => [],
         'keyName' => 'bucketId',
         'action' => 'change-parent',

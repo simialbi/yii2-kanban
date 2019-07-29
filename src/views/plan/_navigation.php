@@ -41,7 +41,8 @@ $action = Yii::$app->controller->action->id;
                     'label' => Yii::t('simialbi/kanban/plan', 'Charts'),
                     'url' => ['chart', 'id' => $model->id],
                     'linkOptions' => [],
-                    'active' => $action === 'chart'
+                    'active' => $action === 'chart',
+                    'visible' => !$readonly
                 ],
                 [
                     'label' => Yii::t('simialbi/kanban/plan', 'Schedule'),
@@ -58,7 +59,7 @@ $action = Yii::$app->controller->action->id;
     <?php if ($action !== 'chart'): ?>
         <div class="col-4 col-lg-5 d-flex flex-row align-items-center justify-content-end">
             <?php if ($action === 'view'): ?>
-                <div class="kanban-plan-assignees d-none d-md-block">
+                <div class="kanban-plan-assignees kanban-assignees d-none d-md-block">
                     <div class="dropdown mr-auto">
                         <a href="javascript:;"<?php if (!$readonly): ?> data-toggle="dropdown"<?php endif; ?>
                            class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
@@ -107,7 +108,7 @@ $action = Yii::$app->controller->action->id;
                                         'assigned' => true
                                     ]),
                                     'linkOptions' => [
-                                        'class' => ['d-flex', 'align-items-center']
+                                        'class' => ['align-items-center', 'remove-assignee', 'is-assigned']
                                     ],
                                     'url' => ['plan/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
                                 ];
@@ -125,7 +126,7 @@ $action = Yii::$app->controller->action->id;
                                         'assigned' => false
                                     ]),
                                     'linkOptions' => [
-                                        'class' => ['d-flex', 'align-items-center']
+                                        'class' => ['align-items-center', 'add-assignee']
                                     ],
                                     'url' => ['plan/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
                                 ];
@@ -143,11 +144,24 @@ $action = Yii::$app->controller->action->id;
                                 $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
                             }
                             $items = array_merge($items, $newUsers);
+
+                            array_unshift($items, HideSeek::widget([
+                                'fieldTemplate' => '<div class="search-field px-3 my-3">{input}</div>',
+                                'options' => [
+                                    'id' => 'kanban-view-plan-assignees',
+                                    'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                                ],
+                                'clientOptions' => [
+                                    'list' => '.kanban-plan-assignees',
+                                    'ignore' => '.search-field,.dropdown-header,.dropdown-divider'
+                                ]
+                            ]));
+
                             echo Dropdown::widget([
                                 'items' => $items,
                                 'encodeLabels' => false,
                                 'options' => [
-                                    'class' => ['w-100']
+                                    'class' => ['kanban-plan-assignees', 'w-100']
                                 ]
                             ]);
                         }
@@ -157,6 +171,7 @@ $action = Yii::$app->controller->action->id;
             <?php endif; ?>
             <?= HideSeek::widget([
                 'options' => [
+                    'id' => 'search-tasks-widget',
                     'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
                 ],
                 'clientOptions' => [

@@ -2,7 +2,9 @@
 
 use kartik\date\DatePicker;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ActiveForm;
+use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
 use yii\widgets\Pjax;
 
@@ -79,6 +81,85 @@ use yii\widgets\Pjax;
                 'readonly' => true
             ]
         ]); ?>
+        <?php if ($keyName !== 'userId'): ?>
+            <div class="kanban-task-assignees kanban-assignees mt-3">
+                <div class="dropdown">
+                    <a href="javascript:;" data-toggle="dropdown"
+                       class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
+
+                    </a>
+                    <?php
+                    foreach ($users as $user) {
+                        $linkOptions = [
+                            'class' => ['align-items-center', 'remove-assignee'],
+                            'style' => ['display' => 'none'],
+                            'onclick' => sprintf(
+                                'window.sa.kanban.removeAssignee.call(this, %u);',
+                                $user->getId()
+                            ),
+                            'data' => [
+                                'id' => $user->getId(),
+                                'name' => $user->name,
+                                'image' => $user->image
+                            ]
+                        ];
+
+                        $items[] = [
+                            'label' => $this->render('_user', [
+                                'user' => $user,
+                                'assigned' => true
+                            ]),
+                            'linkOptions' => $linkOptions,
+                            'url' => 'javascript:;'
+                        ];
+                    }
+                    $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
+                    foreach ($users as $user) {
+                        $linkOptions = [
+                            'class' => ['align-items-center', 'add-assignee'],
+                            'onclick' => sprintf(
+                                'window.sa.kanban.addAssignee.call(this, %u);',
+                                $user->getId()
+                            ),
+                            'data' => [
+                                'id' => $user->getId(),
+                                'name' => $user->name,
+                                'image' => $user->image
+                            ]
+                        ];
+
+                        $items[] = [
+                            'label' => $this->render('_user', [
+                                'user' => $user,
+                                'assigned' => false
+                            ]),
+                            'linkOptions' => $linkOptions,
+                            'url' => 'javascript:;'
+                        ];
+                    }
+
+                    array_unshift($items, HideSeek::widget([
+                        'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
+                        'options' => [
+                            'id' => 'kanban-create-task-assignees',
+                            'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                        ],
+                        'clientOptions' => [
+                            'list' => '.kanban-create-task-assignees',
+                            'ignore' => '.search-field,.dropdown-header'
+                        ]
+                    ]));
+                    ?>
+                    <?= Dropdown::widget([
+                        'items' => $items,
+                        'encodeLabels' => false,
+                        'options' => [
+                            'class' => ['kanban-create-task-assignees', 'w-100']
+                        ]
+                    ]); ?>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
     <div class="list-group list-group-flush">
         <?= Html::submitButton(Yii::t('simialbi/kanban', 'Save'), [

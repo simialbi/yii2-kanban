@@ -40,9 +40,9 @@ window.sa.kanban = (function ($, baseUrl) {
             );
             $assignees.append($assignee);
 
-            $this.removeClass('d-flex').addClass('d-none');
+            $this.addClass('is-assigned').css('display', 'none');
             $this.closest('.dropdown-menu').find('.remove-assignee[data-id="' + id + '"]')
-                .removeClass('d-none').addClass('d-flex');
+                .addClass('is-assigned').css('display', '');
         },
         removeAssignee: function (id) {
             var $this = $(this);
@@ -50,9 +50,9 @@ window.sa.kanban = (function ($, baseUrl) {
             var $assignee = $assignees.find('.kanban-user[data-id="' + id + '"');
 
             $assignee.remove();
-            $this.removeClass('d-flex').addClass('d-none');
+            $this.removeClass('is-assigned').css('display', 'none');
             $this.closest('.dropdown-menu').find('.add-assignee[data-id="' + id + '"]')
-                .removeClass('d-none').addClass('d-flex');
+                .removeClass('is-assigned').css('display', '');
         }
     };
 

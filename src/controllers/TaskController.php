@@ -162,9 +162,24 @@ class TaskController extends Controller
         }
 
         if ($task->load(Yii::$app->request->post()) && $task->save()) {
+            $assignees = Yii::$app->request->getBodyParam('assignees', []);
             $this->module->trigger(Module::EVENT_TASK_CREATED, new TaskEvent([
                 'task' => $task
             ]));
+
+            foreach ($assignees as $assignee) {
+                try {
+                    $task::getDb()->createCommand()->insert(
+                        '{{%kanban_task_user_assignment}}',
+                        ['task_id' => $task->id, 'user_id' => $assignee]
+                    )->execute();
+                    $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+                        'task' => $task,
+                        'user' => ArrayHelper::getValue(Yii::$app->getModule('schedule')->users, $assignee)
+                    ]));
+                } catch (Exception $e) {
+                }
+            }
 
             return $this->redirect(['plan/view', 'id' => $board->id, 'group' => $group]);
         }
@@ -175,7 +190,8 @@ class TaskController extends Controller
             'keyName' => $keyName,
             'task' => $task,
             'buckets' => $buckets,
-            'statuses' => $this->module->statuses
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 

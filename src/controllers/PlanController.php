@@ -114,15 +114,19 @@ class PlanController extends Controller
     public function actionSchedule($id)
     {
         $model = $this->findModel($id);
+        $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
 
-        $tasks = $model->getTasks()
+        $taskQuery = $model->getTasks()
             ->where(['not', ['start_date' => null]])
-            ->orWhere(['not', ['end_date' => null]])
-            ->all();
+            ->orWhere(['not', ['end_date' => null]]);
         /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
 
+        if ($readonly) {
+            $taskQuery->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+        }
+
         $calendarTasks = [];
-        foreach ($tasks as $task) {
+        foreach ($taskQuery->all() as $task) {
             /* @var $task \simialbi\yii2\kanban\models\Task */
             $startDate = (empty($task->start_date))
                 ? Yii::$app->formatter->asDatetime($task->end_date, 'php:c')
@@ -160,9 +164,10 @@ class PlanController extends Controller
 
         return $this->render('schedule', [
             'model' => $model,
-            'otherTasks' => $this->renderBucketContent($model, 'schedule'),
+            'otherTasks' => $this->renderBucketContent($model, 'schedule', $readonly),
             'calendarTasks' => $calendarTasks,
-            'users' => Yii::$app->getModule('schedule')->users
+            'users' => $this->module->users,
+            'readonly' => $readonly
         ]);
     }
 

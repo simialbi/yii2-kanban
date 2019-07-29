@@ -3,6 +3,7 @@
 use kartik\date\DatePicker;
 use kartik\file\FileInput;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
@@ -97,7 +98,8 @@ Pjax::begin([
                         $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
                         foreach ($users as $user) {
                             $linkOptions = [
-                                'class' => ['align-items-center', 'd-none', 'remove-assignee'],
+                                'class' => ['align-items-center', 'remove-assignee'],
+                                'style' => ['display' => 'none'],
                                 'onclick' => sprintf(
                                     'window.sa.kanban.removeAssignee.call(this, %u);',
                                     $user->getId()
@@ -110,8 +112,8 @@ Pjax::begin([
                             ];
                             foreach ($model->assignees as $assignee) {
                                 if ($assignee->getId() === $user->getId()) {
-                                    Html::removeCssClass($linkOptions, 'd-none');
-                                    Html::addCssClass($linkOptions, 'd-flex');
+                                    Html::removeCssStyle($linkOptions, ['display']);
+                                    Html::addCssClass($linkOptions, 'is-assigned');
                                     break;
                                 }
                             }
@@ -125,10 +127,11 @@ Pjax::begin([
                                 'url' => 'javascript:;'
                             ];
                         }
+                        $items[] = '-';
                         $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
                         foreach ($users as $user) {
                             $linkOptions = [
-                                'class' => ['align-items-center', 'd-flex', 'add-assignee'],
+                                'class' => ['align-items-center', 'add-assignee'],
                                 'onclick' => sprintf(
                                     'window.sa.kanban.addAssignee.call(this, %u);',
                                     $user->getId()
@@ -141,8 +144,9 @@ Pjax::begin([
                             ];
                             foreach ($model->assignees as $assignee) {
                                 if ($assignee->getId() === $user->getId()) {
-                                    Html::addCssClass($linkOptions, 'd-none');
-                                    Html::removeCssClass($linkOptions, 'd-flex');
+                                    Html::addCssStyle($linkOptions, ['display' => 'none']);
+                                    Html::addCssClass($linkOptions, 'is-assigned');
+//                                    Html::removeCssClass($linkOptions, 'd-flex');
                                     break;
                                 }
                             }
@@ -156,12 +160,24 @@ Pjax::begin([
                                 'url' => 'javascript:;'
                             ];
                         }
+
+                        array_unshift($items, HideSeek::widget([
+                            'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
+                            'options' => [
+                                'id' => 'kanban-update-task-assignees',
+                                'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                            ],
+                            'clientOptions' => [
+                                'list' => '.kanban-assignees',
+                                'ignore' => '.search-field,.dropdown-header,.dropdown-divider'
+                            ]
+                        ]));
                         ?>
                         <?= Dropdown::widget([
                             'items' => $items,
                             'encodeLabels' => false,
                             'options' => [
-                                'class' => ['w-100']
+                                'class' => ['kanban-assignees', 'w-100']
                             ]
                         ]); ?>
                     </div>
