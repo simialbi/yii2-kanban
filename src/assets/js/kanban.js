@@ -76,7 +76,7 @@ window.sa.kanban = (function ($, baseUrl) {
 
             $inputGroup.append($('<div class="input-group-append" />').append($buttonDelete));
 
-            $addElement.find('input[type="text"]').val('');
+            $addElement.find('input[type="text"]').val('').removeClass(['is-valid', 'is-invalid']);
 
             $linklist.append($addElement);
         } else {
@@ -203,29 +203,28 @@ window.sa.kanban = (function ($, baseUrl) {
     {
         $(document).on('keydown.sa.kanban', '.linklist input[type="text"]', function (evt) {
             var $this = $(this);
-            var $form = $this.closest('form');
             var code = evt.keyCode || evt.which;
             if ($this.val() === '') {
                 return;
             }
             if (parseInt(code) === 9 || parseInt(code) === 13) {
                 evt.preventDefault();
-                if ($this.val().match(/^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+)(?::\d{1,5})?(?:$|[?\/#])/i)) {
-                    $this.removeClass('is-invalid');
+                if ($this.val().match(/^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)*)(?::\d{1,5})?(?:$|[?\/#])/i)) {
+                    $this.removeClass('is-invalid').addClass('is-valid');
                     addLinkElement.apply(this);
                     $('.add-linklist-element input[type="text"]').focus();
                 } else {
-                    $this.addClass('is-invalid');
+                    $this.addClass('is-invalid').addClass('is-valid');
                 }
             }
         });
         $(document).on('change.sa.kanban', '.linklist input[type="text"]', function () {
             var $this = $(this);
-            if ($this.val().match(/^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+)(?::\d{1,5})?(?:$|[?\/#])/i)) {
-                $this.removeClass('is-invalid');
+            if ($this.val().match(/^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)*)(?::\d{1,5})?(?:$|[?\/#])/i)) {
+                $this.removeClass('is-invalid').addClass('is-valid');
                 addLinkElement.apply(this);
             } else {
-                $this.addClass('is-invalid');
+                $this.addClass('is-invalid').addClass('is-valid');
             }
         });
         $(document).on('click.sa.kanban', '.linklist .remove-linklist-element', function () {
