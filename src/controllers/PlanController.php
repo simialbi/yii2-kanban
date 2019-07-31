@@ -372,7 +372,9 @@ class PlanController extends Controller
             'user_id' => $userId
         ])->execute();
 
-        return $this->redirect(Url::previous('plan-view'));
+        $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->id];
+
+        return $this->redirect($previous);
     }
 
     /**
@@ -398,7 +400,9 @@ class PlanController extends Controller
             'user_id' => $userId
         ])->execute();
 
-        return $this->redirect(Url::previous('plan-view'));
+        $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->id];
+
+        return $this->redirect($previous);
     }
 
     /**
