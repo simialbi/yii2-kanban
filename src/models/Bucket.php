@@ -171,6 +171,7 @@ class Bucket extends ActiveRecord
     {
         $query = $this->hasMany(Task::class, ['bucket_id' => 'id'])
             ->where(['status' => Task::STATUS_DONE])
+            ->andWhere(['>=', 'updated_at', strtotime('-2 weeks')])
             ->orderBy([Task::tableName() . '.[[sort]]' => SORT_ASC])
             ->with('attachments')
             ->with('assignments')
