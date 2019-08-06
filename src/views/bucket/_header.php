@@ -17,6 +17,9 @@ use yii\widgets\Pjax;
 ]); ?>
 <div class="kanban-bucket-header d-flex flex-row align-items-center">
     <h5 class="m-0"><?= $title; ?></h5>
+    <?=FAS::i('arrows-alt', [
+        'class' => ['ml-auto', 'kanban-bucket-sort-handle']
+    ])?>
     <?= ButtonDropdown::widget([
         'label' => FAS::i('ellipsis-h'),
         'encodeLabel' => false,
@@ -25,7 +28,8 @@ use yii\widgets\Pjax;
             'class' => ['toggle' => '', 'btn' => 'btn btn-sm']
         ],
         'options' => [
-            'class' => ['ml-auto', 'kanban-bucket-more']
+            'id' => 'bucket-dropdown-' . $id,
+            'class' => ['ml-2', 'kanban-bucket-more']
         ],
         'dropdown' => [
             'items' => [

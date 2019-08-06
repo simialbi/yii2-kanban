@@ -15,6 +15,7 @@ window.sa.kanban = (function ($, baseUrl) {
                 modal.find('.modal-content').load(href);
             });
 
+            initScrollBars();
             initTask();
             initSortable();
             initChecklist();
@@ -118,10 +119,27 @@ window.sa.kanban = (function ($, baseUrl) {
         }
     }
 
+    function initScrollBars()
+    {
+        var $topScrollBar = $('.kanban-top-scrollbar'),
+            $bottomScrollBar = $('.kanban-bottom-scrollbar');
+        $topScrollBar.find('> div').css('width', $bottomScrollBar.find('> div').prop('scrollWidth'));
+
+        $topScrollBar.on('scroll', function () {
+            $bottomScrollBar.scrollLeft($topScrollBar.scrollLeft());
+        });
+        $bottomScrollBar.on('scroll', function () {
+            $topScrollBar.scrollLeft($bottomScrollBar.scrollLeft());
+        });
+    }
+
     function initTask()
     {
         $('[data-toggle="tooltip"]').tooltip();
         $('.kanban-task').on('click.sa.kanban', function (evt) {
+            if (!evt.target || !evt.target.tagName) {
+                return;
+            }
             var element = evt.target.tagName.toLowerCase();
             if (element === 'div' || element === 'h6' || element === 'img') {
                 $(this).find('.kanban-task-update-link').trigger('click');
@@ -131,6 +149,31 @@ window.sa.kanban = (function ($, baseUrl) {
 
     function initSortable()
     {
+        $('.kanban-plan-sortable').sortable({
+            items: '> .kanban-bucket',
+            handle: '.kanban-bucket-sort-handle',
+            stop: function (event, ui) {
+                var $element = ui.item;
+                var $before = $element.prev('.kanban-bucket');
+                var action = 'move-after';
+                var pk = null;
+
+                if (!$before.length) {
+                    action = 'move-as-first';
+                } else {
+                    pk = $before.data('id');
+                }
+
+                $.post(baseUrl + '/sort/' + action, {
+                    modelClass: 'simialbi\\yii2\\kanban\\models\\Bucket',
+                    modelPk: $element.data('id'),
+                    pk: pk
+                }, function (data) {
+                    console.log(data);
+                });
+            }
+        });
+
         $('.kanban-tasks').sortable({
             items: '> .kanban-sortable',
             connectWith: '.kanban-tasks',

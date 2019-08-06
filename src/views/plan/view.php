@@ -26,9 +26,14 @@ $this->params['breadcrumbs'] = [
             'users' => $users,
             'readonly' => $readonly
         ]); ?>
-        <div class="overflow-auto mt-5">
-            <div class="d-flex flex-row">
-                <?= $buckets; ?>
+        <div class="d-flex flex-column mt-3">
+            <div class="kanban-top-scrollbar mb-2">
+                <div></div>
+            </div>
+            <div class="kanban-bottom-scrollbar">
+                <div class="d-flex flex-row kanban-plan-sortable">
+                    <?= $buckets; ?>
+                </div>
             </div>
         </div>
     </div>

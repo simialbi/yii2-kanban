@@ -5,6 +5,25 @@ $user-image-size: 32px;
 
 $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #28A745, #20C997, #17A2B8;
 
+.kanban-top-scrollbal {
+    height: 20px;
+
+    > div {
+        height: 1px;
+        overflow-y: hidden;
+    }
+}
+.kanban-top-scrollbar, .kanban-bottom-scrollbar {
+    width: 100%;
+    overflow-x: scroll;
+    overflow-y: hidden;
+
+    > div {
+        min-height: 1px;
+        //width: 10000px;
+    }
+}
+
 .kanban-board {
     -webkit-transition: all .2s ease-in-out;
     -moz-transition: all .2s ease-in-out;
@@ -51,7 +70,7 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     width: $bucket-width;
 }
 
-.kanban-bucket-more > .btn {
+.kanban-bucket-more > .btn, .kanban-bucket-sort-handle {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
@@ -66,9 +85,13 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     }
 }
 
+.kanban-bucket-sort-handle {
+    cursor: move;
+}
+
 .kanban-bucket-header {
     &:hover {
-        .kanban-bucket-more > .btn {
+        .kanban-bucket-more > .btn, .kanban-bucket-sort-handle {
             opacity: 1;
         }
     }

@@ -258,7 +258,8 @@ class Board extends ActiveRecord
      */
     public function getBuckets()
     {
-        return $this->hasMany(Bucket::class, ['board_id' => 'id']);
+        return $this->hasMany(Bucket::class, ['board_id' => 'id'])
+            ->orderBy([Bucket::tableName() . '.[[sort]]' => SORT_ASC]);
     }
 
     /**

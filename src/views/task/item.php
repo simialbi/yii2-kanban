@@ -199,6 +199,7 @@ Pjax::begin([
                 ], [
                     'class' => ['btn', 'btn-sm', 'ml-auto', 'kanban-task-update-link'],
                     'data' => [
+                        'pjax' => '0',
                         'toggle' => 'modal',
                         'target' => '#taskModal'
                     ]
