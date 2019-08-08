@@ -3,6 +3,14 @@ $bucket-max-height: 370px;
 $kanban-board-image-min-width: 150px;
 $user-image-size: 32px;
 
+$breakpoints: (
+    xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px
+);
+
 $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #28A745, #20C997, #17A2B8;
 
 .kanban-top-scrollbal {
@@ -30,13 +38,23 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     -o-transition: all .2s ease-in-out;
     transition: all .2s ease-in-out;
 
-    width: 33%;
-    width: -webkit-calc(33% - .11111111rem);
-    width: -moz-calc(33% - .11111111rem);
-    width: calc(33% - .11111111rem);
+    width: 100%;
 
     &:hover {
         border-color: var(--dark);
+    }
+
+    @media (min-width: map-get($breakpoints, md)) {
+        width: 50%;
+        width: -webkit-calc(50% - .5rem);
+        width: -moz-calc(50% - .5rem);
+        width: calc(50% - .5rem);
+    }
+    @media (min-width: map-get($breakpoints, xl)) {
+        width: 33%;
+        width: -webkit-calc(33% - .11111111rem);
+        width: -moz-calc(33% - .11111111rem);
+        width: calc(33% - .11111111rem);
     }
 }
 
@@ -62,6 +80,19 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     }
     > img {
         padding: 1rem;
+    }
+}
+
+.kanban-create-plan-mobile {
+    bottom: 0;
+    position: absolute;
+    right: 0;
+
+    > .fa-plus {
+        height: 1.5rem;
+        line-height: 1.5;
+        text-align: center;
+        width: 1.5rem;
     }
 }
 

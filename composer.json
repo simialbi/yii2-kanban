@@ -28,6 +28,7 @@
         "yiisoft/yii2-bootstrap4": "^2.0.4",
         "arogachev/yii2-sortable": "^0.1.6",
         "bower-asset/fullcalendar": "^4.2.0",
+        "bower-asset/swiper": "^4.5.0",
         "kartik-v/yii2-widget-datepicker": "^1.4.7",
         "kartik-v/yii2-widget-fileinput": "^1.0.9",
         "rmrevin/yii2-fontawesome": "^3.3.0",

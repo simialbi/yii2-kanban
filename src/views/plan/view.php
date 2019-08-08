@@ -27,7 +27,7 @@ $this->params['breadcrumbs'] = [
             'readonly' => $readonly
         ]); ?>
         <div class="d-flex flex-column mt-3">
-            <div class="kanban-top-scrollbar mb-2">
+            <div class="kanban-top-scrollbar mb-2 d-none d-md-block">
                 <div></div>
             </div>
             <div class="kanban-bottom-scrollbar">

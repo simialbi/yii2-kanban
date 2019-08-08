@@ -1,7 +1,8 @@
-/* global jQuery, yii, kanbanBaseUrl: false */
+/* global jQuery, yii, Swiper, kanbanBaseUrl: false */
 window.sa = {};
-window.sa.kanban = (function ($, baseUrl) {
+window.sa.kanban = (function ($, Swiper, baseUrl) {
     var activeBucket;
+    var slider;
 
     var pub = {
         isActive: true,
@@ -123,14 +124,22 @@ window.sa.kanban = (function ($, baseUrl) {
     {
         var $topScrollBar = $('.kanban-top-scrollbar'),
             $bottomScrollBar = $('.kanban-bottom-scrollbar');
-        $topScrollBar.find('> div').css('width', $bottomScrollBar.find('> div').prop('scrollWidth'));
 
-        $topScrollBar.on('scroll', function () {
-            $bottomScrollBar.scrollLeft($topScrollBar.scrollLeft());
-        });
-        $bottomScrollBar.on('scroll', function () {
-            $topScrollBar.scrollLeft($bottomScrollBar.scrollLeft());
-        });
+        if ($topScrollBar.is(':visible')) {
+            $topScrollBar.find('> div').css('width', $bottomScrollBar.find('> div').prop('scrollWidth'));
+
+            $topScrollBar.on('scroll', function () {
+                $bottomScrollBar.scrollLeft($topScrollBar.scrollLeft());
+            });
+            $bottomScrollBar.on('scroll', function () {
+                $topScrollBar.scrollLeft($bottomScrollBar.scrollLeft());
+            });
+        } else {
+            slider = new Swiper('.kanban-bottom-scrollbar', {
+                wrapperClass: 'kanban-plan-sortable',
+                slideClass: 'swiper-slide'
+            });
+        }
     }
 
     function initTask()
@@ -311,7 +320,7 @@ window.sa.kanban = (function ($, baseUrl) {
     }
 
     return pub;
-})(window.jQuery, kanbanBaseUrl);
+})(jQuery, Swiper, kanbanBaseUrl);
 
 window.jQuery(function () {
     window.yii.initModule(window.sa.kanban);
