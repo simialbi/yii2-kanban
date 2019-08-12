@@ -47,13 +47,10 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
 }
 
 .kanban-button-next, .kanban-button-prev {
+    padding-left: 1rem;
+    padding-right: 1rem;
     position: absolute;
     top: 0;
-
-    > .fa-caret-left, > .fa-caret-right {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
 }
 
 .kanban-button-prev {
