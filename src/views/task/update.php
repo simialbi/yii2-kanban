@@ -74,7 +74,8 @@ Pjax::begin([
                         <a href="javascript:;" data-toggle="dropdown"
                            class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
                             <?php foreach ($model->assignees as $assignee): ?>
-                                <span class="kanban-user" data-id="<?= $assignee->getId(); ?>">
+                                <span class="kanban-user" data-id="<?= $assignee->getId(); ?>"
+                                      data-name="<?= $assignee->name; ?>" data-image="<?= $assignee->image; ?>">
                                     <?= Html::hiddenInput('assignees[]', $assignee->getId()); ?>
                                     <?php if ($assignee->image): ?>
                                         <?= Html::img($assignee->image, [

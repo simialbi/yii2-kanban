@@ -28,8 +28,8 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         addAssignee: function (id) {
             var $this = $(this);
             var $assignees = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
-            var name = $this.data('name'),
-                image = $this.data('image');
+            var name = $this.data('name') || '',
+                image = $this.data('image') || '';
             var img;
             if (image) {
                 img = '<img src="' + image + '" class="rounded-circle mr-1" alt="' + name + '" title="' + name + '">';
