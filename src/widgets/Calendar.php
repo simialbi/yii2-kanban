@@ -102,8 +102,15 @@ class Calendar extends Widget
         }
 
         if (isset($this->clientOptions['plugins'])) {
-            if (false !== array_search('interaction', $this->clientOptions['plugins'])) {
-                $asset->js[] = 'interaction/main.js';
+            foreach ($this->clientOptions['plugins'] as $plugin) {
+                $cssFile = Yii::getAlias($asset->sourcePath . '/' . $plugin . '/main.css');
+                $jsFile = Yii::getAlias($asset->sourcePath . '/' . $plugin . '/main.js');
+                if (file_exists($cssFile)) {
+                    $asset->css[] = $plugin . '/main.css';
+                }
+                if (file_exists($jsFile)) {
+                    $asset->js[] = $plugin . '/main.js';
+                }
             }
         }
 

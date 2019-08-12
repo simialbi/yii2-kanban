@@ -7,7 +7,6 @@
 
 namespace simialbi\yii2\kanban\widgets;
 
-
 use rmrevin\yii\fontawesome\FAR;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\widgets\Widget;

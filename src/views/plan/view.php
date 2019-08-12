@@ -1,5 +1,6 @@
 <?php
 
+use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
 use yii\bootstrap4\Modal;
 
@@ -33,6 +34,11 @@ $this->params['breadcrumbs'] = [
             <div class="kanban-bottom-scrollbar">
                 <div class="d-flex flex-row kanban-plan-sortable">
                     <?= $buckets; ?>
+                </div>
+
+                <div class="d-md-none">
+                    <div class="kanban-button-prev"><?= FAS::i('caret-left'); ?></div>
+                    <div class="kanban-button-next"><?= FAS::i('caret-right'); ?></div>
                 </div>
             </div>
         </div>

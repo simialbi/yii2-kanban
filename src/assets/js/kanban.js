@@ -22,6 +22,9 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             initChecklist();
             initLinks();
         },
+        getSwiper: function() {
+            return slider;
+        },
         addAssignee: function (id) {
             var $this = $(this);
             var $assignees = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
@@ -137,7 +140,12 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         } else {
             slider = new Swiper('.kanban-bottom-scrollbar', {
                 wrapperClass: 'kanban-plan-sortable',
-                slideClass: 'swiper-slide'
+                slideClass: 'kanban-bucket',
+                navigation: {
+                    nextEl: '.kanban-button-next',
+                    prevEl: '.kanban-button-prev',
+                    disabledClass: 'text-muted'
+                }
             });
         }
     }

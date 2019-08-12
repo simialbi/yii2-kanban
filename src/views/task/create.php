@@ -13,6 +13,8 @@ use yii\widgets\Pjax;
 /* @var $task \simialbi\yii2\kanban\models\Task */
 /* @var $id integer|string */
 /* @var $keyName string */
+/* @var $bucketName string */
+/* @var $mobile boolean */
 /* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 /* @var $buckets \simialbi\yii2\kanban\models\Bucket[] */
 /* @var $statuses array */
@@ -20,19 +22,21 @@ use yii\widgets\Pjax;
 ?>
 
 <?php Pjax::begin([
-    'id' => 'createTaskPjax',
+    'id' => 'createTaskPjax' . $bucketName,
     'formSelector' => '#createTaskForm',
     'enablePushState' => false,
     'clientOptions' => ['skipOuterContainers' => true]
 ]); ?>
-<?= Html::a('+', ['task/create', 'boardId' => $board->id, $keyName => $id], [
-    'class' => ['btn', 'btn-primary', 'btn-block']
-]); ?>
+<?php if (!$mobile) : ?>
+    <?= Html::a('+', ['task/create', 'boardId' => $board->id, $keyName => $id], [
+        'class' => ['btn', 'btn-primary', 'btn-block']
+    ]); ?>
+<?php endif; ?>
 
 <?php $form = ActiveForm::begin([
     'action' => ['task/create',  'boardId' => $board->id, $keyName => $id],
     'options' => [
-        'class' => 'mt-5'
+        'class' => ['mt-2', 'mt-md-5']
     ],
     'id' => 'createTaskForm',
     'fieldConfig' => function ($model, $attribute) {

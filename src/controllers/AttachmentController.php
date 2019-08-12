@@ -7,7 +7,6 @@
 
 namespace simialbi\yii2\kanban\controllers;
 
-
 use simialbi\yii2\kanban\models\Attachment;
 use simialbi\yii2\kanban\models\Bucket;
 use Yii;

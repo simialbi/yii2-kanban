@@ -16,9 +16,9 @@ use yii\widgets\Pjax;
     'clientOptions' => ['skipOuterContainers' => true]
 ]); ?>
 <div class="kanban-bucket-header d-flex flex-row align-items-center">
-    <h5 class="m-0"><?= $title; ?></h5>
+    <h5 class="m-0 mx-auto mx-md-0"><?= $title; ?></h5>
     <?=FAS::i('arrows-alt', [
-        'class' => ['ml-auto', 'kanban-bucket-sort-handle']
+        'class' => ['ml-auto', 'kanban-bucket-sort-handle', 'd-none', 'd-md-block']
     ])?>
     <?= ButtonDropdown::widget([
         'label' => FAS::i('ellipsis-h'),
@@ -29,7 +29,7 @@ use yii\widgets\Pjax;
         ],
         'options' => [
             'id' => 'bucket-dropdown-' . $id,
-            'class' => ['ml-2', 'kanban-bucket-more']
+            'class' => ['d-none', 'd-md-block', 'ml-auto', 'ml-md-2', 'kanban-bucket-more']
         ],
         'dropdown' => [
             'items' => [

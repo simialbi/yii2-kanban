@@ -7,7 +7,6 @@
 
 namespace simialbi\yii2\kanban\controllers;
 
-
 use simialbi\yii2\kanban\models\Attachment;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
@@ -23,6 +22,7 @@ use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
+use yii\helpers\Inflector;
 use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
@@ -97,12 +97,13 @@ class TaskController extends Controller
      * @param integer|null $userId
      * @param integer|null $status
      * @param integer|null $date
+     * @param boolean $mobile
      * @return string
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      */
-    public function actionCreate($boardId, $bucketId = null, $userId = null, $status = null, $date = null)
+    public function actionCreate($boardId, $bucketId = null, $userId = null, $status = null, $date = null, $mobile = 0)
     {
         $board = $this->findBoardModel($boardId);
         $buckets = [];
@@ -189,6 +190,8 @@ class TaskController extends Controller
             'board' => $board,
             'id' => $id,
             'keyName' => $keyName,
+            'bucketName' => ($mobile ? 'Mobile' : '') . (($keyName === 'bucketId') ? Inflector::slug($task->bucket->name) : ''),
+            'mobile' => $mobile ? true : false,
             'task' => $task,
             'buckets' => $buckets,
             'statuses' => $this->module->statuses,

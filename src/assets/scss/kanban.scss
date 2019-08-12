@@ -13,7 +13,11 @@ $breakpoints: (
 
 $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #28A745, #20C997, #17A2B8;
 
-.kanban-top-scrollbal {
+.pb-6 {
+    padding-bottom: 3.5rem;
+}
+
+.kanban-top-scrollbar {
     height: 20px;
 
     > div {
@@ -21,15 +25,43 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
         overflow-y: hidden;
     }
 }
-.kanban-top-scrollbar, .kanban-bottom-scrollbar {
-    width: 100%;
-    overflow-x: scroll;
-    overflow-y: hidden;
 
-    > div {
-        min-height: 1px;
-        //width: 10000px;
+.kanban-bottom-scrollbar {
+    @media (max-width: map-get($breakpoints, md) - 1) {
+        position: relative;
     }
+}
+.kanban-top-scrollbar, .kanban-bottom-scrollbar {
+    @media (min-width: map-get($breakpoints, md)) {
+        width: 100%;
+        overflow-x: scroll;
+        overflow-y: hidden;
+
+        > div {
+            min-height: 1px;
+        }
+    }
+    @media (max-width: map-get($breakpoints, md) - 1) {
+        overflow-x: hidden;
+    }
+}
+
+.kanban-button-next, .kanban-button-prev {
+    position: absolute;
+    top: 0;
+
+    > .fa-caret-left, > .fa-caret-right {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+.kanban-button-prev {
+    left: 10vw;
+}
+
+.kanban-button-next {
+    right: 10vw;
 }
 
 .kanban-board {
@@ -83,7 +115,7 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     }
 }
 
-.kanban-create-plan-mobile {
+.kanban-create-mobile {
     bottom: 0;
     position: absolute;
     right: 0;
@@ -114,6 +146,10 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     &:focus {
         opacity: 1;
     }
+
+    @media (max-width: map-get($breakpoints, md) - 1px) {
+        opacity: 1;
+    }
 }
 
 .kanban-bucket-sort-handle {
@@ -124,6 +160,15 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     &:hover {
         .kanban-bucket-more > .btn, .kanban-bucket-sort-handle {
             opacity: 1;
+        }
+    }
+
+    @media (max-width: map-get($breakpoints, md) - 1) {
+        > h1, > h2, > h3, > h4, > h5, > .h1, > .h2, > .h3, > .h4, > .h5 {
+            max-width: 50vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
     }
 }
@@ -236,6 +281,10 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
                 -o-transition: opacity .2s ease-in-out;
                 transition: opacity .2s ease-in-out;
                 width: $user-image-size;
+
+                @media (max-width: map-get($breakpoints, md) - 1) {
+                    opacity: 1;
+                }
             }
         }
 

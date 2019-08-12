@@ -1,5 +1,6 @@
 <?php
 
+use rmrevin\yii\fontawesome\FAS;
 use yii\bootstrap4\Html;
 use yii\widgets\Pjax;
 
@@ -19,7 +20,7 @@ use yii\widgets\Pjax;
 
 ?>
 
-<div class="kanban-bucket mr-4 d-flex flex-column flex-shrink-0" data-id="<?= $id; ?>"
+<div class="kanban-bucket position-relative mr-md-4 pb-6 pb-md-0 d-flex flex-column flex-shrink-0" data-id="<?= $id; ?>"
      data-sort="<?= $sort ? 'true' : 'false'; ?>" data-action="<?= $action; ?>"
      data-key-name="<?= \yii\helpers\Inflector::camel2id($keyName, '_'); ?>">
     <?php if ($renderContext): ?>
@@ -33,12 +34,15 @@ use yii\widgets\Pjax;
 
     <?php Pjax::begin([
         'id' => 'createTaskPjax' . \yii\helpers\Inflector::slug($title),
+        'options' => [
+            'class' => ['d-none', 'd-md-block']
+        ],
         'formSelector' => '#createTaskForm',
         'enablePushState' => false,
         'clientOptions' => ['skipOuterContainers' => true]
     ]); ?>
     <?php if (!$readonly): ?>
-    <?= Html::a('+', ['task/create', 'boardId' => $boardId, $keyName => $id], [
+    <?= Html::a(FAS::i('plus'), ['task/create', 'boardId' => $boardId, $keyName => $id], [
         'class' => ['btn', 'btn-primary', 'btn-block']
     ]); ?>
     <?php endif; ?>
@@ -58,6 +62,22 @@ use yii\widgets\Pjax;
             ]); ?>
         <?php endforeach; ?>
     </div>
+
+    <?php Pjax::begin([
+        'id' => 'createTaskPjaxMobile' . \yii\helpers\Inflector::slug($title),
+        'options' => [
+            'class' => ['d-md-none']
+        ],
+        'formSelector' => '#createTaskForm',
+        'enablePushState' => false,
+        'clientOptions' => ['skipOuterContainers' => true]
+    ]); ?>
+    <?php if (!$readonly): ?>
+        <?= Html::a(FAS::i('plus'), ['task/create', 'boardId' => $boardId, $keyName => $id, 'mobile' => true], [
+            'class' => ['kanban-create-mobile', 'd-md-none', 'rounded-circle', 'bg-secondary', 'text-white', 'p-3'],
+        ]); ?>
+    <?php endif; ?>
+    <?php Pjax::end(); ?>
 
     <?php if (!empty($completedTasks)): ?>
         <a href="#collapse-<?= $id; ?>" data-toggle="collapse" aria-controls="collapse-<?= $id; ?>"

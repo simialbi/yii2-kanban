@@ -1,5 +1,6 @@
 <?php
 
+use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ButtonDropdown;
 use yii\bootstrap4\Dropdown;
@@ -15,7 +16,7 @@ $group = Yii::$app->request->getQueryParam('group', 'bucket');
 $action = Yii::$app->controller->action->id;
 ?>
 <div class="row">
-    <div class="col-8 col-lg-7 d-flex flex-row align-items-center">
+    <div class="col-md-8 col-lg-7 d-none d-md-flex flex-row align-items-center">
         <div class="kanban-board-image align-self-stretch d-flex justify-content-center align-items-center">
             <?php if ($model->image): ?>
                 <?= Html::img($model->image, ['class' => ['img-fluid']]); ?>
@@ -52,12 +53,12 @@ $action = Yii::$app->controller->action->id;
                 ]
             ],
             'options' => [
-                'class' => ['nav-pills', 'ml-5', 'd-none', 'd-md-flex']
+                'class' => ['nav-pills', 'ml-5']
             ]
         ]); ?>
     </div>
     <?php if ($action !== 'chart'): ?>
-        <div class="col-4 col-lg-5 d-flex flex-row align-items-center justify-content-end">
+        <div class="col-12 col-md-4 col-lg-5 d-flex flex-row align-items-center justify-content-end">
             <?php if ($action === 'view'): ?>
                 <div class="kanban-plan-assignees kanban-assignees d-none d-md-block">
                     <div class="dropdown mr-auto">
@@ -170,21 +171,45 @@ $action = Yii::$app->controller->action->id;
                 </div>
             <?php endif; ?>
             <?= HideSeek::widget([
+                'fieldTemplate' => '<div class="search-field mr-auto mr-md-0">{input}</div>',
                 'options' => [
                     'id' => 'search-tasks-widget',
                     'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
                 ],
                 'clientOptions' => [
                     'list' => '.kanban-tasks'
+                ],
+                'clientEvents' => [
+                    '_after' => new \yii\web\JsExpression('function () {
+                        if (jQuery(\'.d-none.d-md-block:first\').is(\':visible\')) {
+                            return;
+                        }
+                        var value = jQuery(this).val();
+                        jQuery(\'.kanban-bucket\').each(function () {
+                            if (jQuery(\'.kanban-sortable\', this).length || value === \'\') {
+                                jQuery(this).addClass(\'d-flex\').removeClass(\'d-none\');
+                            } else {
+                                jQuery(this).addClass(\'d-none\').removeClass(\'d-flex\');
+                            }
+                        });
+                        window.sa.kanban.getSwiper().update();
+                    }')
                 ]
             ]); ?>
             <?php if ($action === 'view'): ?>
                 <?= ButtonDropdown::widget([
-                    'label' => Yii::t('simialbi/kanban/plan', 'Group by <b>{group}</b>', [
-                        'group' => Yii::t('simialbi/kanban/plan', $group)
-                    ]),
+                    'label' => sprintf(
+                        '<span class="d-md-none">%s</span><span class="d-none d-md-inline">%s</span>',
+                        FAS::i('layer-group'),
+                        Yii::t('simialbi/kanban/plan', 'Group by <b>{group}</b>', [
+                            'group' => Yii::t('simialbi/kanban/plan', $group)
+                        ])
+                    ),
                     'encodeLabel' => false,
                     'dropdown' => [
+                        'options' => [
+                            'class' => ['dropdown-menu-right']
+                        ],
                         'items' => [
                             [
                                 'label' => Yii::t('simialbi/kanban/plan', 'Bucket'),

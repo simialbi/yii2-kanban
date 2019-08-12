@@ -31,6 +31,9 @@ use yii\widgets\Pjax;
         'id' => 'createBucketPjax',
         'formSelector' => '#createBucketForm',
         'enablePushState' => false,
+        'options' => [
+            'class' => ['d-none', 'd-md-block']
+        ],
         'clientOptions' => ['skipOuterContainers' => true]
     ]); ?>
     <div class="kanban-bucket">

@@ -13,7 +13,7 @@ $this->title = Yii::t('simialbi/kanban/plan', 'Kanban Hub');
 $this->params['breadcrumbs'] = [$this->title];
 ?>
 
-<div class="kanban-plan-index pb-5 pb-md-0 position-relative">
+<div class="kanban-plan-index pb-6 pb-md-0 position-relative">
     <h1><?= Html::encode($this->title); ?></h1>
 
     <div class="mt-3 d-flex flex-row justify-content-start flex-wrap">
@@ -51,7 +51,7 @@ $this->params['breadcrumbs'] = [$this->title];
             </div>
         </div>
         <?= Html::a(FAS::i('plus'), ['plan/create'], [
-            'class' => ['kanban-create-plan-mobile', 'd-md-none', 'rounded-circle', 'bg-secondary', 'text-white', 'p-3'],
+            'class' => ['kanban-create-mobile', 'd-md-none', 'rounded-circle', 'bg-secondary', 'text-white', 'p-3'],
             'title' => Html::encode(Yii::t('simialbi/kanban/plan', 'Create board'))
         ]); ?>
     </div>
