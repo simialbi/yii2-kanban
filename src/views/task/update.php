@@ -210,8 +210,7 @@ Pjax::begin([
                 ],
                 'pluginOptions' => [
                     'autoclose' => true,
-                    'todayHighlight' => true,
-                    'startDate' => Yii::$app->formatter->asDate('now')
+                    'todayHighlight' => true
                 ]
             ]); ?>
             <?= $form->field($model, 'end_date', [
