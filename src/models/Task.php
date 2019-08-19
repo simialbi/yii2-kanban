@@ -153,9 +153,6 @@ class Task extends ActiveRecord
     {
         if (!$this->_hash) {
             $string = $this->id . $this->bucket_id . $this->status . $this->end_date . $this->subject;
-            foreach ($this->assignees as $assignee) {
-                $string .= $assignee->getId();
-            }
             $this->_hash = md5($string);
         }
 
