@@ -493,10 +493,13 @@ class TaskController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
-            'task_id' => $model->id,
-            'user_id' => $userId
-        ])->execute();
+        try {
+            $model::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
+                'task_id' => $model->id,
+                'user_id' => $userId
+            ])->execute();
+        } catch (Exception $e) {
+        }
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
