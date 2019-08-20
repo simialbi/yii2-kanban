@@ -83,11 +83,11 @@ class ToDo extends Widget
 
             $html .= Html::beginTag('a', $options);
             $html .= Html::beginTag('div', [
-                'class' => ['custom-control', 'custom-checkbox']
+                'class' => ['form-check']
             ]);
             $html .= Html::checkbox("check[{$task->id}]", false, [
                 'value' => Task::STATUS_DONE,
-                'class' => ['custom-control-input'],
+                'class' => ['form-check-input'],
                 'id' => 'sa-kanban-status-' . $task->id,
                 'data' => [
                     'task-id' => $task->id
@@ -95,7 +95,7 @@ class ToDo extends Widget
             ]);
 
             $html .= Html::label($content, 'sa-kanban-status-' . $task->id, [
-                'class' => ['custom-control-label']
+                'class' => ['form-check-label']
             ]);
             $html .= Html::endTag('div');
             $html .= Html::endTag('a');
@@ -116,9 +116,17 @@ class ToDo extends Widget
         $id = $this->options['id'];
         $url = Url::to(['/schedule/task/set-status']);
         $js = <<<JS
-jQuery('#$id input[type="checkbox"]').on('change', function () {
+jQuery('#$id label').on('click', function (e) {
+    e.preventDefault();
+    window.location.replace(jQuery(this).closest('a').prop('href'));
+});
+jQuery('#$id input[type="checkbox"]').on('click', function (e) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    e.preventDefault();
 	var that = jQuery(this);
 	var id = that.data('taskId');
+	that.prop('checked', true);
 	$.get('$url?id=' + id + '&status=0', function () {
 		that.closest('.list-group-item').remove();
 	});
