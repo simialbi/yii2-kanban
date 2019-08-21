@@ -97,6 +97,7 @@ class PlanController extends Controller
         Url::remember(['plan/view', 'id' => $id, 'group' => $group], 'plan-view');
 
         return $this->render('view', [
+            'boards' => Board::findByUserId(),
             'model' => $model,
             'readonly' => $readonly,
             'buckets' => $bucketContent,
@@ -180,6 +181,7 @@ class PlanController extends Controller
     public function actionChart($id)
     {
         $model = $this->findModel($id);
+        $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
 
         $allUsers = $this->module->users;
 
@@ -306,7 +308,8 @@ class PlanController extends Controller
             'byStatus' => $byStatus,
             'byBucket' => $byBucket,
             'byAssignee' => $byAssignee,
-            'colors' => $this->module->statusColors
+            'colors' => $this->module->statusColors,
+            'readonly' => $readonly
         ]);
     }
 

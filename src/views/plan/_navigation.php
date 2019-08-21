@@ -8,6 +8,7 @@ use yii\bootstrap4\Html;
 use yii\bootstrap4\Nav;
 
 /* @var $this \yii\web\View */
+/* @var $boards \simialbi\yii2\kanban\models\Board[] */
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
 /* @var $readonly boolean */
@@ -27,7 +28,29 @@ $action = Yii::$app->controller->action->id;
             <?php endif; ?>
         </div>
         <div class="ml-3">
-            <h2 class="mb-0"><?= Html::encode($model->name); ?></h2>
+            <h2 class="mb-0">
+                <?php if (empty($boards)): ?>
+                    <?= Html::encode($model->name); ?>
+                <?php else: ?>
+                    <?php $items = []; ?>
+                    <?php foreach ($boards as $board): ?>
+                        <?php $items[] = [
+                            'label' => $board->name,
+                            'url' => ['plan/view', 'id' => $board->id]
+                        ]; ?>
+                    <?php endforeach; ?>
+                    <?php echo ButtonDropdown::widget([
+                        'label' => $model->name,
+                        'id' => 'boardSwitchDropdown',
+                        'buttonOptions' => [
+                            'class' => ['widget' => 'bg-transparent', 'h2', 'm-0', 'p-0', 'border-0']
+                        ],
+                        'dropdown' => [
+                            'items' => $items
+                        ]
+                    ]); ?>
+                <?php endif; ?>
+            </h2>
             <small class="text-muted"><?= Yii::$app->formatter->asDatetime($model->updated_at); ?></small>
         </div>
         <?= Nav::widget([

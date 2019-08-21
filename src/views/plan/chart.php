@@ -16,6 +16,7 @@ use simialbi\yii2\kanban\KanbanAsset;
 /* @var $byBucket array */
 /* @var $byAssignee array */
 /* @var $colors array */
+/* @var $readonly boolean */
 
 KanbanAsset::register($this);
 
@@ -78,8 +79,10 @@ foreach ($statuses as $status => $label) {
 ?>
 <div class="kanban-plan-schedule">
     <?= $this->render('_navigation', [
+        'boards' => [],
         'model' => $model,
-        'users' => $users
+        'users' => $users,
+        'readonly' => $readonly
     ]); ?>
     <div class="mt-5 row">
         <div class="col-12 col-md-5 col-lg-4">

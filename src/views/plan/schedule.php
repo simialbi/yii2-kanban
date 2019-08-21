@@ -25,6 +25,7 @@ $this->params['breadcrumbs'] = [
 ?>
 <div class="kanban-plan-schedule">
     <?= $this->render('_navigation', [
+        'boards' => [],
         'model' => $model,
         'users' => $users,
         'readonly' => $readonly

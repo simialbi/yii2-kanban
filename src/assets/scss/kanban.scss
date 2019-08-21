@@ -17,6 +17,12 @@ $visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #
     padding-bottom: 3.5rem;
 }
 
+h1, h2, h3, .h1, .h2, .h3 {
+    &.dropdown-toggle::after {
+        font-size: 80%;
+    }
+}
+
 .kanban-top-scrollbar {
     height: 20px;
 

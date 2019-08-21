@@ -5,6 +5,7 @@ use simialbi\yii2\kanban\KanbanAsset;
 use yii\bootstrap4\Modal;
 
 /* @var $this \yii\web\View */
+/* @var $boards \simialbi\yii2\kanban\models\Board[] */
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $buckets string */
 /* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
@@ -23,6 +24,7 @@ $this->params['breadcrumbs'] = [
 ?>
     <div class="kanban-plan-view">
         <?= $this->render('_navigation', [
+            'boards' => $boards,
             'model' => $model,
             'users' => $users,
             'readonly' => $readonly
