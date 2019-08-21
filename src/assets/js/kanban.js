@@ -328,7 +328,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
     }
 
     return pub;
-})(jQuery, Swiper, kanbanBaseUrl);
+})(window.jQuery, window.Swiper, kanbanBaseUrl);
 
 window.jQuery(function () {
     window.yii.initModule(window.sa.kanban);

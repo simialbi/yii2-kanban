@@ -41,7 +41,7 @@ class Link extends ActiveRecord
     {
         return [
             [['id', 'task_id'], 'integer'],
-            ['url', 'url', 'enableIDN' => true],
+            ['url', 'url', 'pattern' => '/^{schemes}?:\/\/((?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?)(?::\d{1,5})?(?:$|[?\/#])/'],
 
             [['task_id', 'url'], 'required']
         ];

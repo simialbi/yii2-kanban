@@ -89,7 +89,7 @@ Pjax::begin([
             <?php endif; ?>
             <?php if ($model->card_show_links && count($model->links)): ?>
                 <?php foreach ($model->links as $link): ?>
-                    <a class="kanban-task-link text-truncate" href="<?= $link->url ?>" target="_blank">
+                    <a class="kanban-task-link d-block text-truncate" href="<?= $link->url ?>" target="_blank">
                         <?= $link->url; ?>
                     </a>
                 <?php endforeach; ?>
