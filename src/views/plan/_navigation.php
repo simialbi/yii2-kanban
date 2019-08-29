@@ -10,7 +10,7 @@ use yii\bootstrap4\Nav;
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
 /* @var $model \simialbi\yii2\kanban\models\Board */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
 
 $group = Yii::$app->request->getQueryParam('group', 'bucket');

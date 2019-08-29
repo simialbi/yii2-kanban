@@ -5,7 +5,7 @@ use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Bucket */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $statuses array */
 
 ?>

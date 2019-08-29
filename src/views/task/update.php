@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 /* @var $model \simialbi\yii2\kanban\models\Task */
 /* @var $buckets array */
 /* @var $statuses array */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 
 Pjax::begin([
     'id' => 'taskUpdatePjax',

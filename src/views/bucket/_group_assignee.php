@@ -6,12 +6,12 @@ use yii\helpers\ArrayHelper;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $tasksByUser array */
 /* @var $statuses array */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
 
 
 foreach ($tasksByUser as $userId => $tasks) {
-    /* @var $user \simialbi\yii2\kanban\models\UserInterface */
+    /* @var $user \simialbi\yii2\models\UserInterface */
     $user = ArrayHelper::getValue($users, $userId);
 
     echo $this->render('/bucket/_item', [

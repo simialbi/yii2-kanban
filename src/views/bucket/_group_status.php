@@ -6,7 +6,7 @@ use yii\helpers\ArrayHelper;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $tasksByStatus array */
 /* @var $statuses array */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
 
 foreach ($tasksByStatus as $status => $tasks) {

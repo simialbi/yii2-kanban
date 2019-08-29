@@ -8,7 +8,9 @@
 namespace simialbi\yii2\kanban;
 
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\models\UserInterface;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\View;
@@ -65,6 +67,9 @@ class Module extends \simialbi\yii2\base\Module
 
         $this->registerTranslations();
 
+        if (!(Yii::$app->user->identity instanceof UserInterface)) {
+            throw new InvalidConfigException('The "identityClass" must extend "simialbi\yii2\models\UserInterface"');
+        }
         if (empty($this->statuses)) {
             $this->statuses = [
                 Task::STATUS_NOT_BEGUN => Yii::t('simialbi/kanban/task', 'Not started'),
@@ -91,7 +96,6 @@ class Module extends \simialbi\yii2\base\Module
                 Task::STATUS_LATE => '#d63867'
             ];
         }
-
         $this->users = ArrayHelper::index(call_user_func([Yii::$app->user->identityClass, 'findIdentities']), 'id');
 
         Yii::$app->assetManager->getBundle('yii\jui\JuiAsset')->js = [

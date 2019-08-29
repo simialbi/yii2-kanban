@@ -8,7 +8,7 @@
 namespace simialbi\yii2\kanban;
 
 use simialbi\yii2\kanban\models\Task;
-use simialbi\yii2\kanban\models\UserInterface;
+use simialbi\yii2\models\UserInterface;
 use yii\base\Event;
 
 /**

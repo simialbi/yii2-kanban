@@ -9,7 +9,7 @@ use yii\web\JsExpression;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $calendarTasks array */
 /* @var $otherTasks string */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
 
 KanbanAsset::register($this);

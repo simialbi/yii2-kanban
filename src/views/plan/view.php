@@ -8,7 +8,7 @@ use yii\bootstrap4\Modal;
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $buckets string */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
 
 KanbanAsset::register($this);

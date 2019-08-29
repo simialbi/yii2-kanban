@@ -14,7 +14,7 @@ use yii\widgets\Pjax;
 /* @var $this \yii\web\View */
 /* @var $model Task */
 /* @var $statuses array */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 
 Pjax::begin([
     'id' => 'taskPjax' . $model->hash,

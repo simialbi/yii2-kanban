@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
 /* @var $completedTasks \simialbi\yii2\kanban\models\Task[] */
 /* @var $statuses array */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $sort boolean */
 /* @var $renderContext boolean */
 /* @var $readonly boolean */

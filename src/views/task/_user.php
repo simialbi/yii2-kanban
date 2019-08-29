@@ -4,7 +4,7 @@ use rmrevin\yii\fontawesome\FAS;
 use yii\bootstrap4\Html;
 
 /* @var $this \yii\web\View */
-/* @var $user \simialbi\yii2\kanban\models\UserInterface */
+/* @var $user \simialbi\yii2\models\UserInterface */
 /* @var $assigned boolean */
 
 ?>

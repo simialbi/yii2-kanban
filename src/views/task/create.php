@@ -15,7 +15,7 @@ use yii\widgets\Pjax;
 /* @var $keyName string */
 /* @var $bucketName string */
 /* @var $mobile boolean */
-/* @var $users \simialbi\yii2\kanban\models\UserInterface[] */
+/* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $buckets \simialbi\yii2\kanban\models\Bucket[] */
 /* @var $statuses array */
 

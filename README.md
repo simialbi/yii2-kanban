@@ -2,7 +2,6 @@
 
 [![Latest Stable Version](https://poser.pugx.org/simialbi/yii2-kanban/v/stable?format=flat-square)](https://packagist.org/packages/simialbi/yii2-kanban)
 [![Total Downloads](https://poser.pugx.org/simialbi/yii2-kanban/downloads?format=flat-square)](https://packagist.org/packages/simialbi/yii2-kanban)
-
 [![License](https://poser.pugx.org/simialbi/yii2-kanban/license?format=flat-square)](https://packagist.org/packages/simialbi/yii2-kanban)
 
 ## Resources
@@ -28,7 +27,8 @@ to the `require` section of your `composer.json`.
 
 In order to use this module, you will need to:
 
-1. [Configure](#setup-module) your application so that the module is available.
+1. [Setup Module](#setup-module) your application so that the module is available.
+2. [Create a user identity](#create-identity) class which extends UserInterface
 
 ### Setup Module
 
@@ -70,8 +70,101 @@ Configure the module in the modules section of your Yii configuration file.
 | `EVENT_COMMENT_CREATED`     | Will be triggered after a task got a new comment.                        |
 | `EVENT_ATTACHMENT_ADDED`    | Will be triggered after a task got one or more new attachments.          |
 
+### Create identity
+
+Create an identity class which implements `simialbi\yii2\models\UserInterface` e.g.:
+```php
+<?php
+use yii\db\ActiveRecord;
+use simialbi\yii2\models\UserInterface;
+
+class User extends ActiveRecord implements UserInterface
+{
+    /**
+     * {@inheritDoc}
+     */
+    public static function tableName()
+    {
+        return 'user';
+    }
+
+    /**
+	 * {@inheritDoc}
+     */
+    public static function findIdentity($id)
+    {
+        return static::findOne($id);
+    }
+
+    /**
+	 * {@inheritDoc}
+     */
+    public static function findIdentityByAccessToken($token, $type = null)
+    {
+        return static::findOne(['access_token' => $token]);
+    }
+
+    /**
+	 * {@inheritDoc}
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+	 * {@inheritDoc}
+     */
+    public function getAuthKey()
+    {
+        return $this->auth_key;
+    }
+
+    /**
+	 * {@inheritDoc}
+     */
+    public function validateAuthKey($authKey)
+    {
+        return $this->getAuthKey() === $authKey;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function getImage() {
+		return $this->image;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function getName() {
+		return trim($this->first_name . ' ' . $this->last_name);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public static function findIdentities() {
+		return static::find()->all();
+	}
+}
+```
+
+After creating this class define it as identity class in your application configuration:
+```php
+'components' => [
+    'user' => [
+        'identityClass' => 'app\models\User'
+    ]
+]
+``` 
+
 ## Example Usage
 
+Now you can access the kanban module by navigating to `/kanban`.
+
+> Notice: Some of the actions can only be done as authenticated (logged in) user like creating boards, buckets etc.
 
 ## License
 
