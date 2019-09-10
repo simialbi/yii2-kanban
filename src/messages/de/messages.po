@@ -295,6 +295,10 @@ msgid "Updated by"
 msgstr "Geändert von"
 
 msgctxt "simialbi/kanban/plan"
+msgid "All plans"
+msgstr "Alle Pläne"
+
+msgctxt "simialbi/kanban/plan"
 msgid "Assigned to"
 msgstr "Zugewiesen zu"
 
@@ -323,6 +327,10 @@ msgid "Create plan"
 msgstr "Neuer Plan"
 
 msgctxt "simialbi/kanban/plan"
+msgid "Delegated tasks"
+msgstr "Delegierte Aufgaben"
+
+msgctxt "simialbi/kanban/plan"
 msgid "End date"
 msgstr "Fälligkeitsdatum"
 
@@ -333,6 +341,10 @@ msgstr "Gruppieren nach <b>{group}</b>"
 msgctxt "simialbi/kanban/plan"
 msgid "Kanban Hub"
 msgstr "Kanban Hub"
+
+msgctxt "simialbi/kanban/plan"
+msgid "My tasks"
+msgstr "Meine Aufgaben"
 
 msgctxt "simialbi/kanban/plan"
 msgid "Schedule"

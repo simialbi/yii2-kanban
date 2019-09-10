@@ -18,6 +18,49 @@ use yii\helpers\ArrayHelper;
 trait RenderingTrait
 {
     /**
+     * Render delegated tasks "board" (it's virtual, does not really exists)
+     *
+     * @return string
+     */
+    public function renderDelegatedTasks()
+    {
+        $if = 'IF';
+        if (Task::getDb()->driverName === 'mssql' || Task::getDb()->driverName === 'sqlsrv' ||
+            Task::getDb()->driverName === 'dblib'
+        ) {
+            $if = 'IIF';
+        }
+
+        $query = new Query();
+        $query->select([
+            '{{t}}.*',
+            '{{u}}.[[user_id]]',
+            'is_done' => new Expression("$if({{t}}.[[status]] = 0, 1, 0)")
+        ])
+            ->from(['t' => Task::tableName()])
+            ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
+            ->innerJoin(['b' => Bucket::tableName()], '{{b}}.[[id]] = {{t}}.[[bucket_id]]')
+            ->innerJoin(['p' => Board::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
+            ->where(['{{t}}.[[created_by]]' => Yii::$app->user->id])
+            ->andWhere(['not', ['{{u}}.[[user_id]]' => Yii::$app->user->id]])
+            ->andWhere([
+                'or',
+                ['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]],
+                ['>', '{{t}}.[[updated_at]]', Yii::$app->formatter->asTimestamp('-2 weeks')]
+            ]);
+
+        $tasks = ArrayHelper::index($query->all(), null, ['user_id', 'is_done']);
+
+        return $this->renderPartial('/bucket/_group_assignee', [
+            'model' => null,
+            'tasksByUser' => $tasks,
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users,
+            'readonly' => true
+        ]);
+    }
+
+    /**
      * Render bucket content by board and group
      *
      * @param Board $board

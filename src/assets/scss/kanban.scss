@@ -1,17 +1,29 @@
-$bucket-width: 300px;
-$bucket-max-height: 370px;
-$kanban-board-image-min-width: 150px;
-$user-image-size: 32px;
+@import "npm-asset/bootstrap/scss/functions";
+@import "npm-asset/bootstrap/scss/mixins";
 
-$breakpoints: (
+$enable-transitions: true !default;
+$enable-prefers-reduced-motion-media-query: false !default;
+
+$bucket-width: 300px !default;
+$bucket-max-height: 370px !default;
+$kanban-board-image-min-width: 150px !default;
+$user-image-size: 32px !default;
+
+$nav-border-width: 2px !default;
+$nav-link-hover-border-color: var(--dark) !default;
+$nav-link-disabled-color: var(--gray) !default;
+$nav-link-active-color: var(--dark) !default;
+$nav-link-active-border-color: var(--dark) !default;
+
+$grid-breakpoints: (
     xs: 0,
     sm: 576px,
     md: 768px,
     lg: 992px,
     xl: 1200px
-);
+) !default;
 
-$visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #28A745, #20C997, #17A2B8;
+$visual-colors: #007BFF, #6610F2, #6F42C1, #E83E8C, #DC3545, #FD7E14, #FFC107, #28A745, #20C997, #17A2B8 !default;
 
 .pb-6 {
     padding-bottom: 3.5rem;
@@ -33,12 +45,12 @@ h1, h2, h3, .h1, .h2, .h3 {
 }
 
 .kanban-bottom-scrollbar {
-    @media (max-width: map-get($breakpoints, md) - 1) {
+    @media (max-width: map-get($grid-breakpoints, md) - 1) {
         position: relative;
     }
 }
 .kanban-top-scrollbar, .kanban-bottom-scrollbar {
-    @media (min-width: map-get($breakpoints, md)) {
+    @media (min-width: map-get($grid-breakpoints, md)) {
         width: 100%;
         overflow-x: scroll;
         overflow-y: hidden;
@@ -47,7 +59,7 @@ h1, h2, h3, .h1, .h2, .h3 {
             min-height: 1px;
         }
     }
-    @media (max-width: map-get($breakpoints, md) - 1) {
+    @media (max-width: map-get($grid-breakpoints, md) - 1) {
         overflow-x: hidden;
     }
 }
@@ -68,10 +80,7 @@ h1, h2, h3, .h1, .h2, .h3 {
 }
 
 .kanban-board {
-    -webkit-transition: all .2s ease-in-out;
-    -moz-transition: all .2s ease-in-out;
-    -o-transition: all .2s ease-in-out;
-    transition: all .2s ease-in-out;
+    @include transition(all .2s ease-in-out);
 
     width: 100%;
 
@@ -79,13 +88,13 @@ h1, h2, h3, .h1, .h2, .h3 {
         border-color: var(--dark);
     }
 
-    @media (min-width: map-get($breakpoints, md)) {
+    @media (min-width: map-get($grid-breakpoints, md)) {
         width: 50%;
         width: -webkit-calc(50% - .5rem);
         width: -moz-calc(50% - .5rem);
         width: calc(50% - .5rem);
     }
-    @media (min-width: map-get($breakpoints, xl)) {
+    @media (min-width: map-get($grid-breakpoints, xl)) {
         width: 33%;
         width: -webkit-calc(33% - .11111111rem);
         width: -moz-calc(33% - .11111111rem);
@@ -138,20 +147,18 @@ h1, h2, h3, .h1, .h2, .h3 {
 }
 
 .kanban-bucket-more > .btn, .kanban-bucket-sort-handle {
+    @include transition(opacity .2s ease-in-out);
+
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
     opacity: 0;
-    -webkit-transition: opacity .2s ease-in-out;
-    -moz-transition: opacity .2s ease-in-out;
-    -o-transition: opacity .2s ease-in-out;
-    transition: opacity .2s ease-in-out;
 
     &:focus {
         opacity: 1;
     }
 
-    @media (max-width: map-get($breakpoints, md) - 1px) {
+    @media (max-width: map-get($grid-breakpoints, md) - 1px) {
         opacity: 1;
     }
 }
@@ -167,7 +174,7 @@ h1, h2, h3, .h1, .h2, .h3 {
         }
     }
 
-    @media (max-width: map-get($breakpoints, md) - 1) {
+    @media (max-width: map-get($grid-breakpoints, md) - 1) {
         > h1, > h2, > h3, > h4, > h5, > .h1, > .h2, > .h3, > .h4, > .h5 {
             max-width: 50vw;
             overflow: hidden;
@@ -226,6 +233,8 @@ h1, h2, h3, .h1, .h2, .h3 {
                 }
 
                 &::after {
+                    @include transition(background-color .2s ease-in-out);
+
                     background-size: $user-image-size * .75;
                     border-radius: 50%;
                     height: -webkit-calc(#{$user-image-size} + .5rem);
@@ -237,10 +246,6 @@ h1, h2, h3, .h1, .h2, .h3 {
                     padding: .5rem;
                     position: absolute;
                     top: .25rem;
-                    -webkit-transition: background-color .2s ease-in-out;
-                    -moz-transition: background-color .2s ease-in-out;
-                    -o-transition: background-color .2s ease-in-out;
-                    transition: background-color .2s ease-in-out;
                     width: -webkit-calc(#{$user-image-size} + .5rem);
                     width: -moz-calc(#{$user-image-size} + .5rem);
                     width: calc(#{$user-image-size} + .5rem);
@@ -273,6 +278,8 @@ h1, h2, h3, .h1, .h2, .h3 {
             }
 
             &::after {
+                @include transition(opacity .2s ease-in-out);
+
                 background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNTEyIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik02MjQgMjA4aC02NHYtNjRjMC04LjgtNy4yLTE2LTE2LTE2aC0zMmMtOC44IDAtMTYgNy4yLTE2IDE2djY0aC02NGMtOC44IDAtMTYgNy4yLTE2IDE2djMyYzAgOC44IDcuMiAxNiAxNiAxNmg2NHY2NGMwIDguOCA3LjIgMTYgMTYgMTZoMzJjOC44IDAgMTYtNy4yIDE2LTE2di02NGg2NGM4LjggMCAxNi03LjIgMTYtMTZ2LTMyYzAtOC44LTcuMi0xNi0xNi0xNnptLTQwMCA0OGM3MC43IDAgMTI4LTU3LjMgMTI4LTEyOFMyOTQuNyAwIDIyNCAwIDk2IDU3LjMgOTYgMTI4czU3LjMgMTI4IDEyOCAxMjh6bTg5LjYgMzJoLTE2LjdjLTIyLjIgMTAuMi00Ni45IDE2LTcyLjkgMTZzLTUwLjYtNS44LTcyLjktMTZoLTE2LjdDNjAuMiAyODggMCAzNDguMiAwIDQyMi40VjQ2NGMwIDI2LjUgMjEuNSA0OCA0OCA0OGgzNTJjMjYuNSAwIDQ4LTIxLjUgNDgtNDh2LTQxLjZjMC03NC4yLTYwLjItMTM0LjQtMTM0LjQtMTM0LjR6Ij48L3BhdGg+PC9zdmc+') no-repeat center;
                 background-size: 75%;
                 border: 0 none transparent;
@@ -280,13 +287,9 @@ h1, h2, h3, .h1, .h2, .h3 {
                 height: $user-image-size;
                 margin-left: auto;
                 opacity: 0;
-                -webkit-transition: opacity .2s ease-in-out;
-                -moz-transition: opacity .2s ease-in-out;
-                -o-transition: opacity .2s ease-in-out;
-                transition: opacity .2s ease-in-out;
                 width: $user-image-size;
 
-                @media (max-width: map-get($breakpoints, md) - 1) {
+                @media (max-width: map-get($grid-breakpoints, md) - 1) {
                     opacity: 1;
                 }
             }
@@ -303,11 +306,9 @@ h1, h2, h3, .h1, .h2, .h3 {
 .kanban-task-assignees {
     .dropdown {
         .dropdown-toggle {
+            @include transition(background-color .2s ease-in-out);
+
             background-color: var(--white);
-            -webkit-transition: background-color .2s ease-in-out;
-            -moz-transition: background-color .2s ease-in-out;
-            -o-transition: background-color .2s ease-in-out;
-            transition: background-color .2s ease-in-out;
 
             &:hover {
                 background-color: var(--light);
@@ -356,12 +357,10 @@ h1, h2, h3, .h1, .h2, .h3 {
 }
 
 .kanban-task-done-link {
+    @include transition(opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out);
+
     color: inherit;
     opacity: 0;
-    -webkit-transition: opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out;
-    -moz-transition: opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out;
-    -o-transition: opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out;
-    transition: opacity .2s ease-in-out, background-color .2s ease-in-out, color .2s ease-in-out;
 
     &:hover {
         color: var(--success);
@@ -382,11 +381,9 @@ h1, h2, h3, .h1, .h2, .h3 {
 
 .kanban-task-attachments {
     .kanban-attachment-show .custom-control-label {
+        @include transition(opacity .2s ease-in-out);
+
         opacity: 0;
-        -webkit-transition: opacity .2s ease-in-out;
-        -moz-transition: opacity .2s ease-in-out;
-        -o-transition: opacity .2s ease-in-out;
-        transition: opacity .2s ease-in-out;
     }
 
     .list-group-item:hover .kanban-attachment-show .custom-control-label,
@@ -418,5 +415,33 @@ h1, h2, h3, .h1, .h2, .h3 {
                 display: none !important;
             }
         }
+    }
+}
+
+.nav-kanban {
+    .nav-link {
+        @include transition(border-color .2s ease-in-out);
+
+        border-bottom: $nav-border-width solid transparent;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        padding-left: 0;
+        padding-right: 0;
+
+        @include hover-focus {
+            border-color: $nav-link-hover-border-color;
+        }
+
+        &.disabled {
+            color: $nav-link-disabled-color;
+            background-color: transparent;
+            border-color: transparent;
+        }
+    }
+
+    .nav-link.active,
+    .nav-item.show .nav-link {
+        color: $nav-link-active-color;
+        border-color: $nav-link-active-border-color;
     }
 }

@@ -8,6 +8,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         isActive: true,
 
         init: function (module) {
+            var $tabs = $('#plan-tabs');
             $('#taskModal').on('show.bs.modal', function (evt) {
                 var link = $(evt.relatedTarget);
                 var href = link.prop('href');
@@ -16,7 +17,17 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 modal.find('.modal-content').load(href);
             });
 
-            initScrollBars();
+
+            if ($tabs.length) {
+                $tabs.find('a[data-toggle="tab"]').on('shown.bs.tab', function () {
+                    var $bottomScrollBar = $('.kanban-bottom-scrollbar');
+                    if ($bottomScrollBar.length) {
+                        initScrollBars();
+                    }
+                });
+            } else {
+                initScrollBars();
+            }
             initTask();
             initSortable();
             initChecklist();

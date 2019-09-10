@@ -29,7 +29,7 @@ use yii\widgets\Pjax;
             'title' => $title
         ]); ?>
     <?php else: ?>
-        <h5><?= $title; ?></h5>
+        <h5 class="m-0 mx-auto mx-md-0"><?= $title; ?></h5>
     <?php endif; ?>
 
     <?php Pjax::begin([

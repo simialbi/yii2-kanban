@@ -74,7 +74,8 @@ class PlanController extends Controller
         $boards = Board::findByUserId();
 
         return $this->render('index', [
-            'boards' => $boards
+            'boards' => $boards,
+            'delegated' => $this->renderDelegatedTasks()
         ]);
     }
 
