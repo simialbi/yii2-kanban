@@ -21,8 +21,9 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             if ($tabs.length) {
                 $tabs.find('a[data-toggle="tab"]').on('shown.bs.tab', function () {
                     var $bottomScrollBar = $('.kanban-bottom-scrollbar');
-                    if ($bottomScrollBar.length) {
+                    if ($bottomScrollBar.is(':visible')) {
                         initScrollBars();
+                        $tabs.find('a[data-toggle="tab"]').off('shown.bs.tab');
                     }
                 });
             } else {

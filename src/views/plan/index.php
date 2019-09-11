@@ -4,6 +4,7 @@ use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
 use simialbi\yii2\kanban\widgets\ToDo;
 use yii\bootstrap4\Html;
+use yii\bootstrap4\Modal;
 use yii\bootstrap4\Tabs;
 
 /* @var $this \yii\web\View */
@@ -83,6 +84,22 @@ $this->params['breadcrumbs'] = [$this->title];
             </div>
         </div>
     </div>
+    <?php
+    Modal::begin([
+        'id' => 'taskModal',
+        'options' => [
+            'class' => ['modal', 'remote', 'fade']
+        ],
+        'clientOptions' => [
+            'backdrop' => 'static',
+            'keyboard' => false
+        ],
+        'size' => Modal::SIZE_LARGE,
+        'title' => null,
+        'closeButton' => false
+    ]);
+    Modal::end();
+    ?>
     <?php $this->endBlock(); ?>
 
     <?= Tabs::widget([

@@ -10,10 +10,10 @@ $kanban-board-image-min-width: 150px !default;
 $user-image-size: 32px !default;
 
 $nav-border-width: 2px !default;
-$nav-link-hover-border-color: var(--dark) !default;
-$nav-link-disabled-color: var(--gray) !default;
-$nav-link-active-color: var(--dark) !default;
-$nav-link-active-border-color: var(--dark) !default;
+$nav-link-hover-border-color: #343a40 !default;
+$nav-link-disabled-color: #6c757d !default;
+$nav-link-active-color: #343a40 !default;
+$nav-link-active-border-color: #343a40 !default;
 
 $grid-breakpoints: (
     xs: 0,
