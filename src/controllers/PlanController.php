@@ -73,6 +73,8 @@ class PlanController extends Controller
     {
         $boards = Board::findByUserId();
 
+        Url::remember(['plan/index'], 'plan-view');
+
         return $this->render('index', [
             'boards' => $boards,
             'delegated' => $this->renderDelegatedTasks()
