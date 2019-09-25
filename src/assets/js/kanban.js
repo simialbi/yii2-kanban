@@ -340,7 +340,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
     }
 
     return pub;
-})(window.jQuery, window.Swiper, kanbanBaseUrl);
+})(window.jQuery, window.Swiper, window.kanbanBaseUrl);
 
 window.jQuery(function () {
     window.yii.initModule(window.sa.kanban);

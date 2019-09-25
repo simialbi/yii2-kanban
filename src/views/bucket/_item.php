@@ -20,7 +20,7 @@ use yii\widgets\Pjax;
 
 ?>
 
-<div class="kanban-bucket position-relative mr-md-4 pb-6 pb-md-0 d-flex flex-column flex-shrink-0" data-id="<?= $id; ?>"
+<div class="kanban-bucket mr-md-4 pb-6 pb-md-0 d-flex flex-column flex-shrink-0" data-id="<?= $id; ?>"
      data-sort="<?= $sort ? 'true' : 'false'; ?>" data-action="<?= $action; ?>"
      data-key-name="<?= \yii\helpers\Inflector::camel2id($keyName, '_'); ?>">
     <?php if ($renderContext): ?>

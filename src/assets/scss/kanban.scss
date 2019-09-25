@@ -143,6 +143,7 @@ h1, h2, h3, .h1, .h2, .h3 {
 
 .kanban-bucket {
     max-width: 100%;
+    position: relative;
     width: $bucket-width;
 }
 
