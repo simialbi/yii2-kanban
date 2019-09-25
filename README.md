@@ -160,6 +160,37 @@ After creating this class define it as identity class in your application config
 ]
 ``` 
 
+### Configure jQuery UI (optional)
+
+If you don't use jQuery UI somewhere else in your application, you can minify the load by just load the needed scripts:
+```php
+'components' => [
+    'assetManager' => [
+        'bundles' => [
+            'yii\jui\JuiAsset' => [
+                'css' => [],
+                'js' => [
+                    'ui/data.js',
+                    'ui/scroll-parent.js',
+                    'ui/widget.js',
+                    'ui/widgets/mouse.js',
+                    'ui/widgets/sortable.js',
+                ],
+                'publishOptions' => [
+                    'only' => [
+                        'ui/*',
+                        'ui/widgets/*'
+                    ]
+                ]
+            ]
+        ]
+    ]
+]
+```
+
+> Notice: If you use the full jquery ui package, the bootstrap tooltip used by this module gets overridden by 
+  jui tooltip
+
 ## Example Usage
 
 Now you can access the kanban module by navigating to `/kanban`.
