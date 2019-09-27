@@ -7,7 +7,7 @@
 
 namespace simialbi\yii2\kanban\models;
 
-
+use simialbi\yii2\models\UserInterface;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

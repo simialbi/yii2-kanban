@@ -7,7 +7,6 @@
 
 namespace simialbi\yii2\kanban\models;
 
-
 use yii\db\ActiveRecord;
 
 /**

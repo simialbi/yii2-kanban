@@ -7,7 +7,6 @@
 
 namespace simialbi\yii2\kanban\models;
 
-
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
 use Yii;
 use yii\db\ActiveRecord;
