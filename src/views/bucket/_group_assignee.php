@@ -3,7 +3,7 @@
 use yii\helpers\ArrayHelper;
 
 /* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Board */
+/* @var $model \simialbi\yii2\kanban\models\Board|null */
 /* @var $tasksByUser array */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
@@ -19,7 +19,7 @@ foreach ($tasksByUser as $userId => $tasks) {
         'statuses' => $statuses,
         'users' => $users,
         'id' => $userId,
-        'boardId' => $model->id,
+        'boardId' => $model ? $model->id : null,
         'title' => empty($userId)
             ? '<span class="kanban-user">' . Yii::t('simialbi/kanban', 'Not assigned') . '</span>'
             : $this->render('/task/_user', [
