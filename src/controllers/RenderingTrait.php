@@ -133,6 +133,7 @@ trait RenderingTrait
                     ->innerJoin(['b' => Bucket::tableName()], '{{b}}.[[id]] = {{t}}.[[bucket_id]]')
                     ->innerJoin(['p' => Board::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
                     ->where(['{{p}}.[[id]]' => $board->id])
+                    ->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
                     ->orderBy(['{{t}}.[[end_date]]' => SORT_ASC]);
                 $tasks = ArrayHelper::index($query->all(), null, ['end_date', 'is_done']);
 
