@@ -313,6 +313,7 @@ Pjax::begin([
                         'multiple' => true
                     ],
                     'pluginOptions' => [
+                        'mainClass' => 'file-caption-main input-group-sm',
                         'showPreview' => false,
                         'showUpload' => false
                     ],
@@ -400,8 +401,8 @@ Pjax::begin([
                 <div class="kanban-task-comments mt-4 col-12">
                     <?php $i = 0; ?>
                     <?php foreach ($model->comments as $comment): ?>
-                        <div class="kanban-task-comment media">
-                            <div class="kanban-user mr-3<?php if ($i++ !== 0): ?> mt-2<?php endif; ?>">
+                        <div class="kanban-task-comment media<?php if ($i++ !== 0): ?> mt-3<?php endif; ?>">
+                            <div class="kanban-user mr-3">
                                 <?php if ($comment->author->image): ?>
                                     <?= Html::img($comment->author->image, [
                                         'class' => ['rounded-circle'],
@@ -420,7 +421,8 @@ Pjax::begin([
                             <div class="media-body">
                                 <span class="text-muted d-flex flex-row justify-content-between">
                                     <span><?= Html::encode($comment->author->name); ?></span>
-                                    <span><?= Yii::$app->formatter->asRelativeTime($comment->created_at); ?></span>
+                                    <span><?= Yii::$app->formatter->asDatetime($comment->created_at,
+                                            'medium'); ?></span>
                                 </span>
                                 <?= Yii::$app->formatter->asParagraphs($comment->text); ?>
                             </div>
