@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 /* @var $title string */
 /* @var $keyName string */
 /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
-/* @var $completedTasks \simialbi\yii2\kanban\models\Task[] */
+/* @var $completedTasks integer */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $sort boolean */
@@ -79,7 +79,17 @@ use yii\widgets\Pjax;
     <?php endif; ?>
     <?php Pjax::end(); ?>
 
-    <?php if (!empty($completedTasks)): ?>
+    <?php if ($completedTasks): ?>
+        <?php Pjax::begin([
+            'id' => 'completedTasksPjax' . $id,
+            'enablePushState' => false,
+            'clientOptions' => ['skipOuterContainers' => true]
+        ]); ?>
+        <?= Html::a(Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
+            'cnt' => $completedTasks
+        ]), ['task/view-completed', 'boardId' => $boardId, $keyName => $id], []); ?>
+        <?php Pjax::end(); ?>
+        <?php /*
         <a href="#collapse-<?= $id; ?>" data-toggle="collapse" aria-controls="collapse-<?= $id; ?>"
            aria-expanded="false">
             <?= Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
@@ -100,5 +110,6 @@ use yii\widgets\Pjax;
                 ]); ?>
             <?php endforeach; ?>
         </div>
+    */ ?>
     <?php endif; ?>
 </div>

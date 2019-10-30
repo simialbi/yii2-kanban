@@ -19,7 +19,7 @@ use yii\widgets\Pjax;
         'boardId' => $model->id,
         'title' => $bucket->name,
         'tasks' => $bucket->getOpenTasks($readonly)->all(),
-        'completedTasks' => $bucket->getFinishedTasks($readonly)->all(),
+        'completedTasks' => $bucket->getFinishedTasks($readonly)->count(),
         'keyName' => 'bucketId',
         'action' => 'change-parent',
         'sort' => true,

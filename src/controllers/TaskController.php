@@ -64,7 +64,7 @@ class TaskController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['view']
+                        'actions' => ['view', 'view-completed']
                     ]
                 ]
             ]
@@ -91,7 +91,23 @@ class TaskController extends Controller
     }
 
     /**
-     * Create a new bucket
+     * @param integer $boardId
+     * @param integer|null $bucketId
+     * @param integer|null $userId
+     * @param string|null $date
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionViewCompleted($boardId, $bucketId = null, $userId = null, $date = null)
+    {
+        $board = $this->findBoardModel($boardId);
+        $readonly = !$board->is_public && !$board->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
+
+        return $this->renderCompleted($bucketId, $userId, $date, $readonly);
+    }
+
+    /**
+     * Create a new task
      * @param integer $boardId
      * @param integer|null $bucketId
      * @param integer|null $userId

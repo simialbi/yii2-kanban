@@ -5,6 +5,7 @@ use yii\helpers\ArrayHelper;
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board|null */
 /* @var $tasksByUser array */
+/* @var $doneTasksByUser array */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
@@ -26,8 +27,8 @@ foreach ($tasksByUser as $userId => $tasks) {
                 'assigned' => false,
                 'user' => $user
             ]),
-        'tasks' => ArrayHelper::getValue($tasks, 0, []),
-        'completedTasks' => ArrayHelper::getValue($tasks, 1, []),
+        'tasks' => is_array($tasks) ? $tasks : [],
+        'completedTasks' => ArrayHelper::getValue($doneTasksByUser, $userId, 0),
         'keyName' => 'userId',
         'action' => 'change-assignee',
         'sort' => false,

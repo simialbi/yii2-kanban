@@ -18,7 +18,7 @@ $ php composer.phar require --prefer-dist simialbi/yii2-kanban
 or add
 
 ```
-"simialbi/yii2-kanban": "~1.0@dev"
+"simialbi/yii2-kanban": "^1.0.0"
 ```
 
 to the `require` section of your `composer.json`.
