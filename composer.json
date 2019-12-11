@@ -31,7 +31,7 @@
         "bower-asset/swiper": "^4.5.0",
         "kartik-v/yii2-widget-datepicker": "^1.4.7",
         "kartik-v/yii2-widget-fileinput": "^1.0.9",
-        "rmrevin/yii2-fontawesome": "^3.3.0",
+        "simialbi/yii2-fontawesome": "^3.4.8",
         "simialbi/yii2-simialbi-base": ">=0.6 <1.0 | ^1.0.0",
         "simialbi/yii2-widget-chart": "^0.6.5",
         "simialbi/yii2-widget-hideseek": "^1.0.0"
