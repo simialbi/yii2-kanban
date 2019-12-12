@@ -229,6 +229,9 @@ $action = Yii::$app->controller->action->id;
                         ])
                     ),
                     'encodeLabel' => false,
+                    'buttonOptions' => [
+                        'class' => ['btn-outline-secondary', 'ml-2']
+                    ],
                     'dropdown' => [
                         'options' => [
                             'class' => ['dropdown-menu-right']

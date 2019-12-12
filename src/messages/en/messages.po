@@ -343,6 +343,10 @@ msgid "Kanban Hub"
 msgstr "Kanban Hub"
 
 msgctxt "simialbi/kanban/plan"
+msgid "List view"
+msgstr "List view"
+
+msgctxt "simialbi/kanban/plan"
 msgid "My tasks"
 msgstr "My tasks"
 
@@ -353,6 +357,10 @@ msgstr "Schedule"
 msgctxt "simialbi/kanban/plan"
 msgid "Status"
 msgstr "Status"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Task view"
+msgstr "Task view"
 
 msgctxt "simialbi/kanban/plan"
 msgid "assignee"

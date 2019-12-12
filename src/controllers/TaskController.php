@@ -64,7 +64,7 @@ class TaskController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['view', 'view-completed']
+                        'actions' => ['view', 'view-completed', 'view-delegated']
                     ]
                 ]
             ]
@@ -104,6 +104,21 @@ class TaskController extends Controller
         $readonly = !$board->is_public && !$board->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
 
         return $this->renderCompleted($bucketId, $userId, $date, $readonly);
+    }
+
+    /**
+     * Renders delegated tasks
+     *
+     * @param string $view
+     *
+     * @return string
+     */
+    public function actionViewDelegated($view = 'task')
+    {
+        return $this->renderAjax('delegated', [
+            'delegated' => $this->renderDelegatedTasks($view),
+            'view' => $view
+        ]);
     }
 
     /**

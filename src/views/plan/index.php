@@ -6,6 +6,7 @@ use simialbi\yii2\kanban\widgets\ToDo;
 use yii\bootstrap4\Html;
 use yii\bootstrap4\Modal;
 use yii\bootstrap4\Tabs;
+use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
@@ -67,24 +68,12 @@ $this->params['breadcrumbs'] = [$this->title];
     </div>
     <?php $this->endBlock(); ?>
     <?php $this->beginBlock('tab-delegated-tasks'); ?>
-    <div class="kanban-plan-view">
-        <div class="d-flex flex-column mt-3">
-            <div class="kanban-top-scrollbar mb-2 d-none d-md-block">
-                <div></div>
-            </div>
-            <div class="kanban-bottom-scrollbar">
-                <div class="d-flex flex-row kanban-plan-sortable">
-                    <?= $delegated; ?>
-                </div>
-
-                <div class="d-md-none">
-                    <div class="kanban-button-prev"><?= FAS::i('caret-left'); ?></div>
-                    <div class="kanban-button-next"><?= FAS::i('caret-right'); ?></div>
-                </div>
-            </div>
-        </div>
-    </div>
+        <?= $this->render('/task/delegated', [
+            'delegated' => $delegated,
+            'view' => null
+        ]); ?>
     <?php
+    Pjax::end();
     Modal::begin([
         'id' => 'taskModal',
         'options' => [

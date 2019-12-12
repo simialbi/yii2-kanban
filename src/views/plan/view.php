@@ -3,6 +3,7 @@
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
 use yii\bootstrap4\Modal;
+use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
@@ -10,6 +11,7 @@ use yii\bootstrap4\Modal;
 /* @var $buckets string */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
+/* @var $showTask integer|null */
 
 KanbanAsset::register($this);
 
@@ -46,6 +48,15 @@ $this->params['breadcrumbs'] = [
         </div>
     </div>
 <?php
+if ($showTask) {
+    $link = Url::to(['task/update', 'id' => $showTask]);
+    $js = <<<JS
+var link = jQuery('<a href="$link" data-toggle="modal" data-target="#taskModal" />');
+link.appendTo('body').trigger('click').remove();
+JS;
+
+    $this->registerJs($js);
+}
 Modal::begin([
     'id' => 'taskModal',
     'options' => [

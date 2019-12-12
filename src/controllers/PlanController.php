@@ -86,11 +86,12 @@ class PlanController extends Controller
      *
      * @param integer $id
      * @param string $group
+     * @param integer|null $showTask
      *
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionView($id, $group = 'bucket')
+    public function actionView($id, $group = 'bucket', $showTask = null)
     {
         $model = $this->findModel($id);
         $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
@@ -104,7 +105,8 @@ class PlanController extends Controller
             'model' => $model,
             'readonly' => $readonly,
             'buckets' => $bucketContent,
-            'users' => $this->module->users
+            'users' => $this->module->users,
+            'showTask' => $showTask
         ]);
     }
 

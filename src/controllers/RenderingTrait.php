@@ -7,13 +7,16 @@
 
 namespace simialbi\yii2\kanban\controllers;
 
+use rmrevin\yii\fontawesome\FAR;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\Task;
 use Yii;
+use yii\bootstrap4\Html;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 /**
  * Trait RenderingTrait
@@ -26,9 +29,11 @@ trait RenderingTrait
     /**
      * Render delegated tasks "board" (it's virtual, does not really exists)
      *
+     * @param string $view
+     *
      * @return string
      */
-    public function renderDelegatedTasks()
+    public function renderDelegatedTasks($view = 'task')
     {
         $query = new Query();
         $query->select([
@@ -62,14 +67,67 @@ trait RenderingTrait
 
         $tasks = ArrayHelper::index($query->all(), null, 'user_id');
 
-        return $this->renderPartial('/bucket/_group_assignee', [
-            'model' => null,
-            'tasksByUser' => $tasks,
-            'doneTasksByUser' => $doneTaskCounts,
-            'statuses' => $this->module->statuses,
-            'users' => $this->module->users,
-            'readonly' => true
-        ]);
+        if ($view === 'task') {
+            return $this->renderPartial('/bucket/_group_assignee', [
+                'model'           => null,
+                'tasksByUser'     => $tasks,
+                'doneTasksByUser' => $doneTaskCounts,
+                'statuses'        => $this->module->statuses,
+                'users'           => $this->module->users,
+                'readonly'        => true
+            ]);
+        }
+
+        $html = '';
+        foreach ($tasks as $userId => $userTasks) {
+            /* @var $user \simialbi\yii2\models\UserInterface */
+            $user = ArrayHelper::getValue($this->module, ['users', $userId]);
+            if ($user) {
+                $html .= Html::beginTag('div', ['class' => 'card-header']);
+                $html .= Html::beginTag('h4', ['class' => ['card-title', 'm-0']]);
+                $html .= $this->renderPartial('/task/_user', [
+                    'assigned' => false,
+                    'user' => $user
+                ]);
+                $html .= Html::endTag('h4');
+                $html .= Html::endTag('div');
+            }
+            $html .= Html::beginTag('div', ['class' => ['list-group', 'list-group-flush']]);
+            foreach ($userTasks as $taskData) {
+                $task = new Task();
+                $task->setAttributes($taskData);
+                $options = [
+                    'class' => ['list-group-item', 'list-group-item-action'],
+                    'href' => Url::to(['task/update', 'id' => $task->id]),
+                    'data' => [
+                        'pjax' => '0',
+                        'toggle' => 'modal',
+                        'target' => '#taskModal'
+                    ]
+                ];
+                $content = Html::tag('h6', $task->subject, ['class' => ['m-0']]);
+                $small = $task->board->name;
+                if ($task->getChecklistElements()->count()) {
+                    $small .= '&nbsp;&bull;&nbsp;' . $task->getChecklistStats();
+                }
+                if ($task->end_date) {
+                    if ($task->end_date < time()) {
+                        Html::addCssClass($options, 'list-group-item-danger');
+                    }
+                    $small .= '&nbsp;&bull;&nbsp;' . FAR::i('calendar') . ' ';
+                    $small .= Yii::$app->formatter->asDate($task->end_date, 'short');
+                }
+                if ($task->getComments()->count()) {
+                    $small .= '&nbsp;&bull;&nbsp;' . FAR::i('sticky-note');
+                }
+                $content .= Html::tag('small', $small);
+
+                $html .= Html::tag('a', $content, $options);
+            }
+            $html .= Html::endTag('div');
+        }
+
+        return $html;
     }
 
     /**
