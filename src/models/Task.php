@@ -9,6 +9,7 @@ namespace simialbi\yii2\kanban\models;
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
 use simialbi\yii2\models\UserInterface;
+use simialbi\yii2\ticket\models\Ticket;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -21,6 +22,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer $id
  * @property integer $bucket_id
+ * @property integer $ticket_id
  * @property string $subject
  * @property integer $status
  * @property integer|string $start_date
@@ -47,6 +49,7 @@ use yii\helpers\ArrayHelper;
  * @property-read Link[] $links
  * @property-read Attachment[] $attachments
  * @property-read Comment[] $comments
+ * @property-read Ticket $ticket
  */
 class Task extends ActiveRecord
 {
@@ -74,7 +77,7 @@ class Task extends ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'bucket_id'], 'integer'],
+            [['id', 'bucket_id', 'ticket_id'], 'integer'],
             ['subject', 'string', 'max' => 255],
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['start_date', 'date', 'timestampAttribute' => 'start_date'],
@@ -82,7 +85,7 @@ class Task extends ActiveRecord
             ['description', 'string'],
             [['card_show_description', 'card_show_checklist', 'card_show_links'], 'boolean'],
 
-            ['bucket_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            [['bucket_id', 'ticket_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['status', 'default', 'value' => self::STATUS_NOT_BEGUN],
             [['start_date', 'end_date', 'description'], 'default'],
@@ -276,5 +279,14 @@ class Task extends ActiveRecord
     public function getComments()
     {
         return $this->hasMany(Comment::class, ['task_id' => 'id']);
+    }
+
+    /**
+     * Get associated ticket
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTicket()
+    {
+        return $this->hasOne(Ticket::class, ['id' => 'ticket_id']);
     }
 }

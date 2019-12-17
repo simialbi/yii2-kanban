@@ -17,6 +17,7 @@ use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\Module;
 use simialbi\yii2\kanban\TaskEvent;
 use simialbi\yii2\models\UserInterface;
+use simialbi\yii2\ticket\models\Ticket;
 use Yii;
 use yii\db\Exception;
 use yii\filters\AccessControl;
@@ -306,6 +307,17 @@ class TaskController extends Controller
 
                 $comment->save();
 
+                if ($model->ticket_id) {
+                    $ticketComment = new \simialbi\yii2\ticket\models\Comment([
+                        'ticket_id' => $model->ticket_id,
+                        'text' => $comment->text,
+                        'created_by' => $comment->created_by,
+                        'created_at' => $comment->created_at
+                    ]);
+                    $ticketComment->detachBehaviors();
+                    $ticketComment->save();
+                }
+
                 $this->module->trigger(Module::EVENT_COMMENT_CREATED, new TaskEvent([
                     'task' => $model,
                     'data' => $comment
@@ -364,6 +376,22 @@ class TaskController extends Controller
             }
 
             if ($model->isAttributeChanged('status')) {
+                if ($model->ticket_id && ($ticket = $model->ticket)) {
+                    switch ($model->status) {
+                        case Task::STATUS_IN_PROGRESS:
+                            $ticket->status = Ticket::STATUS_IN_PROGRESS;
+                            break;
+                        case Task::STATUS_NOT_BEGUN:
+                        default:
+                            $ticket->status = Ticket::STATUS_OPEN;
+                            break;
+                        case Task::STATUS_DONE:
+                            $ticket->status = Ticket::STATUS_RESOLVED;
+                            break;
+                    }
+
+                    $ticket->save();
+                }
                 $this->module->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
                     'task' => $model,
                     'data' => $model->status
@@ -442,6 +470,23 @@ class TaskController extends Controller
 
         $model->status = $status;
         $model->save();
+
+        if ($model->ticket_id && ($ticket = $model->ticket)) {
+            switch ($model->status) {
+                case Task::STATUS_IN_PROGRESS:
+                    $ticket->status = Ticket::STATUS_IN_PROGRESS;
+                    break;
+                case Task::STATUS_NOT_BEGUN:
+                default:
+                    $ticket->status = Ticket::STATUS_OPEN;
+                    break;
+                case Task::STATUS_DONE:
+                    $ticket->status = Ticket::STATUS_RESOLVED;
+                    break;
+            }
+
+            $ticket->save();
+        }
 
         $this->module->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
             'task' => $model,

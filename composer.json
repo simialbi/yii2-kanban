@@ -38,6 +38,7 @@
         "simialbi/yii2-widget-hideseek": "^1.0.0"
     },
 	"require-dev": {
+        "simialbi/yii2-ticket": "~1.0@dev",
 		"yiisoft/yii2-coding-standards": "~2.0",
 		"phpunit/phpunit": "<7"
 	},

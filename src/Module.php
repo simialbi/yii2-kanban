@@ -7,6 +7,7 @@
 
 namespace simialbi\yii2\kanban;
 
+use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\models\UserInterface;
 use Yii;
@@ -98,10 +99,31 @@ class Module extends \simialbi\yii2\base\Module
             ];
         }
         $this->users = ArrayHelper::index(call_user_func([Yii::$app->user->identityClass, 'findIdentities']), 'id');
-        
+
         Yii::$app->view->registerJs(
             "var kanbanBaseUrl = '" . Url::to(['/' . $this->id], '') . "';",
             View::POS_HEAD
         );
+    }
+
+    /**
+     * Get users boards
+     * @param integer|null $userId Id of user to get boards for
+     * @return array|Board[]|\yii\db\ActiveRecord[]
+     */
+    public static function getUserBoards($userId = null)
+    {
+        if (!$userId) {
+            $userId = Yii::$app->user->id;
+        }
+
+        return Board::find()
+            ->alias('b')
+            ->with('buckets')
+            ->innerJoinWith('assignments a')
+            ->where(['{{b}}.[[is_public]]' => true])
+            ->orWhere(['{{a}}.[[user_id]]' => $userId])
+            ->indexBy('id')
+            ->all();
     }
 }
