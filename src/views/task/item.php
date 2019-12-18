@@ -159,7 +159,7 @@ Pjax::begin([
                             'changeDate' => new \yii\web\JsExpression('function (e) {
                                 var event = jQuery.Event(\'click\');
                                 var container = \'#\' + jQuery(this).closest(\'[data-pjax-container]\').prop(\'id\');
-                                
+
                                 event.currentTarget = document.createElement(\'a\');
                                 event.currentTarget.href = \'' . Url::to([
                                         'task/set-end-date',
@@ -174,6 +174,11 @@ Pjax::begin([
                             }')
                         ]
                     ]); ?>
+                <?php endif; ?>
+                <?php if ($model->ticket_id): ?>
+                    <small class="text-muted mr-3">
+                        <?= FAS::i('headset'); ?>
+                    </small>
                 <?php endif; ?>
                 <?php if (count($model->comments)): ?>
                     <small class="text-muted mr-3">
