@@ -144,6 +144,7 @@ class Board extends ActiveRecord
         }
 
         $query = static::find()
+            ->cache(60)
             ->alias('b')
             ->joinWith('assignments ba')
             ->joinWith('buckets.tasks.assignments ta')
