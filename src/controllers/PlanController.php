@@ -52,7 +52,7 @@ class PlanController extends Controller
                         'actions' => ['update'],
                         'matchCallback' => function () {
                             $board = $this->findModel(Yii::$app->request->getQueryParam('id'));
-                            return $board->is_public || $board->created_by == Yii::$app->user;
+                            return $board->is_public || $board->created_by == Yii::$app->user->id;
                         }
                     ],
                     [

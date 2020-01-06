@@ -39,7 +39,7 @@ $this->params['breadcrumbs'] = [$this->title];
                         <?php endif; ?>
                     </a>
                     <div class="col col-md-8">
-                        <div class="card-body d-flex align-items-start">
+                        <div class="card-body d-flex align-items-stretch h-100">
                             <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
                                class="flex-grow-1 text-body text-decoration-none">
                                 <h5 class="pt-0"><?= Html::encode($board->name); ?></h5>
