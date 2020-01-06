@@ -6,6 +6,7 @@ use yii\bootstrap4\ButtonDropdown;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
 use yii\bootstrap4\Nav;
+use yii\web\JsExpression;
 
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
@@ -170,7 +171,7 @@ $action = Yii::$app->controller->action->id;
                             $items = array_merge($items, $newUsers);
 
                             array_unshift($items, HideSeek::widget([
-                                'fieldTemplate' => '<div class="search-field px-3 my-3">{input}</div>',
+                                'fieldTemplate' => '<div class="search-field px-3 my-3 flex-grow-1">{input}</div>',
                                 'options' => [
                                     'id' => 'kanban-view-plan-assignees',
                                     'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
@@ -194,7 +195,7 @@ $action = Yii::$app->controller->action->id;
                 </div>
             <?php endif; ?>
             <?= HideSeek::widget([
-                'fieldTemplate' => '<div class="search-field mr-auto mr-md-0">{input}</div>',
+                'fieldTemplate' => '<div class="search-field mr-auto mr-md-0 flex-grow-1">{input}</div>',
                 'options' => [
                     'id' => 'search-tasks-widget',
                     'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
@@ -203,7 +204,7 @@ $action = Yii::$app->controller->action->id;
                     'list' => '.kanban-tasks'
                 ],
                 'clientEvents' => [
-                    '_after' => new \yii\web\JsExpression('function () {
+                    '_after' => new JsExpression('function () {
                         if (jQuery(\'.d-none.d-md-block:first\').is(\':visible\')) {
                             return;
                         }

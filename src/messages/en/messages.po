@@ -27,6 +27,10 @@ msgid "Filter by keyword"
 msgstr "Filter by keyword"
 
 msgctxt "simialbi/kanban"
+msgid "Go to ticket"
+msgstr "Go to ticket"
+
+msgctxt "simialbi/kanban"
 msgid "Loading..."
 msgstr "Loading..."
 
@@ -363,6 +367,10 @@ msgid "Task view"
 msgstr "Task view"
 
 msgctxt "simialbi/kanban/plan"
+msgid "Update plan"
+msgstr "Update plan"
+
+msgctxt "simialbi/kanban/plan"
 msgid "assignee"
 msgstr "assignee"
 
@@ -381,6 +389,10 @@ msgstr "status"
 msgctxt "simialbi/kanban/plan/notification"
 msgid "Board <b>{board}</b> created"
 msgstr "Board <b>{board}</b> created"
+
+msgctxt "simialbi/kanban/plan/notification"
+msgid "Board <b>{board}</b> updated"
+msgstr "Board <b>{board}</b> updated"
 
 msgctxt "simialbi/kanban/task"
 msgid "Attachments"

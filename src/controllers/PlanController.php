@@ -49,6 +49,14 @@ class PlanController extends Controller
                     ],
                     [
                         'allow' => true,
+                        'actions' => ['update'],
+                        'matchCallback' => function () {
+                            $board = $this->findModel(Yii::$app->request->getQueryParam('id'));
+                            return $board->is_public || $board->created_by == Yii::$app->user;
+                        }
+                    ],
+                    [
+                        'allow' => true,
                         'actions' => ['index', 'schedule', 'chart']
                     ],
                     [
@@ -357,6 +365,46 @@ class PlanController extends Controller
         }
 
         return $this->render('create', [
+            'model' => $model
+        ]);
+    }
+
+    /**
+     * Update a board
+     *
+     * @param integer $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \yii\base\Exception
+     */
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $image = UploadedFile::getInstance($model, 'uploadedFile');
+
+            if ($image) {
+                $path = Yii::getAlias('@webroot/uploads');
+                if (FileHelper::createDirectory($path)) {
+                    $filePath = $path . DIRECTORY_SEPARATOR . $image->baseName . '.' . $image->extension;
+                    if ($image->saveAs($filePath)) {
+                        $model->image = Yii::getAlias('@web/uploads/' . $image->baseName . '.' . $image->extension);
+                        $model->save();
+                    }
+                }
+            }
+
+            Yii::$app->session->addFlash('success', Yii::t(
+                'simialbi/kanban/plan/notification',
+                'Board <b>{board}</b> updated',
+                ['board' => $model->name]
+            ));
+
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->render('update', [
             'model' => $model
         ]);
     }

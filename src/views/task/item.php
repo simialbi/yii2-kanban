@@ -8,7 +8,9 @@ use simialbi\yii2\kanban\models\Task;
 use yii\bootstrap4\ButtonDropdown;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
+use yii\helpers\Json;
 use yii\helpers\Url;
+use yii\web\JsExpression;
 use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
@@ -23,7 +25,7 @@ Pjax::begin([
         'class' => ['kanban-sortable'],
         'data' => [
             'id' => $model->id,
-            'event' => \yii\helpers\Json::encode([
+            'event' => Json::encode([
                 'id' => $model->id,
                 'title' => $model->subject,
                 'allDay' => true,
@@ -156,7 +158,7 @@ Pjax::begin([
                             'todayHighlight' => true
                         ],
                         'pluginEvents' => [
-                            'changeDate' => new \yii\web\JsExpression('function (e) {
+                            'changeDate' => new JsExpression('function (e) {
                                 var event = jQuery.Event(\'click\');
                                 var container = \'#\' + jQuery(this).closest(\'[data-pjax-container]\').prop(\'id\');
 
@@ -209,6 +211,46 @@ Pjax::begin([
                         'target' => '#taskModal'
                     ]
                 ]); ?>
+                <?php
+                $items = [
+                    [
+                        'label' => Yii::t('yii', 'Update'),
+                        'url' => [
+                            'task/update',
+                            'id' => $model->id,
+                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                        ],
+                        'linkOptions' => [
+                            'data' => [
+                                'toggle' => 'modal',
+                                'target' => '#taskModal'
+                            ]
+                        ]
+                    ],
+                    [
+                        'label' => Yii::t('yii', 'Delete'),
+                        'url' => [
+                            'task/delete',
+                            'id' => $model->id,
+                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                        ],
+                        'linkOptions' => [
+                            'data' => [
+                                'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')
+                            ]
+                        ]
+                    ]
+                ];
+                if ($model->ticket_id) {
+                    array_unshift($items, [
+                        'label' => Yii::t('simialbi/kanban', 'Go to ticket'),
+                        'url' => ['/ticket/ticket/view', 'id' => $model->ticket_id],
+                        'linkOptions' => [
+                            'target' => '_blank'
+                        ]
+                    ]);
+                }
+                ?>
                 <?= ButtonDropdown::widget([
                     'label' => FAS::i('ellipsis-h'),
                     'encodeLabel' => false,
@@ -217,35 +259,7 @@ Pjax::begin([
                         'class' => ['toggle' => '', 'btn' => 'btn btn-sm']
                     ],
                     'dropdown' => [
-                        'items' => [
-                            [
-                                'label' => Yii::t('yii', 'Update'),
-                                'url' => [
-                                    'task/update',
-                                    'id' => $model->id,
-                                    'group' => Yii::$app->request->getQueryParam('group', 'bucket')
-                                ],
-                                'linkOptions' => [
-                                    'data' => [
-                                        'toggle' => 'modal',
-                                        'target' => '#taskModal'
-                                    ]
-                                ]
-                            ],
-                            [
-                                'label' => Yii::t('yii', 'Delete'),
-                                'url' => [
-                                    'task/delete',
-                                    'id' => $model->id,
-                                    'group' => Yii::$app->request->getQueryParam('group', 'bucket')
-                                ],
-                                'linkOptions' => [
-                                    'data' => [
-                                        'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')
-                                    ]
-                                ]
-                            ]
-                        ]
+                        'items' => $items
                     ]
                 ]); ?>
             </div>
