@@ -45,7 +45,9 @@ class ToDo extends Widget
     public function run()
     {
         $tasks = Task::find()
+            ->cache(10)
             ->alias('t')
+            ->with('bucket', 'board')
             ->innerJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{t}}.[[id]] = {{u}}.[[task_id]]')
             ->where(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
             ->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id])
