@@ -89,7 +89,7 @@ class User extends ActiveRecord implements UserInterface
     }
 
     /**
-	 * {@inheritDoc}
+     * {@inheritDoc}
      */
     public static function findIdentity($id)
     {
@@ -97,7 +97,7 @@ class User extends ActiveRecord implements UserInterface
     }
 
     /**
-	 * {@inheritDoc}
+     * {@inheritDoc}
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
@@ -105,7 +105,7 @@ class User extends ActiveRecord implements UserInterface
     }
 
     /**
-	 * {@inheritDoc}
+     * {@inheritDoc}
      */
     public function getId()
     {
@@ -113,7 +113,7 @@ class User extends ActiveRecord implements UserInterface
     }
 
     /**
-	 * {@inheritDoc}
+     * {@inheritDoc}
      */
     public function getAuthKey()
     {
@@ -121,33 +121,33 @@ class User extends ActiveRecord implements UserInterface
     }
 
     /**
-	 * {@inheritDoc}
+     * {@inheritDoc}
      */
     public function validateAuthKey($authKey)
     {
         return $this->getAuthKey() === $authKey;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function getImage() {
-		return $this->image;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public function getImage() {
+        return $this->image;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function getName() {
-		return trim($this->first_name . ' ' . $this->last_name);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public function getName() {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public static function findIdentities() {
-		return static::find()->all();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public static function findIdentities() {
+        return static::find()->all();
+    }
 }
 ```
 
