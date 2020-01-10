@@ -12,6 +12,7 @@ use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\widgets\Widget;
 use Yii;
 use yii\bootstrap4\Html;
+use yii\db\Expression;
 use yii\helpers\Url;
 
 /**
@@ -51,11 +52,9 @@ class ToDo extends Widget
             ->innerJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{t}}.[[id]] = {{u}}.[[task_id]]')
             ->where(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
             ->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id])
-            ->orderBy([
-                '{{t}}.[[end_date]]' => SORT_ASC,
-                '{{t}}.[[start_date]]' => SORT_ASC,
-                '{{t}}.[[created_at]]' => SORT_ASC
-            ]);
+            ->addOrderBy(new Expression('-{{t}}.[[end_date]] DESC'))
+            ->addOrderBy(new Expression('-{{t}}.[[start_date]] DESC'))
+            ->addOrderBy(['{{t}}.[[created_at]]' => SORT_ASC]);
 
         $options = $this->options;
         Html::addCssClass($options, ['widget' => 'list-group']);
