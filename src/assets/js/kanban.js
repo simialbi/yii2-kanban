@@ -206,6 +206,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         $('.kanban-tasks').sortable({
             items: '> .kanban-sortable',
             connectWith: '.kanban-tasks',
+            distance: 5,
             start: function (event, ui) {
                 var $element = ui.item;
                 activeBucket = $element.closest('.kanban-bucket');

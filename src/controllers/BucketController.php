@@ -59,9 +59,12 @@ class BucketController extends Controller
                 'boardId' => $model->board_id,
                 'title' => $model->name,
                 'tasks' => $model->tasks,
+                'completedTasks' => 0,
                 'keyName' => 'bucketId',
                 'action' => 'change-parent',
-                'sort' => true
+                'sort' => true,
+                'renderContext' => true,
+                'readonly' => false
             ]);
         }
 

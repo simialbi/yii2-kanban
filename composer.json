@@ -27,6 +27,7 @@
 		"yiisoft/yii2": "^2.0.20",
         "yiisoft/yii2-bootstrap4": "^2.0.4",
         "arogachev/yii2-sortable": "^0.1.6",
+        "bizley/quill": "^2.6.0",
         "bower-asset/fullcalendar": "4.2.*",
         "bower-asset/swiper": "^4.5.0",
         "fortawesome/font-awesome": "^5.12.0",

@@ -1,5 +1,6 @@
 <?php
 
+use bizley\quill\Quill;
 use kartik\date\DatePicker;
 use kartik\file\FileInput;
 use rmrevin\yii\fontawesome\FAS;
@@ -243,7 +244,9 @@ Pjax::begin([
                 'options' => [
                     'class' => ['form-group', 'col-12']
                 ]
-            ])->textarea(['rows' => 10]);?>
+            ])->widget(Quill::class, [
+
+            ]); ?>
         </div>
         <div class="row">
             <div class="form-group col-12 checklist">
@@ -273,7 +276,7 @@ Pjax::begin([
                         <?= Html::input(
                             'text',
                             'checklist[' . $checklistElement->id . '][name]',
-                            Html::encode($checklistElement->name),
+                            $checklistElement->name,
                             [
                                 'class' => ['form-control'],
                                 'style' => [
@@ -321,13 +324,14 @@ Pjax::begin([
                 ]); ?>
             </div>
         </div>
-    <?php if ($model->attachments): ?>
+        <?php if ($model->attachments): ?>
     </div>
     <div class="list-group list-group-flush kanban-task-attachments">
         <?php $i = 0; ?>
         <?php foreach ($model->attachments as $attachment): ?>
             <div class="list-group-item list-group-item-action d-flex flex-row justify-content-between">
-                <a href="<?= $attachment->path; ?>" target="_blank" data-pjax="0"><?= Html::encode($attachment->name); ?></a>
+                <a href="<?= $attachment->path; ?>" target="_blank"
+                   data-pjax="0"><?= Html::encode($attachment->name); ?></a>
                 <?= $form->field($attachment, "[$i]card_show", [
                     'options' => ['class' => 'ml-auto mr-3 kanban-attachment-show'],
                     'labelOptions' => [
@@ -346,7 +350,7 @@ Pjax::begin([
         <?php endforeach; ?>
     </div>
     <div class="modal-body">
-    <?php endif; ?>
+        <?php endif; ?>
         <div class="row">
             <div class="form-group col-12 linklist">
                 <div class="d-flex justify-content-between">
