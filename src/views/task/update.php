@@ -245,7 +245,26 @@ Pjax::begin([
                     'class' => ['form-group', 'col-12']
                 ]
             ])->widget(Quill::class, [
-
+                'localAssets' => true,
+                'modules' => ['syntax' => true],
+                'highlightStyle' => 'github.min.css',
+                'options' => [
+                    'style' => [
+                        'height' => 'auto'
+                    ]
+                ],
+                'toolbarOptions' => [
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [
+                        ['script' => 'sub'],
+                        ['script' => 'super']
+                    ],
+                    [
+                        ['list' => 'ordered'],
+                        ['list' => 'bullet'],
+                    ],
+                    ['blockquote', 'code-block']
+                ]
             ]); ?>
         </div>
         <div class="row">
@@ -397,8 +416,30 @@ Pjax::begin([
                 <?= Html::label(Yii::t('simialbi/kanban/task', 'Comments'), 'comment', [
                     'class' => ['col-form-label-sm', 'py-0']
                 ]); ?>
-                <?= Html::textarea('comment', null, [
-                    'class' => ['form-control', 'form-control-sm']
+                <?= Quill::widget([
+                    'name' => 'comment',
+                    'value' => '',
+                    'localAssets' => true,
+                    'modules' => ['syntax' => true],
+                    'highlightStyle' => 'github.min.css',
+                    'options' => [
+                        'class' => ['form-control', 'form-control-sm'],
+                        'style' => [
+                            'height' => 'auto'
+                        ]
+                    ],
+                    'toolbarOptions' => [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [
+                            ['script' => 'sub'],
+                            ['script' => 'super']
+                        ],
+                        [
+                            ['list' => 'ordered'],
+                            ['list' => 'bullet'],
+                        ],
+                        ['blockquote', 'code-block']
+                    ]
                 ]); ?>
             </div>
             <?php if (count($model->comments)): ?>
@@ -425,10 +466,11 @@ Pjax::begin([
                             <div class="media-body">
                                 <span class="text-muted d-flex flex-row justify-content-between">
                                     <span><?= Html::encode($comment->author->name); ?></span>
-                                    <span><?= Yii::$app->formatter->asDatetime($comment->created_at,
-                                            'medium'); ?></span>
+                                    <span>
+                                        <?= Yii::$app->formatter->asDatetime($comment->created_at, 'medium'); ?>
+                                    </span>
                                 </span>
-                                <?= Yii::$app->formatter->asParagraphs($comment->text); ?>
+                                <?= $comment->text; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>

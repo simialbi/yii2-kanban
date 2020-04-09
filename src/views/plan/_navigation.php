@@ -177,7 +177,7 @@ $action = Yii::$app->controller->action->id;
                                     'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
                                 ],
                                 'clientOptions' => [
-                                    'list' => '.kanban-plan-assignees',
+                                    'list' => '.kanban-plan-assignees-dropdown',
                                     'ignore' => '.search-field,.dropdown-header,.dropdown-divider'
                                 ]
                             ]));
@@ -186,7 +186,7 @@ $action = Yii::$app->controller->action->id;
                                 'items' => $items,
                                 'encodeLabels' => false,
                                 'options' => [
-                                    'class' => ['kanban-plan-assignees', 'w-100']
+                                    'class' => ['kanban-plan-assignees-dropdown', 'w-100']
                                 ]
                             ]);
                         }

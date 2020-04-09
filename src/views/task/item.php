@@ -1,5 +1,6 @@
 <?php
 
+use bizley\quill\assets\HighlightLocalAsset;
 use kartik\date\DatePicker;
 use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
@@ -64,7 +65,8 @@ Pjax::begin([
                 ); ?>
             </div>
             <?php if ($model->card_show_description && $model->description): ?>
-                <p class="card-text kanban-task-description"><?= Html::encode($model->description); ?></p>
+                <?php HighlightLocalAsset::register($this); ?>
+                <div class="kanban-task-description"><?= $model->description; ?></div>
             <?php endif; ?>
             <?php if ($model->card_show_checklist && count($model->checklistElements)): ?>
                 <?php foreach ($model->checklistElements as $checklistElement): ?>
