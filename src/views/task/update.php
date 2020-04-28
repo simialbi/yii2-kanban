@@ -246,7 +246,7 @@ Pjax::begin([
                 ]
             ])->widget(Quill::class, [
                 'localAssets' => true,
-                'modules' => ['syntax' => true],
+                'modules' => ['syntax' => true, 'smart-breaker' => true],
                 'highlightStyle' => 'github.min.css',
                 'options' => [
                     'style' => [
@@ -420,7 +420,7 @@ Pjax::begin([
                     'name' => 'comment',
                     'value' => '',
                     'localAssets' => true,
-                    'modules' => ['syntax' => true],
+                    'modules' => ['syntax' => true, 'smart-breaker' => true],
                     'highlightStyle' => 'github.min.css',
                     'options' => [
                         'class' => ['form-control', 'form-control-sm'],
