@@ -216,7 +216,7 @@ Pjax::begin([
                 <?php
                 $items = [
                     [
-                        'label' => Yii::t('yii', 'Update'),
+                        'label' => FAS::i('edit', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('yii', 'Update'),
                         'url' => [
                             'task/update',
                             'id' => $model->id,
@@ -230,7 +230,33 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => Yii::t('yii', 'Delete'),
+                        'label' => FAS::i('clone', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy task'),
+                        'url' => [
+                            'task/copy',
+                            'id' => $model->id,
+                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                        ],
+                        'linkOptions' => [
+                            'data' => [
+                                'toggle' => 'modal',
+                                'target' => '#taskModal'
+                            ]
+                        ]
+                    ],
+                    [
+                        'label' => FAS::i('link', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy link'),
+                        'url' => 'javascript:;',
+                        'linkOptions' => [
+                            'onclick' => 'window.sa.kanban.copyTextToClipboard(\'' . Url::to([
+                                    'plan/view',
+                                    'id' => $model->board->id,
+                                    'showTask' => $model->id,
+                                    'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                                ], true) . '\')'
+                        ]
+                    ],
+                    [
+                        'label' => FAS::i('trash-alt', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('yii', 'Delete'),
                         'url' => [
                             'task/delete',
                             'id' => $model->id,
@@ -261,7 +287,8 @@ Pjax::begin([
                         'class' => ['toggle' => '', 'btn' => 'btn btn-sm']
                     ],
                     'dropdown' => [
-                        'items' => $items
+                        'items' => $items,
+                        'encodeLabels' => false
                     ]
                 ]); ?>
             </div>

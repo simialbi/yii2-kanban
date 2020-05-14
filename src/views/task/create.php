@@ -89,7 +89,7 @@ use yii\widgets\Pjax;
             <div class="kanban-task-assignees kanban-assignees mt-3">
                 <div class="dropdown">
                     <a href="javascript:;" data-toggle="dropdown"
-                       class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
+                       class="dropdown-toggle text-decoration-none text-reset d-flex flex-row flex-wrap">
 
                     </a>
                     <?php
@@ -161,6 +161,20 @@ use yii\widgets\Pjax;
                             'class' => ['kanban-create-task-assignees', 'w-100']
                         ]
                     ]); ?>
+                </div>
+            </div>
+            <div class="form-group mt-3 mb-0">
+                <div class="custom-control custom-checkbox">
+                    <?= Html::hiddenInput('copy_per_user', 0); ?>
+                    <?= Html::checkbox('copy_per_user', false, [
+                        'id' => 'task-copy_per_user',
+                        'class' => ['custom-control-input'],
+                        'value' => 1
+                    ]); ?>
+                    <label for="task-copy_per_user" class="custom-control-label">
+                        <?= Yii::t('simialbi/kanban/task', 'Create task per each user'); ?>
+                    </label>
+                    <div class="invalid-feedback"></div>
                 </div>
             </div>
         <?php endif; ?>

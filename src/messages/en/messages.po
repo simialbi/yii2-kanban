@@ -19,6 +19,14 @@ msgid "Close"
 msgstr "Close"
 
 msgctxt "simialbi/kanban"
+msgid "Copy link"
+msgstr "Copy link"
+
+msgctxt "simialbi/kanban"
+msgid "Copy task"
+msgstr "Copy task"
+
+msgctxt "simialbi/kanban"
 msgid "Create"
 msgstr "Create"
 
@@ -29,6 +37,10 @@ msgstr "Filter by keyword"
 msgctxt "simialbi/kanban"
 msgid "Go to ticket"
 msgstr "Go to ticket"
+
+msgctxt "simialbi/kanban"
+msgid "Include"
+msgstr ""
 
 msgctxt "simialbi/kanban"
 msgid "Loading..."
@@ -220,7 +232,7 @@ msgstr "Id"
 
 msgctxt "simialbi/kanban/model/link"
 msgid "Show on card"
-msgstr "@@Show on card@@"
+msgstr "Show on card"
 
 msgctxt "simialbi/kanban/model/link"
 msgid "Task"
@@ -297,6 +309,42 @@ msgstr "Updated at"
 msgctxt "simialbi/kanban/model/task"
 msgid "Updated by"
 msgstr "Updated by"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Assignment"
+msgstr "Assignment"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Attachments"
+msgstr "Attachments"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Bucket Id"
+msgstr "Bucket Id"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Checklist"
+msgstr "Checklist"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Dates"
+msgstr "Dates"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Description"
+msgstr "Description"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Links"
+msgstr "Links"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Subject"
+msgstr "New subject"
 
 msgctxt "simialbi/kanban/plan"
 msgid "All plans"
@@ -405,6 +453,10 @@ msgstr "Checklist"
 msgctxt "simialbi/kanban/task"
 msgid "Comments"
 msgstr "Comments"
+
+msgctxt "simialbi/kanban/task"
+msgid "Create task per each user"
+msgstr "Create task per each user"
 
 msgctxt "simialbi/kanban/task"
 msgid "Done"

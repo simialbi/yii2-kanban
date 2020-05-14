@@ -19,6 +19,14 @@ msgid "Close"
 msgstr "Schliessen"
 
 msgctxt "simialbi/kanban"
+msgid "Copy link"
+msgstr "Link kopieren"
+
+msgctxt "simialbi/kanban"
+msgid "Copy task"
+msgstr "Aufgabe Kopieren"
+
+msgctxt "simialbi/kanban"
 msgid "Create"
 msgstr "Erstellen"
 
@@ -29,6 +37,10 @@ msgstr "Nach Schlüsselwort filtern"
 msgctxt "simialbi/kanban"
 msgid "Go to ticket"
 msgstr "Gehe zum Ticket"
+
+msgctxt "simialbi/kanban"
+msgid "Include"
+msgstr ""
 
 msgctxt "simialbi/kanban"
 msgid "Loading..."
@@ -298,6 +310,42 @@ msgctxt "simialbi/kanban/model/task"
 msgid "Updated by"
 msgstr "Geändert von"
 
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Assignment"
+msgstr "Zuweisung"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Attachments"
+msgstr "Anlagen"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Bucket Id"
+msgstr "Bucket"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Checklist"
+msgstr "Checkliste"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Dates"
+msgstr "Daten"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Description"
+msgstr "Beschreibung"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Links"
+msgstr "Links"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Status"
+msgstr "Fortschritt"
+
+msgctxt "simialbi/kanban/model/task-copy-form"
+msgid "Subject"
+msgstr "Name der neuen Aufgabe"
+
 msgctxt "simialbi/kanban/plan"
 msgid "All plans"
 msgstr "Alle Pläne"
@@ -405,6 +453,10 @@ msgstr "Checkliste"
 msgctxt "simialbi/kanban/task"
 msgid "Comments"
 msgstr "Kommentare"
+
+msgctxt "simialbi/kanban/task"
+msgid "Create task per each user"
+msgstr "Aufgabe pro Benutzer"
 
 msgctxt "simialbi/kanban/task"
 msgid "Done"

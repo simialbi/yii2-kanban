@@ -7,7 +7,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
     var pub = {
         isActive: true,
 
-        init: function (module) {
+        init: function () {
             var $tabs = $('#plan-tabs');
             $('#taskModal').on('show.bs.modal', function (evt) {
                 var link = $(evt.relatedTarget);
@@ -37,6 +37,10 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         getSwiper: function() {
             return slider;
         },
+        /**
+         * Add assignee
+         * @param {string} id
+         */
         addAssignee: function (id) {
             var $this = $(this);
             var $assignees = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
@@ -62,6 +66,10 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             $this.closest('.dropdown-menu').find('.remove-assignee[data-id="' + id + '"]')
                 .addClass('is-assigned').css('display', '');
         },
+        /**
+         * Remove assignee
+         * @param {string} id
+         */
         removeAssignee: function (id) {
             var $this = $(this);
             var $assignees = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
@@ -71,6 +79,38 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             $this.removeClass('is-assigned').css('display', 'none');
             $this.closest('.dropdown-menu').find('.add-assignee[data-id="' + id + '"]')
                 .removeClass('is-assigned').css('display', '');
+        },
+        /**
+         * Copy passed text to browser clipboard
+         *
+         * @param {string} text the text to copy to clipboard
+         */
+        copyTextToClipboard: function (text) {
+            if (!window.navigator.clipboard) {
+                var textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';  //avoid scrolling to bottom
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    // console.error('Fallback: Oops, unable to copy', err);
+                }
+
+            }
+
+            function listener(e)
+            {
+                e.clipboardData.setData('text/plain', text);
+                e.preventDefault();
+            }
+
+            document.addEventListener('copy', listener);
+            document.execCommand('copy');
+            document.removeEventListener('copy', listener);
         }
     };
 

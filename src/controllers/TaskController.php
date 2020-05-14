@@ -14,6 +14,8 @@ use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Comment;
 use simialbi\yii2\kanban\models\Link;
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\models\TaskCopyForm;
+use simialbi\yii2\kanban\models\TaskUserAssignment;
 use simialbi\yii2\kanban\Module;
 use simialbi\yii2\kanban\TaskEvent;
 use simialbi\yii2\models\UserInterface;
@@ -54,6 +56,7 @@ class TaskController extends Controller
                         'actions' => [
                             'create',
                             'update',
+                            'copy',
                             'delete',
                             'set-status',
                             'set-end-date',
@@ -196,13 +199,20 @@ class TaskController extends Controller
         }
 
         if ($task->load(Yii::$app->request->post()) && $task->save()) {
+            $taskPerUser = Yii::$app->request->getBodyParam('copy_per_user', false);
             $assignees = Yii::$app->request->getBodyParam('assignees', []);
             $this->module->trigger(Module::EVENT_TASK_CREATED, new TaskEvent([
                 'task' => $task
             ]));
 
+            $i = 0;
             foreach ($assignees as $assignee) {
                 try {
+                    if ($taskPerUser && $i++ > 0) {
+                        $task->setAttribute('id', null);
+                        $task = new Task($task->toArray());
+                        $task->save();
+                    }
                     $task::getDb()->createCommand()->insert(
                         '{{%kanban_task_user_assignment}}',
                         ['task_id' => $task->id, 'user_id' => $assignee]
@@ -430,6 +440,96 @@ class TaskController extends Controller
             'buckets' => $buckets,
             'users' => $this->module->users,
             'statuses' => $statuses
+        ]);
+    }
+
+    public function actionCopy($id)
+    {
+        $task = $this->findModel($id);
+        $model = new TaskCopyForm([
+            'subject' => $task->subject,
+            'bucketId' => $task->bucket_id
+        ]);
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $newTask = new Task([
+                'subject' => $model->subject,
+                'bucket_id' => $model->bucketId
+            ]);
+            if ($model->copyDescription) {
+                $newTask->description = $task->description;
+            }
+            if ($model->copyDates) {
+                $newTask->start_date = $task->start_date ? Yii::$app->formatter->asDate($task->start_date) : null;
+                $newTask->end_date = $task->end_date ? Yii::$app->formatter->asDate($task->end_date) : null;
+            }
+            if ($model->copyStatus) {
+                $newTask->status = $task->status;
+            }
+
+            $newTask->save();
+
+            if ($model->copyAssignment) {
+                foreach ($task->assignments as $assignment) {
+                    $newAssignment = new TaskUserAssignment([
+                        'task_id' => $newTask->id,
+                        'user_id' => $assignment->user_id
+                    ]);
+                    $newTask->link('assignments', $newAssignment);
+                }
+            }
+            if ($model->copyChecklist) {
+                foreach ($task->checklistElements as $element) {
+                    $newElement = new ChecklistElement([
+                        'task_id' => $newTask->id,
+                        'name' => $element->name,
+                        'sort' => $element->sort
+                    ]);
+                    $newElement->save();
+                }
+            }
+            if ($model->copyAttachments) {
+                foreach ($task->attachments as $attachment) {
+                    $newAttachment = new Attachment([
+                        'task_id' => $newTask->id,
+                        'name' => $attachment->name,
+                        'path' => $attachment->path,
+                        'mime_type' => $attachment->mime_type,
+                        'size' => $attachment->size,
+                        'card_show' => $attachment->card_show
+                    ]);
+                    $newAttachment->save();
+                }
+            }
+            if ($model->copyLinks) {
+                foreach ($task->links as $link) {
+                    $newLink = new Link([
+                        'task_id' => $newTask->id,
+                        'url' => $link->url
+                    ]);
+                    $newLink->save();
+                }
+            }
+
+            return $this->redirect(['plan/view', 'id' => $newTask->board->id, 'showTask' => $newTask->id]);
+        }
+
+        $module = $this->module;
+        $boards = $module::getUserBoards();
+
+        $buckets = [];
+        foreach ($boards as $board) {
+            $buckets[$board->name] = $board->getBuckets()
+                ->select(['name', 'id'])
+                ->orderBy(['name' => SORT_ASC])
+                ->indexBy('id')
+                ->column();
+        }
+
+        return $this->renderAjax('copy', [
+            'model' => $model,
+            'task' => $task,
+            'buckets' => $buckets
         ]);
     }
 
