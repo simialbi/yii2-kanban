@@ -78,7 +78,7 @@ class TaskController extends Controller
     /**
      * Render task item
      *
-     * @param string $id
+     * @param integer $id Tasks id
      *
      * @return string
      * @throws NotFoundHttpException
@@ -95,10 +95,11 @@ class TaskController extends Controller
     }
 
     /**
-     * @param integer $boardId
-     * @param integer|null $bucketId
-     * @param integer|null $userId
-     * @param string|null $date
+     * Render completed tasks
+     * @param integer $boardId Boards id
+     * @param integer|null $bucketId Buckets id
+     * @param integer|null $userId Users id
+     * @param string|null $date Dates id
      * @return string
      * @throws NotFoundHttpException
      */
@@ -242,7 +243,8 @@ class TaskController extends Controller
     }
 
     /**
-     * @param integer $id
+     * Update a task
+     * @param integer $id Tasks id
      * @return string
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
@@ -443,6 +445,13 @@ class TaskController extends Controller
         ]);
     }
 
+    /**
+     * Copy a task
+     * @param integer $id Tasks id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
     public function actionCopy($id)
     {
         $task = $this->findModel($id);
@@ -534,9 +543,8 @@ class TaskController extends Controller
     }
 
     /**
-     * Delete task
-     *
-     * @param integer $id
+     * Delete a task
+     * @param integer $id Tasks id
      *
      * @return \yii\web\Response
      * @throws NotFoundHttpException
@@ -558,8 +566,8 @@ class TaskController extends Controller
     /**
      * Set status of task and redirect back
      *
-     * @param integer $id
-     * @param integer $status
+     * @param integer $id Tasks id
+     * @param integer $status New status
      *
      * @return string
      * @throws NotFoundHttpException
@@ -607,10 +615,10 @@ class TaskController extends Controller
     }
 
     /**
-     * Set status of task and redirect back
+     * Set end date of task and redirect back
      *
-     * @param integer $id
-     * @param integer $date
+     * @param integer $id Tasks id
+     * @param integer $date New end date
      *
      * @return string
      * @throws NotFoundHttpException
@@ -633,7 +641,7 @@ class TaskController extends Controller
     /**
      * Change task dates
      *
-     * @param integer $id
+     * @param integer $id Tasks id
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      */
@@ -658,8 +666,8 @@ class TaskController extends Controller
     /**
      * Assign user to task
      *
-     * @param integer $id
-     * @param integer|string $userId
+     * @param integer $id Tasks id
+     * @param integer|string $userId Users id
      *
      * @return string
      * @throws NotFoundHttpException
@@ -692,8 +700,8 @@ class TaskController extends Controller
     /**
      * Assign user to task
      *
-     * @param integer $id
-     * @param integer|string $userId
+     * @param integer $id Tasks id
+     * @param integer|string $userId Users id
      *
      * @return string
      * @throws NotFoundHttpException
