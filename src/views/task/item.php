@@ -146,6 +146,9 @@ Pjax::begin([
                     <?php if ($model->end_date < time() && $model->status !== $model::STATUS_DONE): ?>
                         <?php Html::addCssClass($options, ['btn-danger', 'px-1']); ?>
                         <?php Html::removeCssClass($options, 'px-0'); ?>
+                    <?php elseif ($model->start_date && $model->start_date <= time()): ?>
+                        <?php Html::addCssClass($options, ['btn-info', 'px-1']); ?>
+                        <?php Html::removeCssClass($options, 'px-0'); ?>
                     <?php endif; ?>
                     <?= DatePicker::widget([
                         'model' => $model,

@@ -61,6 +61,7 @@ class ToDo extends Widget
         $html = Html::beginTag('div', $options);
 
         foreach ($tasks->all() as $task) {
+            /** @var Task $task */
             $options = $this->itemOptions;
             Html::addCssClass($options, ['widget' => 'list-group-item list-group-item-action']);
             $options['href'] = Url::to(['/schedule/plan/view', 'id' => $task->board->id, 'showTask' => $task->id]);
@@ -73,6 +74,8 @@ class ToDo extends Widget
             if ($task->end_date) {
                 if ($task->end_date < time()) {
                     Html::addCssClass($options, 'list-group-item-danger');
+                } elseif ($task->start_date && $task->start_date <= time()) {
+                    Html::addCssClass($options, 'list-group-item-info');
                 }
                 $small .= '&nbsp;&bull;&nbsp;' . FAR::i('calendar') . ' ';
                 $small .= Yii::$app->formatter->asDate($task->end_date, 'short');
