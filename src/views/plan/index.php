@@ -80,6 +80,16 @@ $this->params['breadcrumbs'] = [$this->title];
         ]); ?>
     <?php
     Pjax::end();
+    $js = <<<JS
+function onHide() {
+    jQuery('.note-editor', this).each(function () {
+        var summernote = jQuery(this).prev().data('summernote');
+        if (summernote) {
+            summernote.destroy();
+        }
+    });
+}
+JS;
     Modal::begin([
         'id' => 'taskModal',
         'options' => [
@@ -88,6 +98,9 @@ $this->params['breadcrumbs'] = [$this->title];
         'clientOptions' => [
             'backdrop' => 'static',
             'keyboard' => false
+        ],
+        'clientEvents' => [
+            'hide.bs.modal' => new \yii\web\JsExpression($js)
         ],
         'size' => Modal::SIZE_LARGE,
         'title' => null,

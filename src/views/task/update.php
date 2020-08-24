@@ -1,8 +1,8 @@
 <?php
 
-use bizley\quill\Quill;
 use kartik\date\DatePicker;
 use kartik\file\FileInput;
+use marqu3s\summernote\Summernote;
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ActiveForm;
@@ -241,29 +241,26 @@ Pjax::begin([
             ])->checkbox(['inline' => true, 'class' => 'custom-control-input']); ?>
             <?= $form->field($model, 'description', [
                 'template' => "<div class=\"d-flex justify-content-between\">{label}$showDescription</div>\n{input}\n{hint}\n{error}",
+                'inputOptions' => ['id' => 'taskModalSummernote-description'],
                 'options' => [
                     'class' => ['form-group', 'col-12']
                 ]
-            ])->widget(Quill::class, [
-                'localAssets' => true,
-                'modules' => ['syntax' => true, 'smart-breaker' => true],
-                'highlightStyle' => 'github.min.css',
-                'options' => [
-                    'style' => [
-                        'height' => 'auto'
-                    ]
-                ],
-                'toolbarOptions' => [
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [
-                        ['script' => 'sub'],
-                        ['script' => 'super']
-                    ],
-                    [
-                        ['list' => 'ordered'],
-                        ['list' => 'bullet'],
-                    ],
-                    ['blockquote', 'code-block']
+            ])->widget(Summernote::class, [
+                'clientOptions' => [
+                    'styleTags' => ['p', [
+                        'title' => 'blockquote',
+                        'tag' => 'blockquote',
+                        'className' => 'blockquote',
+                        'value' => 'blockquote'
+                    ], 'pre'],
+                    'toolbar' => new \yii\helpers\ReplaceArrayValue([
+                        ['style', ['style']],
+                        ['font', ['bold', 'italic', 'underline', 'strikethrough']],
+                        ['script', ['subscript', 'superscript']],
+                        ['list' => ['ol', 'ul']],
+                        ['list' => ['ol', 'ul']],
+                        ['clear', ['clear']]
+                    ])
                 ]
             ]); ?>
         </div>
@@ -416,29 +413,26 @@ Pjax::begin([
                 <?= Html::label(Yii::t('simialbi/kanban/task', 'Comments'), 'comment', [
                     'class' => ['col-form-label-sm', 'py-0']
                 ]); ?>
-                <?= Quill::widget([
+                <?= Summernote::widget([
+                    'id' => 'taskModalSummernote-comment',
                     'name' => 'comment',
                     'value' => '',
-                    'localAssets' => true,
-                    'modules' => ['syntax' => true, 'smart-breaker' => true],
-                    'highlightStyle' => 'github.min.css',
-                    'options' => [
-                        'class' => ['form-control', 'form-control-sm'],
-                        'style' => [
-                            'height' => 'auto'
-                        ]
-                    ],
-                    'toolbarOptions' => [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [
-                            ['script' => 'sub'],
-                            ['script' => 'super']
-                        ],
-                        [
-                            ['list' => 'ordered'],
-                            ['list' => 'bullet'],
-                        ],
-                        ['blockquote', 'code-block']
+                    'options' => ['form-control', 'form-control-sm'],
+                    'clientOptions' => [
+                        'styleTags' => ['p', [
+                            'title' => 'blockquote',
+                            'tag' => 'blockquote',
+                            'className' => 'blockquote',
+                            'value' => 'blockquote'
+                        ], 'pre'],
+                        'toolbar' => new \yii\helpers\ReplaceArrayValue([
+                            ['style', ['style']],
+                            ['font', ['bold', 'italic', 'underline', 'strikethrough']],
+                            ['script', ['subscript', 'superscript']],
+                            ['list' => ['ol', 'ul']],
+                            ['list' => ['ol', 'ul']],
+                            ['clear', ['clear']]
+                        ])
                     ]
                 ]); ?>
             </div>
