@@ -257,8 +257,7 @@ Pjax::begin([
                         ['style', ['style']],
                         ['font', ['bold', 'italic', 'underline', 'strikethrough']],
                         ['script', ['subscript', 'superscript']],
-                        ['list' => ['ol', 'ul']],
-                        ['list' => ['ol', 'ul']],
+                        ['list', ['ol', 'ul']],
                         ['clear', ['clear']]
                     ])
                 ]
