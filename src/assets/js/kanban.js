@@ -13,6 +13,10 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 var link = $(evt.relatedTarget);
                 var href = link.prop('href');
 
+                if (!href) {
+                    return;
+                }
+
                 var modal = $(this);
                 modal.find('.modal-content').load(href);
             });

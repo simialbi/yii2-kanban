@@ -77,7 +77,7 @@ Modal::begin([
         'keyboard' => false
     ],
     'clientEvents' => [
-        'hide.bs.modal' => new \yii\web\JsExpression($js)
+        'hidden.bs.modal' => new \yii\web\JsExpression($js)
     ],
     'size' => Modal::SIZE_LARGE,
     'title' => null,
