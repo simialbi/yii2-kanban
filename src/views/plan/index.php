@@ -51,7 +51,7 @@ $this->params['breadcrumbs'] = [$this->title];
                                 <small class="text-muted"><?= Yii::$app->formatter->asDatetime($board->updated_at); ?></small>
                             </a>
                             <?php if (Yii::$app->user->id == $board->created_by): ?>
-                                <span class="d-flex flex-column">
+                                <span class="d-flex flex-column justify-content-around">
                                     <?= Html::a(FAS::i('edit'), ['plan/update', 'id' => $board->id], [
                                         'class' => ['text-body'],
                                         'title' => Yii::t('simialbi/kanban/plan', 'Update plan')
