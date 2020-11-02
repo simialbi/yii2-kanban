@@ -1,13 +1,17 @@
 <?php
 
 use yii\bootstrap4\Html;
+use yii\helpers\ArrayHelper;
 use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
+/* @var $tasks array */
+/* @var $completedTasks integer[]|\simialbi\yii2\kanban\models\Task[] */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
+/* @var $isFiltered boolean */
 ?>
 
 <?php foreach ($model->buckets as $bucket): ?>
@@ -18,8 +22,8 @@ use yii\widgets\Pjax;
         'id' => $bucket->id,
         'boardId' => $model->id,
         'title' => $bucket->name,
-        'tasks' => $bucket->getOpenTasks($readonly)->all(),
-        'completedTasks' => $bucket->getFinishedTasks($readonly)->count(),
+        'tasks' => ArrayHelper::remove($tasks, $bucket->id, []),
+        'completedTasks' => ArrayHelper::remove($completedTasks, $bucket->id, $isFiltered ? [] : 0),
         'keyName' => 'bucketId',
         'action' => 'change-parent',
         'sort' => true,

@@ -80,7 +80,7 @@ Pjax::begin([
                             'id' => 'checklistElement-' . $model->id . '-' . $checklistElement->id
                         ]); ?>
                         <?= Html::label(
-                            Html::encode($checklistElement->name),
+                            $checklistElement->label,
                             'checklistElement-' . $model->id . '-' . $checklistElement->id,
                             [
                                 'class' => ['custom-control-label']

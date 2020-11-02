@@ -20,7 +20,9 @@ use simialbi\yii2\kanban\Module;
 use simialbi\yii2\kanban\TaskEvent;
 use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\ticket\models\Ticket;
+use Throwable;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -30,13 +32,14 @@ use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 use yii\web\UploadedFile;
 
 /**
  * Class TaskController
  * @package simialbi\yii2\kanban\controllers
  *
- * @property-read \simialbi\yii2\kanban\Module $module
+ * @property-read Module $module
  */
 class TaskController extends Controller
 {
@@ -100,15 +103,17 @@ class TaskController extends Controller
      * @param integer|null $bucketId Buckets id
      * @param integer|null $userId Users id
      * @param string|null $date Dates id
+     * @param array $filters Search filters
+     *
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionViewCompleted($boardId, $bucketId = null, $userId = null, $date = null)
+    public function actionViewCompleted($boardId, $bucketId = null, $userId = null, $date = null, $filters = [])
     {
         $board = $this->findBoardModel($boardId);
         $readonly = !$board->is_public && !$board->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
 
-        return $this->renderCompleted($bucketId, $userId, $date, $readonly);
+        return $this->renderCompleted($bucketId, $userId, $date, $readonly, $filters);
     }
 
     /**
@@ -137,7 +142,7 @@ class TaskController extends Controller
      * @return string
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function actionCreate($boardId, $bucketId = null, $userId = null, $status = null, $date = null, $mobile = 0)
     {
@@ -247,7 +252,7 @@ class TaskController extends Controller
      * @param integer $id Tasks id
      * @return string
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      * @throws \yii\base\Exception
      */
     public function actionUpdate($id)
@@ -261,7 +266,7 @@ class TaskController extends Controller
             $comment = Yii::$app->request->getBodyParam('comment');
             $newAttachments = UploadedFile::getInstancesByName('attachments');
             $links = Yii::$app->request->getBodyParam('link', []);
-            $newLinkElements =  ArrayHelper::remove($links, 'new', []);
+            $newLinkElements = ArrayHelper::remove($links, 'new', []);
 
             ChecklistElement::deleteAll([
                 'and',
@@ -448,9 +453,9 @@ class TaskController extends Controller
     /**
      * Copy a task
      * @param integer $id Tasks id
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function actionCopy($id)
     {
@@ -546,9 +551,9 @@ class TaskController extends Controller
      * Delete a task
      * @param integer $id Tasks id
      *
-     * @return \yii\web\Response
+     * @return Response
      * @throws NotFoundHttpException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function actionDelete($id)
     {
@@ -622,7 +627,7 @@ class TaskController extends Controller
      *
      * @return string
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function actionSetEndDate($id, $date)
     {
@@ -643,7 +648,7 @@ class TaskController extends Controller
      *
      * @param integer $id Tasks id
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function actionSetDates($id)
     {
@@ -671,7 +676,7 @@ class TaskController extends Controller
      *
      * @return string
      * @throws NotFoundHttpException
-     * @throws \yii\db\Exception
+     * @throws Exception
      */
     public function actionAssignUser($id, $userId)
     {
@@ -705,7 +710,7 @@ class TaskController extends Controller
      *
      * @return string
      * @throws NotFoundHttpException
-     * @throws \yii\db\Exception
+     * @throws Exception
      */
     public function actionExpelUser($id, $userId)
     {
@@ -734,12 +739,12 @@ class TaskController extends Controller
      *
      * @param integer $id
      *
-     * @return Task the loaded model
+     * @return Board the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findBoardModel($id)
     {
-        if (($model = Task::findOne($id)) !== null) {
+        if (($model = Board::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
@@ -770,12 +775,12 @@ class TaskController extends Controller
      *
      * @param integer $id
      *
-     * @return Board the loaded model
+     * @return Task the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findBoardModel($id)
+    protected function findModel($id)
     {
-        if (($model = Board::findOne($id)) !== null) {
+        if (($model = Task::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));

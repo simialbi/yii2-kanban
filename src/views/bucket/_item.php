@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 /* @var $title string */
 /* @var $keyName string */
 /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
-/* @var $completedTasks integer */
+/* @var $completedTasks integer|\simialbi\yii2\kanban\models\Task[] */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $sort boolean */
@@ -80,36 +80,37 @@ use yii\widgets\Pjax;
     <?php Pjax::end(); ?>
 
     <?php if ($completedTasks): ?>
-        <?php Pjax::begin([
-            'id' => 'completedTasksPjax' . $id,
-            'enablePushState' => false,
-            'clientOptions' => ['skipOuterContainers' => true]
-        ]); ?>
-        <?= Html::a(Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
-            'cnt' => $completedTasks
-        ]), ['task/view-completed', 'boardId' => $boardId, $keyName => $id], []); ?>
-        <?php Pjax::end(); ?>
-        <?php /*
-        <a href="#collapse-<?= $id; ?>" data-toggle="collapse" aria-controls="collapse-<?= $id; ?>"
-           aria-expanded="false">
-            <?= Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
-                'cnt' => count($completedTasks)
-            ]) ?>
-        </a>
-        <div class="kanban-tasks-mt-4 collapse flex-grow-0" id="collapse-<?= $id; ?>">
-            <?php foreach ($completedTasks as $task): ?>
-                <?php if (is_array($task)): ?>
-                    <?php $t = new \simialbi\yii2\kanban\models\Task(); ?>
-                    <?php $t->setAttributes($task); ?>
-                    <?php $task = $t; ?>
-                <?php endif; ?>
-                <?= $this->render('/task/item', [
-                    'model' => $task,
-                    'statuses' => $statuses,
-                    'users' => $users
-                ]); ?>
-            <?php endforeach; ?>
-        </div>
-    */ ?>
+        <?php if (is_numeric($completedTasks)): ?>
+            <?php Pjax::begin([
+                'id' => 'completedTasksPjax' . $id,
+                'enablePushState' => false,
+                'clientOptions' => ['skipOuterContainers' => true]
+            ]); ?>
+            <?= Html::a(Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
+                'cnt' => $completedTasks
+            ]), ['task/view-completed', 'boardId' => $boardId, $keyName => $id], []); ?>
+            <?php Pjax::end(); ?>
+        <?php elseif (is_array($completedTasks)): ?>
+            <a href="#collapse-<?= $id; ?>" data-toggle="collapse" aria-controls="collapse-<?= $id; ?>"
+               aria-expanded="true">
+                <?= Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
+                    'cnt' => count($completedTasks)
+                ]) ?>
+            </a>
+            <div class="kanban-tasks-mt-4 collapse show flex-grow-0" id="collapse-<?= $id; ?>">
+                <?php foreach ($completedTasks as $task): ?>
+                    <?php if (is_array($task)): ?>
+                        <?php $t = new \simialbi\yii2\kanban\models\Task(); ?>
+                        <?php $t->setAttributes($task); ?>
+                        <?php $task = $t; ?>
+                    <?php endif; ?>
+                    <?= $this->render('/task/item', [
+                        'model' => $task,
+                        'statuses' => $statuses,
+                        'users' => $users
+                    ]); ?>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
 </div>

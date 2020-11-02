@@ -36,9 +36,10 @@ $this->params['breadcrumbs'] = [
                 <div></div>
             </div>
             <div class="kanban-bottom-scrollbar">
-                <div class="d-flex flex-row kanban-plan-sortable">
-                    <?= $buckets; ?>
-                </div>
+                <?= $this->render('buckets', [
+                    'model' => $model,
+                    'buckets' => $buckets
+                ]); ?>
 
                 <div class="d-md-none">
                     <div class="kanban-button-prev"><?= FAS::i('caret-left'); ?></div>

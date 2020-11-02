@@ -31,6 +31,10 @@ msgid "Create"
 msgstr "Create"
 
 msgctxt "simialbi/kanban"
+msgid "Filter by board"
+msgstr "Filter by board"
+
+msgctxt "simialbi/kanban"
 msgid "Filter by keyword"
 msgstr "Filter by keyword"
 
@@ -177,6 +181,10 @@ msgstr "Updated at"
 msgctxt "simialbi/kanban/model/bucket"
 msgid "Updated by"
 msgstr "Updated by"
+
+msgctxt "simialbi/kanban/model/checklist-element"
+msgid "End date"
+msgstr "End date"
 
 msgctxt "simialbi/kanban/model/checklist-element"
 msgid "Id"
@@ -381,6 +389,10 @@ msgstr "Create plan"
 msgctxt "simialbi/kanban/plan"
 msgid "Delegated tasks"
 msgstr "Delegated tasks"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Delete plan"
+msgstr "Delete plan"
 
 msgctxt "simialbi/kanban/plan"
 msgid "End date"

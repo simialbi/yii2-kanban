@@ -194,32 +194,44 @@ $action = Yii::$app->controller->action->id;
                     </div>
                 </div>
             <?php endif; ?>
-            <?= HideSeek::widget([
-                'fieldTemplate' => '<div class="search-field mr-auto mr-md-0 flex-grow-1">{input}</div>',
-                'options' => [
-                    'id' => 'search-tasks-widget',
-                    'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
-                ],
-                'clientOptions' => [
-                    'list' => '.kanban-tasks'
-                ],
-                'clientEvents' => [
-                    '_after' => new JsExpression('function () {
-                        if (jQuery(\'.d-none.d-md-block:first\').is(\':visible\')) {
-                            return;
-                        }
-                        var value = jQuery(this).val();
-                        jQuery(\'.kanban-bucket\').each(function () {
-                            if (jQuery(\'.kanban-sortable\', this).length || value === \'\') {
-                                jQuery(this).addClass(\'d-flex\').removeClass(\'d-none\');
-                            } else {
-                                jQuery(this).addClass(\'d-none\').removeClass(\'d-flex\');
+            <?php if ($action === 'view'): ?>
+                <div class="search-field mr-auto-mr-md-0 flex-grow-1">
+                    <?= Html::beginForm(['plan/search-tasks', 'id' => $model->id, 'group' => $group], 'POST', ['id' => 'searchTasksForm']) ?>
+                    <label for="search-tasks-widget" class="sr-only">
+                        <?= Yii::t('simialbi/kanban', 'Filter by keyword'); ?>
+                    </label>
+                    <input id="search-tasks-widget" class="form-control" name="q"
+                           placeholder="<?= Yii::t('simialbi/kanban', 'Filter by keyword'); ?>">
+                    <?= Html::endForm(); ?>
+                </div>
+            <?php elseif ($action === 'schedule'): ?>
+                <?= HideSeek::widget([
+                    'fieldTemplate' => '<div class="search-field mr-auto mr-md-0 flex-grow-1">{input}</div>',
+                    'options' => [
+                        'id' => 'search-tasks-widget',
+                        'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                    ],
+                    'clientOptions' => [
+                        'list' => '.kanban-tasks'
+                    ],
+                    'clientEvents' => [
+                        '_after' => new JsExpression('function () {
+                            if (jQuery(\'.d-none.d-md-block:first\').is(\':visible\')) {
+                                return;
                             }
-                        });
-                        window.sa.kanban.getSwiper().update();
-                    }')
-                ]
-            ]); ?>
+                            var value = jQuery(this).val();
+                            jQuery(\'.kanban-bucket\').each(function () {
+                                if (jQuery(\'.kanban-sortable\', this).length || value === \'\') {
+                                    jQuery(this).addClass(\'d-flex\').removeClass(\'d-none\');
+                                } else {
+                                    jQuery(this).addClass(\'d-none\').removeClass(\'d-flex\');
+                                }
+                            });
+                            window.sa.kanban.getSwiper().update();
+                        }')
+                    ]
+                ]); ?>
+            <?php endif; ?>
             <?php if ($action === 'view'): ?>
                 <?= ButtonDropdown::widget([
                     'label' => sprintf(

@@ -16,6 +16,7 @@ use Yii;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Url;
@@ -49,10 +50,10 @@ class PlanController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['update'],
+                        'actions' => ['update', 'delete'],
                         'matchCallback' => function () {
                             $board = $this->findModel(Yii::$app->request->getQueryParam('id'));
-                            return $board->is_public || $board->created_by == Yii::$app->user->id;
+                            return $board->created_by == Yii::$app->user->id;
                         }
                     ],
                     [
@@ -61,7 +62,7 @@ class PlanController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['view'],
+                        'actions' => ['view', 'search-tasks'],
                         'matchCallback' => function () {
                             return ArrayHelper::keyExists(
                                 Yii::$app->request->getQueryParam('id'),
@@ -70,14 +71,23 @@ class PlanController extends Controller
                         }
                     ]
                 ]
+            ],
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'search-tasks' => ['POST'],
+                    'delete' => ['POST']
+                ]
             ]
         ];
     }
 
     /**
      * Plan overview
+     * @param string $activeTab One of 'plan', 'tasks', 'delegated'
+     * @return string
      */
-    public function actionIndex()
+    public function actionIndex($activeTab = 'plan')
     {
         $boards = Board::findByUserId();
 
@@ -85,7 +95,8 @@ class PlanController extends Controller
 
         return $this->render('index', [
             'boards' => $boards,
-            'delegated' => $this->renderDelegatedTasks()
+            'delegated' => $this->renderDelegatedTasks(),
+            'activeTab' => $activeTab
         ]);
     }
 
@@ -115,6 +126,36 @@ class PlanController extends Controller
             'buckets' => $bucketContent,
             'users' => $this->module->users,
             'showTask' => $showTask
+        ]);
+    }
+
+    /**
+     * @param integer $id
+     * @param string $group
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionSearchTasks($id, $group = 'bucket')
+    {
+        $q = Yii::$app->request->getBodyParam('q');
+        if (empty($q)) {
+            return $this->redirect(['view', 'id' => $id]);
+        }
+
+        $model = $this->findModel($id);
+        $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
+
+        $bucketContent = $this->renderBucketContent($model, $group, $readonly, [
+            'or',
+            ['like', '{{t}}.[[subject]]', $q],
+            ['like', '{{t}}.[[description]]', $q],
+            ['like', '{{c}}.[[name]]', $q],
+            ['like', '{{co}}.[[text]]', $q]
+        ]);
+
+        return $this->renderAjax('buckets', [
+            'model' => $model,
+            'buckets' => $bucketContent
         ]);
     }
 
@@ -407,6 +448,24 @@ class PlanController extends Controller
         return $this->render('update', [
             'model' => $model
         ]);
+    }
+
+    /**
+     * Delete a board
+     *
+     * @param integer $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \yii\base\Exception
+     * @throws \Throwable
+     */
+    public function actionDelete($id)
+    {
+        $model = $this->findModel($id);
+
+        $model->delete();
+
+        return $this->redirect(['plan/index']);
     }
 
     /**

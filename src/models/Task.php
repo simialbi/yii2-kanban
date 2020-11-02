@@ -25,8 +25,8 @@ use yii\helpers\ArrayHelper;
  * @property integer $ticket_id
  * @property string $subject
  * @property integer $status
- * @property integer|string $start_date
- * @property integer|string $end_date
+ * @property integer|string|\DateTime $start_date
+ * @property integer|string|\DateTime $end_date
  * @property string $description
  * @property boolean $card_show_description
  * @property boolean $card_show_checklist

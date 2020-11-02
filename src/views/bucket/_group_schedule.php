@@ -4,6 +4,7 @@ use yii\bootstrap4\Html;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
+/* @var $tasksScheduled array */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */

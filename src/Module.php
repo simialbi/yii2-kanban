@@ -58,6 +58,16 @@ class Module extends \simialbi\yii2\base\Module
     public $users = [];
 
     /**
+     * @var array Role-cache
+     */
+    public $roles = [];
+
+    /**
+     * @var array|\Closure User groups
+     */
+    public $groups = [];
+
+    /**
      * {@inheritDoc}
      * @throws \ReflectionException
      * @throws \yii\base\InvalidConfigException
@@ -99,6 +109,9 @@ class Module extends \simialbi\yii2\base\Module
             ];
         }
         $this->users = ArrayHelper::index(call_user_func([Yii::$app->user->identityClass, 'findIdentities']), 'id');
+        if (Yii::$app->has('authManager')) {
+            $this->roles = ArrayHelper::getColumn(ArrayHelper::index(Yii::$app->authManager->getRoles(), 'name'), 'description');
+        }
 
         Yii::$app->view->registerJs(
             "var kanbanBaseUrl = '" . Url::to(['/' . $this->id], '') . "';",

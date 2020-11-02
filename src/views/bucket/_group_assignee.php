@@ -9,12 +9,9 @@ use yii\helpers\ArrayHelper;
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $readonly boolean */
-
+/* @var $isFiltered boolean */
 
 foreach ($tasksByUser as $userId => $tasks) {
-    /* @var $user \simialbi\yii2\models\UserInterface */
-    $user = ArrayHelper::getValue($users, $userId);
-
     echo $this->render('/bucket/_item', [
         'readonly' => $readonly,
         'statuses' => $statuses,
@@ -25,10 +22,10 @@ foreach ($tasksByUser as $userId => $tasks) {
             ? '<span class="kanban-user">' . Yii::t('simialbi/kanban', 'Not assigned') . '</span>'
             : $this->render('/task/_user', [
                 'assigned' => false,
-                'user' => $user
+                'user' => ArrayHelper::getValue($users, $userId)
             ]),
         'tasks' => is_array($tasks) ? $tasks : [],
-        'completedTasks' => ArrayHelper::getValue($doneTasksByUser, $userId, 0),
+        'completedTasks' => ArrayHelper::getValue($doneTasksByUser, $userId, $isFiltered ? [] : 0),
         'keyName' => 'userId',
         'action' => 'change-assignee',
         'sort' => false,

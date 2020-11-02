@@ -10,6 +10,8 @@ namespace simialbi\yii2\kanban\controllers;
 use rmrevin\yii\fontawesome\FAR;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\kanban\models\ChecklistElement;
+use simialbi\yii2\kanban\models\Comment;
 use simialbi\yii2\kanban\models\Task;
 use Yii;
 use yii\bootstrap4\Html;
@@ -69,12 +71,13 @@ trait RenderingTrait
 
         if ($view === 'task') {
             return $this->renderPartial('/bucket/_group_assignee', [
-                'model'           => null,
-                'tasksByUser'     => $tasks,
+                'model' => null,
+                'tasksByUser' => $tasks,
                 'doneTasksByUser' => $doneTaskCounts,
-                'statuses'        => $this->module->statuses,
-                'users'           => $this->module->users,
-                'readonly'        => true
+                'statuses' => $this->module->statuses,
+                'users' => $this->module->users,
+                'readonly' => true,
+                'isFiltered' => false
             ]);
         }
 
@@ -136,16 +139,17 @@ trait RenderingTrait
      * @param Board $board
      * @param string $group
      * @param boolean $readonly
+     * @param array $filters
      * @return string rendered content
      */
-    public function renderBucketContent($board, $group = 'bucket', $readonly = false)
+    public function renderBucketContent($board, $group = 'bucket', $readonly = false, $filters = [])
     {
-        $if = 'IF';
-        if (Task::getDb()->driverName === 'mssql' || Task::getDb()->driverName === 'sqlsrv' ||
-            Task::getDb()->driverName === 'dblib'
-        ) {
-            $if = 'IIF';
-        }
+//        $if = 'IF';
+//        if (Task::getDb()->driverName === 'mssql' || Task::getDb()->driverName === 'sqlsrv' ||
+//            Task::getDb()->driverName === 'dblib'
+//        ) {
+//            $if = 'IIF';
+//        }
 
         switch ($group) {
             case 'assignee':
@@ -154,28 +158,33 @@ trait RenderingTrait
                     '{{t}}.*',
                     '{{u}}.[[user_id]]'
                 ])
+                    ->distinct(true)
                     ->from(['t' => Task::tableName()])
                     ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
+                    ->leftJoin(['c' => ChecklistElement::tableName()], '{{c}}.[[task_id]] = {{t}}.[[id]]')
+                    ->leftJoin(['co' => Comment::tableName()], '{{co}}.[[task_id]] = {{t}}.[[id]]')
                     ->innerJoin(['b' => Bucket::tableName()], '{{b}}.[[id]] = {{t}}.[[bucket_id]]')
                     ->innerJoin(['p' => Board::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
-                    ->where(['{{p}}.[[id]]' => $board->id]);
+                    ->where(['{{p}}.[[id]]' => $board->id])
+                    ->andFilterWhere($filters);
 
                 if ($readonly) {
                     $query->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
                 }
                 $doneQuery = clone $query;
                 $query->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]]);
-                $doneQuery->select([
-                    'cnt' => 'COUNT({{t}}.[[id]])',
-                    '{{u}}.[[user_id]]'
-                ])->andWhere(['{{t}}.[[status]]' => Task::STATUS_DONE])->groupBy([
-                    '{{u}}.[[user_id]]'
-                ])->indexBy('user_id');
-                $doneTaskCounts = $doneQuery->column();
 
                 $tasks = ArrayHelper::index($query->all(), null, 'user_id');
+                if (!empty($filters)) {
+                    $completedTasks = ArrayHelper::index($doneQuery->andWhere(['{{t}}.[[status]]' => Task::STATUS_DONE])->all(), null, 'user_id');
+                } else {
+                    $completedTasks = $doneQuery->select([
+                        'cnt' => 'COUNT({{t}}.[[id]])',
+                        'user_id'
+                    ])->andWhere(['{{t}}.[[status]]' => Task::STATUS_DONE])->groupBy(['user_id'])->indexBy('user_id')->column();
+                }
 
-                foreach (array_keys($doneTaskCounts) as $userId) {
+                foreach (array_keys($completedTasks) as $userId) {
                     if (!ArrayHelper::keyExists($userId, $tasks)) {
                         $tasks[$userId] = [];
                     }
@@ -184,26 +193,35 @@ trait RenderingTrait
                 $bucketContent = $this->renderPartial('/bucket/_group_assignee', [
                     'model' => $board,
                     'tasksByUser' => $tasks,
-                    'doneTasksByUser' => $doneTaskCounts,
+                    'doneTasksByUser' => $completedTasks,
                     'statuses' => $this->module->statuses,
                     'users' => $this->module->users,
-                    'readonly' => $readonly
+                    'readonly' => $readonly,
+                    'isFiltered' => !empty($filters)
                 ]);
                 break;
 
             case 'status':
-                $tasks = ArrayHelper::index(
-                    $board->getTasks()->orderBy(['status' => SORT_DESC])->all(),
-                    null,
-                    'status'
-                );
+                $query = $board->getTasks()
+                    ->alias('t')
+                    ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
+                    ->leftJoin(['c' => ChecklistElement::tableName()], '{{c}}.[[task_id]] = {{t}}.[[id]]')
+                    ->leftJoin(['co' => Comment::tableName()], '{{co}}.[[task_id]] = {{t}}.[[id]]')
+                    ->innerJoin(['b' => Bucket::tableName()], '{{b}}.[[id]] = {{t}}.[[bucket_id]]')
+                    ->innerJoin(['p' => Board::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
+                    ->andFilterWhere($filters)
+                    ->orderBy(['status' => SORT_DESC]);
+                if ($readonly) {
+                    $query->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+                }
 
                 $bucketContent = $this->renderPartial('/bucket/_group_status', [
                     'model' => $board,
-                    'tasksByStatus' => $tasks,
+                    'tasksByStatus' => ArrayHelper::index($query->all(), null, 'status'),
                     'statuses' => $this->module->statuses,
                     'users' => $this->module->users,
-                    'readonly' => $readonly
+                    'readonly' => $readonly,
+                    'isFiltered' => !empty($filters)
                 ]);
                 break;
 
@@ -211,23 +229,53 @@ trait RenderingTrait
                 $query = new Query();
                 $query->select([
                     '{{t}}.*',
-                    '{{t}}.[[end_date]]',
-                    'is_done' => new Expression("$if({{t}}.[[status]] = 0, 1, 0)")
+                    'end_date' => new Expression('DATE_FORMAT(FROM_UNIXTIME({{t}}.[[end_date]]), \'%Y-%m-%d\')')
                 ])
+                    ->distinct(true)
                     ->from(['t' => Task::tableName()])
+                    ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
+                    ->leftJoin(['c' => ChecklistElement::tableName()], '{{c}}.[[task_id]] = {{t}}.[[id]]')
+                    ->leftJoin(['co' => Comment::tableName()], '{{co}}.[[task_id]] = {{t}}.[[id]]')
                     ->innerJoin(['b' => Bucket::tableName()], '{{b}}.[[id]] = {{t}}.[[bucket_id]]')
                     ->innerJoin(['p' => Board::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
                     ->where(['{{p}}.[[id]]' => $board->id])
-                    ->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
+                    ->andFilterWhere($filters)
                     ->orderBy(['{{t}}.[[end_date]]' => SORT_ASC]);
-                $tasks = ArrayHelper::index($query->all(), null, ['end_date', 'is_done']);
+
+                if ($readonly) {
+                    $query->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+                }
+                $doneQuery = clone $query;
+                $query->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]]);
+
+                $tasks = ArrayHelper::index($query->all(), null, 'end_date');
+                if (!empty($filters)) {
+                    $completedTasks = ArrayHelper::index($doneQuery->andWhere(['{{t}}.[[status]]' => Task::STATUS_DONE])->all(), null, 'end_date');
+                } else {
+                    $completedTasks = $doneQuery->select([
+                        'cnt' => 'COUNT({{t}}.[[id]])',
+                        'end_date' => new Expression('DATE_FORMAT(FROM_UNIXTIME({{t}}.[[end_date]]), \'%Y-%m-%d\')')
+                    ])->andWhere(['{{t}}.[[status]]' => Task::STATUS_DONE])->groupBy(['user_id'])->indexBy('end_date')->column();
+                }
+
+                foreach (array_keys($completedTasks) as $date) {
+                    if (!ArrayHelper::keyExists($date, $tasks)) {
+                        $tasks[$date] = [];
+                    }
+                }
+                if (isset($completedTasks[''])) {
+                    $completedTasks[Yii::$app->formatter->asDate(null)] = $completedTasks[''];
+                    unset($completedTasks['']);
+                }
 
                 $bucketContent = $this->renderPartial('/bucket/_group_date', [
                     'model' => $board,
                     'tasksByDate' => $tasks,
+                    'doneTasksByDate' => $completedTasks,
                     'statuses' => $this->module->statuses,
                     'users' => $this->module->users,
-                    'readonly' => $readonly
+                    'readonly' => $readonly,
+                    'isFiltered' => !empty($filters)
                 ]);
                 break;
 
@@ -236,17 +284,46 @@ trait RenderingTrait
                     'model' => $board,
                     'statuses' => $this->module->statuses,
                     'users' => $this->module->users,
-                    'readonly' => $readonly
+                    'readonly' => $readonly,
+                    'isFiltered' => !empty($filters)
                 ]);
                 break;
 
             case 'bucket':
             default:
+                $query = $board->getTasks()
+                    ->alias('t')
+                    ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
+                    ->leftJoin(['c' => ChecklistElement::tableName()], '{{c}}.[[task_id]] = {{t}}.[[id]]')
+                    ->leftJoin(['co' => Comment::tableName()], '{{co}}.[[task_id]] = {{t}}.[[id]]')
+                    ->innerJoin(['b' => Bucket::tableName()], '{{b}}.[[id]] = {{t}}.[[bucket_id]]')
+                    ->innerJoin(['p' => Board::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
+                    ->andFilterWhere($filters)
+                    ->orderBy(['status' => SORT_DESC]);
+
+                if ($readonly) {
+                    $query->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+                }
+                $doneQuery = clone $query;
+                $query->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]]);
+                if (!empty($filters)) {
+                    $completedTasks = ArrayHelper::index($doneQuery->andWhere(['{{t}}.[[status]]' => Task::STATUS_DONE])->all(), null, 'bucket_id');
+                } else {
+                    $completedTasks = $doneQuery->select([
+                        'cnt' => 'COUNT({{t}}.[[id]])',
+                        'bucket_id'
+                    ])->andWhere(['{{t}}.[[status]]' => Task::STATUS_DONE])->groupBy(['bucket_id'])->indexBy('bucket_id')->column();
+                }
+                $tasks = ArrayHelper::index($query->all(), null, 'bucket_id');
+
                 $bucketContent = $this->renderPartial('/bucket/_group_bucket', [
                     'model' => $board,
+                    'tasks' => $tasks,
+                    'completedTasks' => $completedTasks,
                     'statuses' => $this->module->statuses,
                     'users' => $this->module->users,
-                    'readonly' => $readonly
+                    'readonly' => $readonly,
+                    'isFiltered' => !empty($filters)
                 ]);
                 break;
         }
@@ -261,14 +338,16 @@ trait RenderingTrait
      * @param integer|null $userId
      * @param integer|null $date
      * @param boolean $readonly
+     * @param array $filters
      * @return string rendered content
      */
-    public function renderCompleted($bucketId = null, $userId = null, $date = null, $readonly = false)
+    public function renderCompleted($bucketId = null, $userId = null, $date = null, $readonly = false, $filters = [])
     {
         $query = Task::find()
             ->alias('t')
             ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
-            ->where(['{{t}}.[[status]]' => Task::STATUS_DONE]);
+            ->where(['{{t}}.[[status]]' => Task::STATUS_DONE])
+            ->andFilterWhere($filters);
 
         if ($bucketId) {
             $query->andWhere(['{{t}}.[[bucket_id]]' => $bucketId]);

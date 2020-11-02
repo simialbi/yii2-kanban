@@ -278,7 +278,7 @@ Pjax::begin([
                     ])->checkbox(['inline' => true, 'class' => 'custom-control-input']); ?>
                 </div>
                 <?php foreach ($model->checklistElements as $checklistElement): ?>
-                    <div class="input-group input-group-sm mb-1">
+                    <div class="kanban-task-checklist-element input-group input-group-sm mb-1">
                         <div class="input-group-prepend">
                             <div class="input-group-text">
                                 <?= Html::hiddenInput('checklist[' . $checklistElement->id . '][is_done]', 0); ?>
@@ -300,6 +300,23 @@ Pjax::begin([
                                 'placeholder' => Html::encode($checklistElement->name)
                             ]
                         ); ?>
+                        <?= DatePicker::widget([
+                            'name' => 'checklist[' . $checklistElement->id . '][end_date]',
+                            'value' => $checklistElement->end_date ? Yii::$app->formatter->asDate($checklistElement->end_date) : null,
+                            'id' => 'task-' . $model->id . '-ce-' . $checklistElement->id . '-end-date',
+                            'bsVersion' => '4',
+                            'type' => DatePicker::TYPE_INPUT,
+                            'options' => [
+                                'autocomplete' => 'off',
+                                'placeholder' => Yii::t('simialbi/kanban/model/checklist-element', 'End date')
+                            ],
+                            'pluginOptions' => [
+                                'autoclose' => true,
+                                'todayHighlight' => true,
+                                'startDate' => Yii::$app->formatter->asDate('now'),
+                                'endDate' => ($model->end_date) ? Yii::$app->formatter->asDate($model->end_date) : null
+                            ]
+                        ]); ?>
                         <div class="input-group-append">
                             <button class="btn btn-outline-danger remove-checklist-element">
                                 <?= FAS::i('trash-alt'); ?>
@@ -307,15 +324,38 @@ Pjax::begin([
                         </div>
                     </div>
                 <?php endforeach; ?>
-                <div class="input-group input-group-sm add-checklist-element mb-1">
+                <div class="kanban-task-checklist-element input-group input-group-sm add-checklist-element mb-1">
                     <div class="input-group-prepend">
                         <div class="input-group-text">
                             <?= Html::checkbox('checklist[new][][is_done]', false); ?>
                         </div>
                     </div>
                     <?= Html::input('text', 'checklist[new][][name]', null, [
-                        'class' => ['form-control']
+                        'class' => ['form-control'],
+                        'placeholder' => Yii::t('simialbi/kanban/model/checklist-element', 'Name')
                     ]); ?>
+                    <?= DatePicker::widget([
+                        'name' => 'checklist[new][][end_date]',
+                        'value' => null,
+                        'id' => 'task-' . $model->id . '-ce-new-end-date-1',
+                        'bsVersion' => '4',
+                        'type' => DatePicker::TYPE_INPUT,
+                        'options' => [
+                            'autocomplete' => 'off',
+                            'placeholder' => Yii::t('simialbi/kanban/model/checklist-element', 'End date')
+                        ],
+                        'pluginOptions' => [
+                            'autoclose' => true,
+                            'todayHighlight' => true,
+                            'startDate' => Yii::$app->formatter->asDate('now'),
+                            'endDate' => ($model->end_date) ? Yii::$app->formatter->asDate($model->end_date) : null
+                        ]
+                    ]); ?>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-danger remove-checklist-element disabled" disabled>
+                            <?= FAS::i('trash-alt'); ?>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

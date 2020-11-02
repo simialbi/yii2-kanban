@@ -82,6 +82,17 @@ h1, h2, h3, .h1, .h2, .h3 {
 .kanban-board {
     @include transition(all .2s ease-in-out);
 
+    &, > .kanban-board-inner {
+        max-height: 150px;
+    }
+
+    .kanban-board-image > img {
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        width: 100%;
+    }
+
     width: 100%;
 
     &:hover {
@@ -339,6 +350,18 @@ h1, h2, h3, .h1, .h2, .h3 {
 
     .kanban-task-content {
         padding: .5rem .75rem;
+    }
+}
+
+.kanban-task-checklist-element {
+    .krajee-datepicker {
+        max-width: 25%;
+    }
+
+    @media (max-width: map-get($grid-breakpoints, sm) - 1) {
+        .krajee-datepicker {
+            max-width: 33.33333333%;
+        }
     }
 }
 

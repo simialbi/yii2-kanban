@@ -3,6 +3,7 @@ window.sa = {};
 window.sa.kanban = (function ($, Swiper, baseUrl) {
     var activeBucket;
     var slider;
+    var searchTimeout;
 
     var pub = {
         isActive: true,
@@ -38,7 +39,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             initChecklist();
             initLinks();
         },
-        getSwiper: function() {
+        getSwiper: function () {
             return slider;
         },
         /**
@@ -157,17 +158,15 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         if ($this.closest('.add-checklist-element').length) {
             var $addElement = $this.closest('.add-checklist-element').clone(),
                 $inputGroup = $this.closest('.input-group'),
-                $buttonDelete = $(
-                    '<button class="btn btn-outline-danger remove-checklist-element">' +
-                        '<svg class="svg-inline--fa fa-trash-alt fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="trash-alt" data-fa-i2svg="" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z"></path></svg>' +
-                    '</button>'
-                );
+                $datePicker = $addElement.find('.krajee-datepicker'),
+                idParts = $datePicker.prop('id').split('-');
             $this.closest('.add-checklist-element').removeClass('add-checklist-element');
             $this.attr('placeholder', $this.val());
 
-            $inputGroup.append($('<div class="input-group-append" />').append($buttonDelete));
-
+            idParts[idParts.length - 1] = parseInt(idParts[idParts.length - 1]) + 1;
+            $inputGroup.find('.remove-checklist-element').removeClass('disabled').prop('disabled', false);
             $addElement.find('input[type="text"]').val('');
+            $datePicker.prop('id', idParts.join('-')).kvDatepicker(eval($datePicker.data('krajeeKvdatepicker')))
 
             $checklist.append($addElement);
         } else {
@@ -213,8 +212,8 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             if (!evt.target || !evt.target.tagName) {
                 return;
             }
-            var element = evt.target.tagName.toLowerCase();
-            if (element === 'div' || element === 'h6' || element === 'img' || $(element).closest('.kanban-task-description').length) {
+            var el = evt.target.tagName.toLowerCase();
+            if (el === 'div' || el === 'h6' || el === 'img' || $(el).closest('.kanban-task-description').length) {
                 $(this).find('.kanban-task-update-link').trigger('click');
             }
         });
@@ -318,6 +317,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
 
     function initLinks()
     {
+        var regex = /^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)*)(?::\d{1,5})?(?:$|[?\/#])/i;
         $(document).on('keydown.sa.kanban', '.linklist input[type="text"]', function (evt) {
             var $this = $(this);
             var code = evt.keyCode || evt.which;
@@ -326,7 +326,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             }
             if (parseInt(code) === 9 || parseInt(code) === 13) {
                 evt.preventDefault();
-                if ($this.val().match(/^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)*)(?::\d{1,5})?(?:$|[?\/#])/i)) {
+                if ($this.val().match(regex)) {
                     $this.removeClass('is-invalid').addClass('is-valid');
                     addLinkElement.apply(this);
                     $('.add-linklist-element input[type="text"]').focus();
@@ -337,7 +337,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         });
         $(document).on('change.sa.kanban', '.linklist input[type="text"]', function () {
             var $this = $(this);
-            if ($this.val().match(/^https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)*)(?::\d{1,5})?(?:$|[?\/#])/i)) {
+            if ($this.val().match(regex)) {
                 $this.removeClass('is-invalid').addClass('is-valid');
                 addLinkElement.apply(this);
             } else {
@@ -353,7 +353,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
     {
         $(document).on('keydown.sa.kanban', '.checklist input[type="text"]', function (evt) {
             var $this = $(this);
-            var code = evt.keyCode || evt.which;
+            var code = evt.which || evt.keyCode;
             if ($this.val() === '') {
                 return;
             }

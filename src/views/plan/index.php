@@ -12,6 +12,7 @@ use yii\widgets\Pjax;
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
 /* @var $delegated string */
+/* @var $activeTab string */
 
 KanbanAsset::register($this);
 
@@ -26,8 +27,12 @@ $this->params['breadcrumbs'] = [$this->title];
     <div class="mt-3 d-md-flex flex-row justify-content-start flex-wrap">
         <?php $i = 0; ?>
         <?php foreach ($boards as $board): ?>
-            <div class="kanban-board card mb-3<?php if (++$i % 3 !== 0): ?> mr-md-2<?php endif; ?>">
-                <div class="row no-gutters flex-nowrap flex-grow-1">
+            <?php $options = ['class' => ['kanban-board', 'card', 'mb-3', 'mr-md-2']]; ?>
+            <?php if (++$i % 3 === 0 && $i % 2 !== 0): ?>
+                <?php Html::addCssClass($options, 'mr-xl-0'); ?>
+            <?php endif; ?>
+            <?= Html::beginTag('div', $options); ?>
+                <div class="kanban-board-inner row no-gutters flex-nowrap flex-grow-1">
                     <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
                        class="kanban-board-image col-3 col-md-4 d-flex justify-content-center align-items-center text-decoration-none">
                         <?php if ($board->image): ?>
@@ -43,16 +48,28 @@ $this->params['breadcrumbs'] = [$this->title];
                             <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
                                class="flex-grow-1 text-body text-decoration-none">
                                 <h5 class="pt-0"><?= Html::encode($board->name); ?></h5>
-                                <small class="text-muted"><?=Yii::$app->formatter->asDatetime($board->updated_at);?></small>
+                                <small class="text-muted"><?= Yii::$app->formatter->asDatetime($board->updated_at); ?></small>
                             </a>
-                            <?= Html::a(FAS::i('edit'), ['plan/update', 'id' => $board->id], [
-                                'class' => ['text-body'],
-                                'title' => Yii::t('simialbi/kanban/plan', 'Update plan')
-                            ]); ?>
+                            <?php if (Yii::$app->user->id == $board->created_by): ?>
+                                <span class="d-flex flex-column">
+                                    <?= Html::a(FAS::i('edit'), ['plan/update', 'id' => $board->id], [
+                                        'class' => ['text-body'],
+                                        'title' => Yii::t('simialbi/kanban/plan', 'Update plan')
+                                    ]); ?>
+                                    <?= Html::a(FAS::i('trash-alt'), ['plan/delete', 'id' => $board->id], [
+                                        'class' => ['text-body'],
+                                        'title' => Yii::t('simialbi/kanban/plan', 'Delete plan'),
+                                        'data' => [
+                                            'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+                                            'method' => 'post'
+                                        ]
+                                    ]); ?>
+                                </span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-            </div>
+            <?= Html::endTag('div'); ?>
         <?php endforeach; ?>
         <div class="kanban-board card mr-md-2 mb-3 d-none d-md-block">
             <div class="card-body">
@@ -70,7 +87,9 @@ $this->params['breadcrumbs'] = [$this->title];
     <?php $this->endBlock(); ?>
     <?php $this->beginBlock('tab-tasks'); ?>
     <div class="mt-3">
-        <?= ToDo::widget(); ?>
+        <?= ToDo::widget([
+            'addBoardFilter' => true
+        ]); ?>
     </div>
     <?php $this->endBlock(); ?>
     <?php $this->beginBlock('tab-delegated-tasks'); ?>
@@ -120,15 +139,17 @@ JS;
             [
                 'label' => Yii::t('simialbi/kanban/plan', 'All plans'),
                 'content' => $this->blocks['tab-hub'],
-                'active' => true
+                'active' => ($activeTab === 'plan')
             ],
             [
                 'label' => Yii::t('simialbi/kanban/plan', 'My tasks'),
-                'content' => $this->blocks['tab-tasks']
+                'content' => $this->blocks['tab-tasks'],
+                'active' => ($activeTab === 'todo')
             ],
             [
                 'label' => Yii::t('simialbi/kanban/plan', 'Delegated tasks'),
-                'content' => $this->blocks['tab-delegated-tasks']
+                'content' => $this->blocks['tab-delegated-tasks'],
+                'active' => ($activeTab === 'delegated')
             ]
         ]
     ]) ?>
