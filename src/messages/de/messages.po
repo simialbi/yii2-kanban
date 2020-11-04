@@ -184,7 +184,7 @@ msgstr "Geändert von"
 
 msgctxt "simialbi/kanban/model/checklist-element"
 msgid "End date"
-msgstr "End date"
+msgstr "Fälligkeitsdatum"
 
 msgctxt "simialbi/kanban/model/checklist-element"
 msgid "Id"
