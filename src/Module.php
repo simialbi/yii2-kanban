@@ -80,7 +80,7 @@ class Module extends \simialbi\yii2\base\Module
 
         $identity = new Yii::$app->user->identityClass;
         if (!($identity instanceof UserInterface)) {
-            throw new InvalidConfigException('The "identityClass" must extend "simialbi\yii2\models\UserInterface"');
+            //throw new InvalidConfigException('The "identityClass" must extend "simialbi\yii2\models\UserInterface"');
         }
         if (empty($this->statuses)) {
             $this->statuses = [
