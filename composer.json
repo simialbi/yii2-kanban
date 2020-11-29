@@ -1,5 +1,5 @@
 {
-	"name": "simialbi/yii2-kanban",
+	"name": "mis-pulse/yii2-kanban",
 	"type": "yii2-extension",
 	"description": "Kanban board module for yii2",
 	"keywords": [
