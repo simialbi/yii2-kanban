@@ -23,6 +23,13 @@ or add
 
 to the `require` section of your `composer.json`.
 
+
+To use the menu manager (optional), execute the migration here:
+```
+yii migrate --migrationPath=@simialbi/yii2/kanban/migrations
+```
+
+
 ## Usage
 
 In order to use this module, you will need to:
