@@ -23,13 +23,6 @@ or add
 
 to the `require` section of your `composer.json`.
 
-
-To use the menu manager (optional), execute the migration here:
-```
-yii migrate --migrationPath=@simialbi/yii2/kanban/migrations
-```
-
-
 ## Usage
 
 In order to use this module, you will need to:
@@ -147,6 +140,13 @@ class User extends ActiveRecord implements UserInterface
      */
     public function getName() {
         return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getEmail() {
+        return $this->email;
     }
 
     /**

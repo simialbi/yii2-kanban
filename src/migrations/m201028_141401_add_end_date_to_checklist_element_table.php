@@ -4,6 +4,7 @@
  * @author Simon Karlen <simi.albi@gmail.com>
  */
 
+namespace simialbi\yii2\kanban\migrations;
 
 use yii\db\Migration;
 

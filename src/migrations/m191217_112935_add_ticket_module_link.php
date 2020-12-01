@@ -5,6 +5,7 @@
  * @copyright Copyright © 2019 Simon Karlen
  */
 
+namespace simialbi\yii2\kanban\migrations;
 
 use yii\db\Migration;
 use yii\helpers\ArrayHelper;
