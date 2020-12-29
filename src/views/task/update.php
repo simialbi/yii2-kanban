@@ -8,6 +8,7 @@ use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
+use yii\helpers\ReplaceArrayValue;
 use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
@@ -50,7 +51,7 @@ Pjax::begin([
                 'class' => ['sr-only']
             ],
             'inputOptions' => [
-                'class' => new \yii\helpers\ReplaceArrayValue(['form-control'])
+                'class' => new ReplaceArrayValue(['form-control'])
             ]
         ])->textInput()->hint(Yii::t('simialbi/kanban/task', 'Last modified {date,date} {date,time} by {user}', [
             'date' => $model->updated_at,
@@ -253,7 +254,7 @@ Pjax::begin([
                         'className' => 'blockquote',
                         'value' => 'blockquote'
                     ], 'pre'],
-                    'toolbar' => new \yii\helpers\ReplaceArrayValue([
+                    'toolbar' => new ReplaceArrayValue([
                         ['style', ['style']],
                         ['font', ['bold', 'italic', 'underline', 'strikethrough']],
                         ['script', ['subscript', 'superscript']],
@@ -312,6 +313,8 @@ Pjax::begin([
                             ],
                             'pluginOptions' => [
                                 'autoclose' => true,
+                                'clearBtn' => true,
+                                'forceParse' => false,
                                 'todayHighlight' => true,
                                 'startDate' => Yii::$app->formatter->asDate('now'),
                                 'endDate' => ($model->end_date) ? Yii::$app->formatter->asDate($model->end_date) : null
@@ -346,6 +349,8 @@ Pjax::begin([
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
+                            'clearBtn' => true,
+                            'forceParse' => false,
                             'todayHighlight' => true,
                             'startDate' => Yii::$app->formatter->asDate('now'),
                             'endDate' => ($model->end_date) ? Yii::$app->formatter->asDate($model->end_date) : null
@@ -432,6 +437,11 @@ Pjax::begin([
                             ]
                         ); ?>
                         <div class="input-group-append">
+                            <a href="<?= $link->url; ?>" class="btn btn-outline-secondary" target="_blank">
+                                <?= FAS::i('external-link-alt') ?>
+                            </a>
+                        </div>
+                        <div class="input-group-append">
                             <button class="btn btn-outline-danger remove-linklist-element">
                                 <?= FAS::i('trash-alt'); ?>
                             </button>
@@ -464,7 +474,7 @@ Pjax::begin([
                             'className' => 'blockquote',
                             'value' => 'blockquote'
                         ], 'pre'],
-                        'toolbar' => new \yii\helpers\ReplaceArrayValue([
+                        'toolbar' => new ReplaceArrayValue([
                             ['style', ['style']],
                             ['font', ['bold', 'italic', 'underline', 'strikethrough']],
                             ['script', ['subscript', 'superscript']],

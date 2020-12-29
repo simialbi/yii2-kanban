@@ -39,6 +39,10 @@ use yii\web\UploadedFile;
 class Board extends ActiveRecord
 {
     /**
+     * @var UploadedFile
+     */
+    public $uploadedFile;
+    /**
      * @var array Colors to user for visualisation generation
      */
     private $_colors = [
@@ -53,12 +57,6 @@ class Board extends ActiveRecord
         [32, 201, 151],
         [23, 162, 184]
     ];
-
-    /**
-     * @var UploadedFile
-     */
-    public $uploadedFile;
-
     /**
      * @var string Visualisation
      */
@@ -70,6 +68,31 @@ class Board extends ActiveRecord
     public static function tableName()
     {
         return '{{%kanban_board}}';
+    }
+
+    /**
+     * Find boards assigned to user
+     * @param integer|string|null $id
+     *
+     * @return Board[]
+     */
+    public static function findByUserId($id = null)
+    {
+        if ($id === null) {
+            $id = Yii::$app->user->id;
+        }
+
+        $query = static::find()
+            ->cache(60)
+            ->alias('b')
+            ->joinWith('assignments ba')
+            ->joinWith('buckets.tasks.assignments ta')
+            ->where(['{{b}}.[[is_public]]' => 1])
+            ->orWhere(['{{ba}}.[[user_id]]' => $id])
+            ->orWhere(['{{ta}}.[[user_id]]' => $id])
+            ->orderBy(['{{b}}.[[name]]' => SORT_ASC]);
+
+        return $query->all();
     }
 
     /**
@@ -98,14 +121,14 @@ class Board extends ActiveRecord
     {
         return [
             'blameable' => [
-                'class'      => BlameableBehavior::class,
+                'class' => BlameableBehavior::class,
                 'attributes' => [
                     self::EVENT_BEFORE_INSERT => ['created_by', 'updated_by'],
                     self::EVENT_BEFORE_UPDATE => 'updated_by'
                 ]
             ],
             'timestamp' => [
-                'class'      => TimestampBehavior::class,
+                'class' => TimestampBehavior::class,
                 'attributes' => [
                     self::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
                     self::EVENT_BEFORE_UPDATE => 'updated_at'
@@ -129,30 +152,6 @@ class Board extends ActiveRecord
             'created_at' => Yii::t('simialbi/kanban/model/board', 'Created at'),
             'updated_at' => Yii::t('simialbi/kanban/model/board', 'Updated at')
         ];
-    }
-
-    /**
-     * Find boards assigned to user
-     * @param integer|string|null $id
-     *
-     * @return Board[]
-     */
-    public static function findByUserId($id = null)
-    {
-        if ($id === null) {
-            $id = Yii::$app->user->id;
-        }
-
-        $query = static::find()
-            ->cache(60)
-            ->alias('b')
-            ->joinWith('assignments ba')
-            ->joinWith('buckets.tasks.assignments ta')
-            ->where(['{{b}}.[[is_public]]' => 1])
-            ->orWhere(['{{ba}}.[[user_id]]' => $id])
-            ->orWhere(['{{ta}}.[[user_id]]' => $id]);
-
-        return $query->all();
     }
 
     /**

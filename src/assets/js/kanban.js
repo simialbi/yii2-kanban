@@ -3,7 +3,7 @@ window.sa = {};
 window.sa.kanban = (function ($, Swiper, baseUrl) {
     var activeBucket;
     var slider;
-    var searchTimeout;
+    // var searchTimeout;
 
     var pub = {
         isActive: true,
@@ -171,7 +171,9 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             $checklist.append($addElement);
         } else {
             if ($this.val() === '') {
-                $this.val($this.attr('placeholder'));
+                if (!$this.hasClass('krajee-datepicker')) {
+                    $this.val($this.attr('placeholder'));
+                }
             } else {
                 $this.attr('placeholder', $this.val());
             }
@@ -214,7 +216,10 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             }
             var el = evt.target.tagName.toLowerCase();
             if (el === 'div' || el === 'h6' || el === 'img' || $(el).closest('.kanban-task-description').length) {
-                $(this).find('.kanban-task-update-link').trigger('click');
+                var $modal = $('#taskModal');
+
+                $modal.modal('show');
+                $modal.find('.modal-content').load($(this).find('.kanban-task-update-link').prop('href'));
             }
         });
     }
