@@ -171,9 +171,10 @@ Pjax::begin([
                                         'id' => $model->id
                                     ]) . '&date=\' + (e.date.getTime() / 1000)
                                 jQuery.pjax.click(event, container, {
-                                    replace: false,
                                     push: false,
-                                    skipOuterContainers: true
+                                    replace: false,
+                                    skipOuterContainers: true,
+                                    timeout: 0
                                 });
                                 jQuery(this).kvDatepicker(\'hide\');
                             }')

@@ -296,6 +296,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                             jQuery.pjax.click(event, container, {
                                 replace: false,
                                 push: false,
+                                timeout: 0,
                                 skipOuterContainers: true
                             });
                         });
