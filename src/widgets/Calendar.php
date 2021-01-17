@@ -80,12 +80,17 @@ class Calendar extends Widget
      * Registers the FullCalendar javascript assets and builds the required js for the widget and the related events
      *
      * @param string $pluginName
+     * @param string|null $selector
      */
-    protected function registerPlugin($pluginName = 'FullCalendar.Calendar')
+    protected function registerPlugin($pluginName = 'FullCalendar.Calendar', $selector = null)
     {
         $id = $this->options['id'];
         $view = $this->getView();
         $asset = FullCalendarAsset::register($view);
+
+        if (empty($selector)) {
+            $selector = "#$id";
+        }
 
         $js = [];
 
@@ -94,9 +99,9 @@ class Calendar extends Widget
             if (is_string($this->draggable)) {
                 $js[] = "new FullCalendarInteraction.Draggable('{$this->draggable}')";
             } else {
-                $selector = ArrayHelper::remove($this->draggable, 'selector');
-                if ($selector) {
-                    $js[] = "new FullCalendarInteraction.Draggable($selector, " . Json::encode($this->draggable) . ');';
+                $draggableSelector = ArrayHelper::remove($this->draggable, 'selector');
+                if ($draggableSelector) {
+                    $js[] = "new FullCalendarInteraction.Draggable($draggableSelector, " . Json::encode($this->draggable) . ');';
                 }
             }
         }
@@ -114,7 +119,7 @@ class Calendar extends Widget
             }
         }
 
-        $js[] = "var calendar = new $pluginName(jQuery('#$id').get(0), " . $this->getClientOptions() . ');';
+        $js[] = "var calendar = new $pluginName(jQuery('$selector').get(0), " . $this->getClientOptions() . ');';
         $js[] = 'calendar.render();';
         $view->registerJs(implode("\n", $js), View::POS_READY);
     }

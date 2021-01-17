@@ -39,6 +39,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property-read string $hash
  * @property-read string $checklistStats
+ * @property-read string|null $endDate
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
  * @property-read UserInterface[] $assignees
@@ -178,6 +179,26 @@ class Task extends ActiveRecord
         $all = count($this->checklistElements);
 
         return "$done/$all";
+    }
+
+    /**
+     * Get the end date, either from task or checklist element
+     * @return string|null
+     */
+    public function getEndDate()
+    {
+        if ($this->end_date) {
+            return $this->end_date;
+        }
+
+        $qry = $this->getChecklistElements()->where(['not', ['end_date' => null]])->orderBy(['end_date' => SORT_DESC]);
+        if ($qry->count()) {
+            /** @var ChecklistElement $element */
+            $element = $qry->one();
+            return $element->end_date;
+        }
+
+        return null;
     }
 
     /**

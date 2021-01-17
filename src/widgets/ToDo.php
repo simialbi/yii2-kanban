@@ -166,7 +166,7 @@ class ToDo extends Widget
     /**
      * {@inheritDoc}
      */
-    protected function registerPlugin($pluginName = null)
+    protected function registerPlugin($pluginName = null, $selector = null)
     {
         $id = $this->options['id'];
         $url = Url::to(['/schedule/task/set-status']);
