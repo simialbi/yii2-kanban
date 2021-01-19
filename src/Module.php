@@ -82,6 +82,17 @@ class Module extends \simialbi\yii2\base\Module
         if (!($identity instanceof UserInterface)) {
             throw new InvalidConfigException('The "identityClass" must extend "simialbi\yii2\models\UserInterface"');
         }
+        if (!Yii::$app->hasModule('gridview')) {
+            $this->setModule('gridview', [
+                'class' => 'kartik\grid\Module',
+                'exportEncryptSalt' => 'ror_HTbRh0Ad7K7DqhAtZOp50GKyia4c',
+                'i18n' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@kvgrid/messages',
+                    'forceTranslation' => true
+                ]
+            ]);
+        }
         if (empty($this->statuses)) {
             $this->statuses = [
                 Task::STATUS_NOT_BEGUN => Yii::t('simialbi/kanban/task', 'Not started'),

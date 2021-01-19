@@ -15,14 +15,14 @@ use yii\widgets\Pjax;
 ]); ?>
 <div class="mt-3">
     <?= ButtonDropdown::widget([
-        'label'         => ($view === 'list')
+        'label' => ($view === 'list')
             ? Yii::t('simialbi/kanban/plan', 'List view')
             : Yii::t('simialbi/kanban/plan', 'Task view'),
-        'id'            => 'delegatedTasksView',
+        'id' => 'delegatedTasksView',
         'buttonOptions' => [
             'class' => ['btn-outline-secondary']
         ],
-        'dropdown'      => [
+        'dropdown' => [
             'items' => [
                 [
                     'label' => Yii::t('simialbi/kanban/plan', 'Task view'),
@@ -59,3 +59,5 @@ use yii\widgets\Pjax;
         </div>
     <?php endif; ?>
 </div>
+<?php
+Pjax::end();

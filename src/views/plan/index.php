@@ -7,7 +7,7 @@ use yii\bootstrap4\Html;
 use yii\bootstrap4\Modal;
 use yii\bootstrap4\Tabs;
 use yii\helpers\Url;
-use yii\widgets\Pjax;
+use yii\web\JsExpression;
 
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
@@ -32,26 +32,27 @@ $this->params['breadcrumbs'] = [$this->title];
                 <?php Html::addCssClass($options, 'mr-xl-0'); ?>
             <?php endif; ?>
             <?= Html::beginTag('div', $options); ?>
-                <div class="kanban-board-inner row no-gutters flex-nowrap flex-grow-1">
-                    <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
-                       class="kanban-board-image col-3 col-md-4 d-flex justify-content-center align-items-center text-decoration-none">
-                        <?php if ($board->image): ?>
-                            <?= Html::img($board->image, ['class' => ['img-fluid']]); ?>
-                        <?php else: ?>
-                            <span class="kanban-visualisation modulo-<?= $board->id % 10; ?>">
+            <div class="kanban-board-inner row no-gutters flex-nowrap flex-grow-1">
+                <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
+                   class="kanban-board-image col-3 col-md-4 d-flex justify-content-center align-items-center text-decoration-none">
+                    <?php if ($board->image): ?>
+                        <?= Html::img($board->image, ['class' => ['img-fluid']]); ?>
+                    <?php else: ?>
+                        <span class="kanban-visualisation modulo-<?= $board->id % 10; ?>">
                                 <?= substr($board->name, 0, 1); ?>
                             </span>
-                        <?php endif; ?>
-                    </a>
-                    <div class="col col-md-8">
-                        <div class="card-body d-flex align-items-stretch h-100">
-                            <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
-                               class="flex-grow-1 text-body text-decoration-none">
-                                <h5 class="pt-0"><?= Html::encode($board->name); ?></h5>
-                                <small class="text-muted"><?= Yii::$app->formatter->asDatetime($board->updated_at); ?></small>
-                            </a>
-                            <?php if (Yii::$app->user->id == $board->created_by): ?>
-                                <span class="d-flex flex-column justify-content-around">
+                    <?php endif; ?>
+                </a>
+                <div class="col col-md-8">
+                    <div class="card-body d-flex align-items-stretch h-100">
+                        <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
+                           class="flex-grow-1 text-body text-decoration-none">
+                            <h5 class="pt-0"><?= Html::encode($board->name); ?></h5>
+                            <small
+                                class="text-muted"><?= Yii::$app->formatter->asDatetime($board->updated_at); ?></small>
+                        </a>
+                        <?php if (Yii::$app->user->id == $board->created_by): ?>
+                            <span class="d-flex flex-column justify-content-around">
                                     <?= Html::a(FAS::i('edit'), ['plan/update', 'id' => $board->id], [
                                         'class' => ['text-body'],
                                         'title' => Yii::t('simialbi/kanban/plan', 'Update plan')
@@ -65,10 +66,10 @@ $this->params['breadcrumbs'] = [$this->title];
                                         ]
                                     ]); ?>
                                 </span>
-                            <?php endif; ?>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
+            </div>
             <?= Html::endTag('div'); ?>
         <?php endforeach; ?>
         <div class="kanban-board card mr-md-2 mb-3 d-none d-md-block">
@@ -93,12 +94,12 @@ $this->params['breadcrumbs'] = [$this->title];
     </div>
     <?php $this->endBlock(); ?>
     <?php $this->beginBlock('tab-delegated-tasks'); ?>
-        <?= $this->render('/task/delegated', [
-            'delegated' => $delegated,
-            'view' => null
-        ]); ?>
+    <?= $this->render('/task/delegated', [
+        'delegated' => $delegated,
+        'view' => null
+    ]); ?>
+    <?php $this->endBlock(); ?>
     <?php
-    Pjax::end();
     $js = <<<JS
 function onHide() {
     jQuery('.note-editor', this).each(function () {
@@ -119,7 +120,7 @@ JS;
             'keyboard' => false
         ],
         'clientEvents' => [
-            'hidden.bs.modal' => new \yii\web\JsExpression($js)
+            'hidden.bs.modal' => new JsExpression($js)
         ],
         'size' => Modal::SIZE_LARGE,
         'title' => null,
@@ -127,7 +128,6 @@ JS;
     ]);
     Modal::end();
     ?>
-    <?php $this->endBlock(); ?>
 
     <?= Tabs::widget([
         'options' => [
@@ -150,6 +150,15 @@ JS;
                 'label' => Yii::t('simialbi/kanban/plan', 'Delegated tasks'),
                 'content' => $this->blocks['tab-delegated-tasks'],
                 'active' => ($activeTab === 'delegated')
+            ],
+            [
+                'label' => Yii::t('simialbi/kanban/plan', 'Monitoring'),
+                'linkOptions' => [
+                    'data-src' => Url::to(['monitoring/index'])
+                ],
+                'content' => '',
+                'active' => ($activeTab === 'monitoring'),
+                'visible' => Yii::$app->user->can('monitorKanbanTasks')
             ]
         ]
     ]) ?>

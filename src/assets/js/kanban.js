@@ -22,6 +22,15 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 modal.find('.modal-content').load(href);
             });
 
+            $tabs.find('.nav-link').on('click', function (e) {
+                var $target = jQuery(e.target);
+                if ($target.data('src')) {
+                    e.preventDefault();
+                    var $container = jQuery($target.attr('href'));
+                    $container.load($target.data('src'));
+                    $target.tab('show');
+                }
+            });
 
             if ($tabs.length) {
                 $tabs.find('a[data-toggle="tab"]').on('shown.bs.tab', function () {
@@ -129,7 +138,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 $inputGroup = $this.closest('.input-group'),
                 $buttonDelete = $(
                     '<button class="btn btn-outline-danger remove-linklist-element">' +
-                        '<svg class="svg-inline--fa fa-trash-alt fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="trash-alt" data-fa-i2svg="" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z"></path></svg>' +
+                    '<svg class="svg-inline--fa fa-trash-alt fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="trash-alt" data-fa-i2svg="" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z"></path></svg>' +
                     '</button>'
                 );
             $this.closest('.add-linklist-element').removeClass('add-linklist-element');

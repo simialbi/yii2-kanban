@@ -133,15 +133,15 @@ Pjax::begin([
                         ?>
                     </small>
                 <?php endif; ?>
-                <?php if ($model->end_date): ?>
+                <?php if ($model->endDate): ?>
                     <?php $options = [
                         'label' => FAR::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate(
-                            $model->end_date,
+                            $model->endDate,
                             'short'
                         ),
                         'class' => ['btn', 'btn-sm', 'mr-3', 'px-0']
                     ]; ?>
-                    <?php if ($model->end_date < time() && $model->status !== $model::STATUS_DONE): ?>
+                    <?php if ($model->endDate < time() && $model->status !== $model::STATUS_DONE): ?>
                         <?php Html::addCssClass($options, ['btn-danger', 'px-1']); ?>
                         <?php Html::removeCssClass($options, 'px-0'); ?>
                     <?php elseif ($model->start_date && $model->start_date <= time()): ?>

@@ -23,8 +23,8 @@ use yii\helpers\ArrayHelper;
  * @property integer $board_id
  * @property string $name
  * @property integer $sort
- * @property integer $created_by
- * @property integer $updated_by
+ * @property integer|string $created_by
+ * @property integer|string $updated_by
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *

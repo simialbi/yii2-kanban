@@ -9,11 +9,13 @@ namespace simialbi\yii2\kanban\widgets;
 
 use kartik\select2\Select2;
 use rmrevin\yii\fontawesome\FAR;
+use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\widgets\Widget;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\JsExpression;
@@ -66,15 +68,27 @@ class ToDo extends Widget
      */
     public function run()
     {
+        $checklistQuery = new Query();
+        $checklistQuery
+            ->select('end_date')
+            ->from(ChecklistElement::tableName())
+            ->where(new Expression('[[task_id]] = {{t}}.[[id]]'))
+            ->orderBy(['end_date' => SORT_ASC])
+            ->limit(1);
         $tasks = Task::find()
-            ->cache(10)
+            ->select([
+                '{{t}}.*',
+                'cEndDate' => $checklistQuery,
+                'endDate' => new Expression('IF({{t}}.[[end_date]], {{t}}.[[end_date]], (SELECT [[cEndDate]]))')
+            ])
+            ->cache(60)
             ->alias('t')
             ->innerJoinWith('bucket bu')
             ->innerJoinWith('board b')
             ->innerJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{t}}.[[id]] = {{u}}.[[task_id]]')
             ->where(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
             ->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id])
-            ->addOrderBy(new Expression('-{{t}}.[[end_date]] DESC'))
+            ->addOrderBy(new Expression('-[[endDate]] DESC'))
             ->addOrderBy(new Expression('-{{t}}.[[start_date]] DESC'))
             ->addOrderBy(['{{t}}.[[created_at]]' => SORT_ASC]);
 
@@ -121,14 +135,14 @@ class ToDo extends Widget
             if ($task->getChecklistElements()->count()) {
                 $small .= '&nbsp;&bull;&nbsp;' . $task->getChecklistStats();
             }
-            if ($task->end_date) {
-                if ($task->end_date < time()) {
+            if ($task->endDate) {
+                if ($task->endDate < time()) {
                     Html::addCssClass($options, 'list-group-item-danger');
                 } elseif ($task->start_date && $task->start_date <= time()) {
                     Html::addCssClass($options, 'list-group-item-info');
                 }
                 $small .= '&nbsp;&bull;&nbsp;' . FAR::i('calendar') . ' ';
-                $small .= Yii::$app->formatter->asDate($task->end_date, 'short');
+                $small .= Yii::$app->formatter->asDate($task->endDate, 'short');
             }
             if ($task->getComments()->count()) {
                 $small .= '&nbsp;&bull;&nbsp;' . FAR::i('sticky-note');

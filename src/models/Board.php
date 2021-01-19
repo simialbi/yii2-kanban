@@ -23,8 +23,8 @@ use yii\web\UploadedFile;
  * @property string $name
  * @property string $image
  * @property boolean $is_public
- * @property integer $created_by
- * @property integer $updated_by
+ * @property integer|string $created_by
+ * @property integer|string $updated_by
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *

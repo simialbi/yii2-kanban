@@ -25,8 +25,8 @@ use yii\helpers\ArrayHelper;
  * @property string $mime_type
  * @property integer $size
  * @property boolean $card_show
- * @property integer $created_by
- * @property integer $updated_by
+ * @property integer|string $created_by
+ * @property integer|string $updated_by
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *

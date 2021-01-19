@@ -32,8 +32,8 @@ use yii\helpers\ArrayHelper;
  * @property boolean $card_show_checklist
  * @property boolean $card_show_links
  * @property integer $sort
- * @property integer $created_by
- * @property integer $updated_by
+ * @property integer|string $created_by
+ * @property integer|string $updated_by
  * @property integer|string $created_at
  * @property integer|string $updated_at
  *

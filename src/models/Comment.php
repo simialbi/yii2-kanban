@@ -21,7 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $id
  * @property integer $task_id
  * @property string $text
- * @property integer $created_by
+ * @property integer|string $created_by
  * @property integer|string $created_at
  *
  * @property-read UserInterface $author

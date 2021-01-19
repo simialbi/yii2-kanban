@@ -223,7 +223,8 @@ Pjax::begin([
                 'bsVersion' => '4',
                 'type' => DatePicker::TYPE_INPUT,
                 'options' => [
-                    'autocomplete' => 'off'
+                    'autocomplete' => 'off',
+                    'placeholder' => $model->endDate ? Yii::$app->formatter->asDate($model->endDate) : ''
                 ],
                 'pluginOptions' => [
                     'autoclose' => true,
