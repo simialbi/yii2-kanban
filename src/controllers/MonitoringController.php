@@ -119,6 +119,15 @@ class MonitoringController extends Controller
     }
 
     /**
+     * @param integer $id
+     * @throws NotFoundHttpException
+     */
+    public function actionView($id)
+    {
+        $list = $this->findModel($id);
+    }
+
+    /**
      * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *

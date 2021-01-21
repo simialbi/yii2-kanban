@@ -11,9 +11,11 @@ use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
 use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\ticket\models\Ticket;
 use Yii;
+use yii\base\ModelEvent;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\AfterSaveEvent;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -34,8 +36,10 @@ use yii\helpers\ArrayHelper;
  * @property integer $sort
  * @property integer|string $created_by
  * @property integer|string $updated_by
+ * @property integer|string $finished_by
  * @property integer|string $created_at
  * @property integer|string $updated_at
+ * @property integer|string $finished_at
  *
  * @property-read string $hash
  * @property-read string $checklistStats
@@ -54,6 +58,9 @@ use yii\helpers\ArrayHelper;
  */
 class Task extends ActiveRecord
 {
+    const EVENT_BEFORE_FINISH = 'beforeFinish';
+    const EVENT_AFTER_FINISH = 'afterFinish';
+
     /**
      * @var string Hash
      */
@@ -106,14 +113,16 @@ class Task extends ActiveRecord
                 'class' => BlameableBehavior::class,
                 'attributes' => [
                     self::EVENT_BEFORE_INSERT => ['created_by', 'updated_by'],
-                    self::EVENT_BEFORE_UPDATE => 'updated_by'
+                    self::EVENT_BEFORE_UPDATE => 'updated_by',
+                    self::EVENT_BEFORE_FINISH => 'finished_by'
                 ]
             ],
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
                     self::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
-                    self::EVENT_BEFORE_UPDATE => 'updated_at'
+                    self::EVENT_BEFORE_UPDATE => 'updated_at',
+                    self::EVENT_BEFORE_FINISH => 'finished_at'
                 ]
             ],
             'sortable' => [
@@ -148,6 +157,83 @@ class Task extends ActiveRecord
             'created_at' => Yii::t('simialbi/kanban/model/task', 'Created at'),
             'updated_at' => Yii::t('simialbi/kanban/model/task', 'Updated at'),
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function beforeSave($insert)
+    {
+        if ($this->isAttributeChanged('status') && $this->status === self::STATUS_DONE) {
+            if (!$this->beforeFinish()) {
+                return false;
+            }
+        }
+
+        return parent::beforeSave($insert);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        if (isset($changedAttributes['status']) && $this->status === self::STATUS_DONE) {
+            $this->afterFinish($changedAttributes);
+        }
+
+        parent::afterSave($insert, $changedAttributes);
+    }
+
+    /**
+     * This method is called before a task will be finished.
+     *
+     * The default implementation will trigger an [[EVENT_BEFORE_FINISH]] event.
+     * When overriding this method, make sure you call the parent implementation like the following:
+     *
+     * ```php
+     * public function beforeFinish()
+     * {
+     *     if (!parent::beforeFinish()) {
+     *         return false;
+     *     }
+     *
+     *     // ...custom code here...
+     *     return true;
+     * }
+     * ```
+     *
+     * @return bool whether the insertion or updating should continue.
+     * If `false`, the insertion or updating will be cancelled.
+     */
+    public function beforeFinish()
+    {
+        $event = new ModelEvent();
+        $this->trigger(self::EVENT_BEFORE_FINISH, $event);
+
+        return $event->isValid;
+    }
+
+    /**
+     * This method is called after finishing a task.
+     * The default implementation will trigger an [[EVENT_AFTER_FINISH]] event.
+     * The event class used is [[AfterSaveEvent]]. When overriding this method, make sure you call the
+     * parent implementation so that the event is triggered.
+     * @param array $changedAttributes The old values of attributes that had changed and were saved.
+     * You can use this parameter to take action based on the changes made for example send an email
+     * when the password had changed or implement audit trail that tracks all the changes.
+     * `$changedAttributes` gives you the old attribute values while the active record (`$this`) has
+     * already the new, updated values.
+     *
+     * Note that no automatic type conversion performed by default. You may use
+     * [[\yii\behaviors\AttributeTypecastBehavior]] to facilitate attribute typecasting.
+     * See http://www.yiiframework.com/doc-2.0/guide-db-active-record.html#attributes-typecasting.
+     */
+    public function afterFinish($changedAttributes)
+    {
+        $this->trigger(self::EVENT_AFTER_FINISH, new AfterSaveEvent([
+            'changedAttributes' => $changedAttributes,
+        ]));
     }
 
     /**
