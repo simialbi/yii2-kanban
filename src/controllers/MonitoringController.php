@@ -102,6 +102,23 @@ class MonitoringController extends Controller
     }
 
     /**
+     * Delete a list
+     * @param integer $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function actionDelete($id)
+    {
+        $list = $this->findModel($id);
+
+        $list->delete();
+
+        return $this->redirect(['plan/index', 'activeTab' => 'monitoring']);
+    }
+
+    /**
      * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *

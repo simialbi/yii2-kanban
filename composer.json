@@ -36,7 +36,7 @@
         "simialbi/yii2-fontawesome": "^3.4.8",
         "simialbi/yii2-simialbi-base": ">=0.10.2 <1.0 | ^1.0.0",
         "simialbi/yii2-summernote": "^1.1.0",
-        "simialbi/yii2-widget-chart": "^0.6.5",
+        "simialbi/yii2-widget-chart": "^0.7.0",
         "simialbi/yii2-widget-hideseek": "^1.0.0"
     },
 	"require-dev": {
