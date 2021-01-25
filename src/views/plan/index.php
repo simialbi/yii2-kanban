@@ -154,7 +154,7 @@ JS;
             [
                 'label' => Yii::t('simialbi/kanban/plan', 'Monitoring'),
                 'linkOptions' => [
-                    'data-src' => Url::to(['monitoring/index'])
+                    'data' => ['src' => Url::to(['monitoring/index'])]
                 ],
                 'content' => '',
                 'active' => ($activeTab === 'monitoring'),

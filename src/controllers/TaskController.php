@@ -31,6 +31,7 @@ use yii\helpers\Inflector;
 use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UploadedFile;
@@ -552,12 +553,15 @@ class TaskController extends Controller
      * @param integer $id Tasks id
      *
      * @return Response
-     * @throws NotFoundHttpException
-     * @throws Throwable
+     * @throws NotFoundHttpException|ForbiddenHttpException|Throwable
      */
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
+
+        if (Yii::$app->user->id != $model->created_by) {
+            throw new ForbiddenHttpException(Yii::t('yii', 'You are not allowed to perform this action.'));
+        }
 
         $model->delete();
 
@@ -675,20 +679,20 @@ class TaskController extends Controller
      * @param integer|string $userId Users id
      *
      * @return string
-     * @throws NotFoundHttpException
-     * @throws Exception
+     * @throws NotFoundHttpException|Exception|ForbiddenHttpException
      */
     public function actionAssignUser($id, $userId)
     {
         $model = $this->findModel($id);
 
-        try {
-            $model::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
-                'task_id' => $model->id,
-                'user_id' => $userId
-            ])->execute();
-        } catch (Exception $e) {
+        if (Yii::$app->user->id != $model->created_by) {
+            throw new ForbiddenHttpException(Yii::t('yii', 'You are not allowed to perform this action.'));
         }
+
+        $model::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
+            'task_id' => $model->id,
+            'user_id' => $userId
+        ])->execute();
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
@@ -709,12 +713,15 @@ class TaskController extends Controller
      * @param integer|string $userId Users id
      *
      * @return string
-     * @throws NotFoundHttpException
-     * @throws Exception
+     * @throws NotFoundHttpException|Exception|ForbiddenHttpException
      */
     public function actionExpelUser($id, $userId)
     {
         $model = $this->findModel($id);
+
+        if (Yii::$app->user->id != $model->created_by) {
+            throw new ForbiddenHttpException(Yii::t('yii', 'You are not allowed to perform this action.'));
+        }
 
         $model::getDb()->createCommand()->delete('{{%kanban_task_user_assignment}}', [
             'task_id' => $model->id,

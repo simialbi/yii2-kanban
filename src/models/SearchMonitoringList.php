@@ -81,20 +81,20 @@ class SearchMonitoringList extends MonitoringList
         $query->andFilterWhere(['like', '{{l}}.[[name]]', $this->name])
             ->andFilterWhere([
                 'and',
-                ['>=', '{{l}}.[[created_at]]', (($date = strtotime($this->created_at)) === false) ? null : $date],
+                ['>=', '{{l}}.[[created_at]]', (empty($this->created_at)) ? null : strtotime($this->created_at)],
                 [
                     '<=',
                     '{{l}}.[[created_at]]',
-                    (($date = strtotime($this->created_at . ' +1 day')) === false) ? null : $date
+                    (empty($this->created_at)) ? null : strtotime($this->created_at . ' +1 day')
                 ],
             ])
             ->andFilterWhere([
                 'and',
-                ['>=', '{{l}}.[[updated_at]]', (($date = strtotime($this->updated_at)) === false) ? null : $date],
+                ['>=', '{{l}}.[[updated_at]]', (empty($this->updated_at)) ? null : strtotime($this->updated_at)],
                 [
                     '<=',
                     '{{l}}.[[updated_at]]',
-                    (($date = strtotime($this->updated_at . ' +1 day')) === false) ? null : $date
+                    (empty($this->created_at)) ? null : strtotime($this->updated_at . ' +1 day')
                 ],
             ]);
 

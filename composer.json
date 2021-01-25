@@ -40,12 +40,15 @@
         "simialbi/yii2-widget-hideseek": "^1.0.0"
     },
 	"require-dev": {
+        "ext-gd": "*",
+        "ext-mbstring": "*",
         "simialbi/yii2-ticket": "~1.0@dev",
 		"yiisoft/yii2-coding-standards": "~2.0",
 		"phpunit/phpunit": "<7"
 	},
     "suggest": {
-        "ext-gd": "For autogeneration of visualisations"
+        "ext-gd": "For autogeneration of visualisations",
+        "ext-mbstring": "For encoding conversion"
     },
 	"autoload": {
 		"psr-4": {

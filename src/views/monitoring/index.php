@@ -106,7 +106,7 @@ use yii\widgets\Pjax;
             ],
             [
                 'class' => '\kartik\grid\ActionColumn',
-                'template' => '{view} {update} {delete} {excel}',
+                'template' => '{view} {update} {delete} {csv}',
                 'viewOptions' => [
                     'icon' => (string)FAS::i('eye')
                 ],
@@ -122,9 +122,12 @@ use yii\widgets\Pjax;
                     'icon' => (string)FAS::i('trash-alt')
                 ],
                 'buttons' => [
-                    'excel' => function ($url) {
+                    'csv' => function ($url) {
                         return Html::a(FAS::i('file-csv'), $url, [
-                            'target' => '_blank'
+                            'target' => '_blank',
+                            'data' => [
+                                'pjax' => '0'
+                            ]
                         ]);
                     }
                 ],

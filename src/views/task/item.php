@@ -264,6 +264,7 @@ Pjax::begin([
                             'id' => $model->id,
                             'group' => Yii::$app->request->getQueryParam('group', 'bucket')
                         ],
+                        'disabled' => $model->created_by != Yii::$app->user->id,
                         'linkOptions' => [
                             'data' => [
                                 'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')
@@ -331,6 +332,7 @@ Pjax::begin([
                             'linkOptions' => [
                                 'class' => ['align-items-center', 'remove-assignee', 'is-assigned']
                             ],
+                            'disabled' => $model->created_by != Yii::$app->user->id,
                             'url' => ['task/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
                         ];
                     }
@@ -349,6 +351,7 @@ Pjax::begin([
                             'linkOptions' => [
                                 'class' => ['align-items-center', 'add-assignee']
                             ],
+                            'disabled' => $model->created_by != Yii::$app->user->id,
                             'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
                         ];
                     }

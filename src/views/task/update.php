@@ -43,6 +43,25 @@ Pjax::begin([
         ]
     ]); ?>
     <div class="modal-header">
+        <?php $hint = ($model->status === $model::STATUS_DONE)
+            ? Yii::t(
+                'simialbi/kanban/task',
+                'Finished at {finished,date} {finished,time} by {finisher}',
+                [
+                    'finished' => $model->finished_at ? $model->finished_at : null,
+                    'finisher' => $model->finisher ? $model->finisher->name : Yii::t('yii', '(not set)')
+                ]
+            )
+            : Yii::t(
+                'simialbi/kanban/task',
+                'Created at {created,date} {created,time} by {creator}, last modified {updated,date} {updated,time} by {modifier}',
+                [
+                    'created' => $model->created_at,
+                    'creator' => $model->author->name,
+                    'updated' => $model->updated_at,
+                    'modifier' => $model->updater->name
+                ]
+            ); ?>
         <?= $form->field($model, 'subject', [
             'options' => [
                 'class' => ['my-0', 'w-100']
@@ -53,10 +72,7 @@ Pjax::begin([
             'inputOptions' => [
                 'class' => new ReplaceArrayValue(['form-control'])
             ]
-        ])->textInput()->hint(Yii::t('simialbi/kanban/task', 'Last modified {date,date} {date,time} by {user}', [
-            'date' => $model->updated_at,
-            'user' => $model->updater->name
-        ])); ?>
+        ])->textInput()->hint($hint); ?>
         <?= Html::button('<span aria-hidden="true">' . FAS::i('times') . '</span>', [
             'type' => 'button',
             'class' => ['close'],
@@ -73,8 +89,17 @@ Pjax::begin([
             <div class="col-12">
                 <div class="kanban-task-assignees">
                     <div class="dropdown">
-                        <a href="javascript:;" data-toggle="dropdown"
-                           class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
+                        <?php $options = [
+                            'href' => 'javascript:;',
+                            'data' => ['toggle' => 'dropdown'],
+                            'class' => ['dropdown-toggle', 'text-decoration-none', 'text-reset', 'd-flex', 'flex-row']
+                        ];
+                        if ($model->created_by != Yii::$app->user->id) {
+                            Html::addCssClass($options, 'disabled');
+                            $options['aria']['disabled'] = 'true';
+                        }
+                        ?>
+                        <?= Html::beginTag('a', $options); ?>
                             <?php foreach ($model->assignees as $assignee): ?>
                                 <span class="kanban-user" data-id="<?= $assignee->getId(); ?>"
                                       data-name="<?= $assignee->name; ?>" data-image="<?= $assignee->image; ?>">
@@ -96,7 +121,7 @@ Pjax::begin([
                                     <?php endif; ?>
                                 </span>
                             <?php endforeach; ?>
-                        </a>
+                        <?= Html::endTag('a'); ?>
                         <?php
                         $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
                         foreach ($users as $user) {

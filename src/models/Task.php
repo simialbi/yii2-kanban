@@ -46,6 +46,7 @@ use yii\helpers\ArrayHelper;
  * @property-read string|null $endDate
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
+ * @property-read UserInterface $finisher
  * @property-read UserInterface[] $assignees
  * @property-read TaskUserAssignment[] $assignments
  * @property-read Bucket $bucket
@@ -143,6 +144,8 @@ class Task extends ActiveRecord
         return [
             'id' => Yii::t('simialbi/kanban/model/task', 'Id'),
             'bucket_id' => Yii::t('simialbi/kanban/model/task', 'Bucket'),
+            'board_id' => Yii::t('simialbi/kanban/model/task', 'Board'),
+            'assignee_id' => Yii::t('simialbi/kanban/model/task', 'Assignee'),
             'subject' => Yii::t('simialbi/kanban/model/task', 'Subject'),
             'status' => Yii::t('simialbi/kanban/model/task', 'Status'),
             'start_date' => Yii::t('simialbi/kanban/model/task', 'Start date'),
@@ -154,8 +157,10 @@ class Task extends ActiveRecord
             'sort' => Yii::t('simialbi/kanban/model/task', 'Sort'),
             'created_by' => Yii::t('simialbi/kanban/model/task', 'Created by'),
             'updated_by' => Yii::t('simialbi/kanban/model/task', 'Updated by'),
+            'finished_by' => Yii::t('simialbi/kanban/model/task', 'Finished by'),
             'created_at' => Yii::t('simialbi/kanban/model/task', 'Created at'),
             'updated_at' => Yii::t('simialbi/kanban/model/task', 'Updated at'),
+            'finished_at' => Yii::t('simialbi/kanban/model/task', 'Finished at')
         ];
     }
 
@@ -303,6 +308,15 @@ class Task extends ActiveRecord
     public function getUpdater()
     {
         return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->updated_by);
+    }
+
+    /**
+     * Get user finished
+     * @return UserInterface
+     */
+    public function getFinisher()
+    {
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->finished_by);
     }
 
     /**

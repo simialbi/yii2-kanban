@@ -258,6 +258,66 @@ msgctxt "simialbi/kanban/model/link"
 msgid "Updated by"
 msgstr "Geändert von"
 
+msgctxt "simialbi/kanban/model/monitoring-form"
+msgid "Id"
+msgstr "Id"
+
+msgctxt "simialbi/kanban/model/monitoring-form"
+msgid "Members"
+msgstr "Mitglieder"
+
+msgctxt "simialbi/kanban/model/monitoring-form"
+msgid "Name"
+msgstr "Name"
+
+msgctxt "simialbi/kanban/model/monitoring-list"
+msgid "Created at"
+msgstr "Erstellt am"
+
+msgctxt "simialbi/kanban/model/monitoring-list"
+msgid "Created by"
+msgstr "Erstellt von"
+
+msgctxt "simialbi/kanban/model/monitoring-list"
+msgid "Id"
+msgstr "Id"
+
+msgctxt "simialbi/kanban/model/monitoring-list"
+msgid "Name"
+msgstr "Name"
+
+msgctxt "simialbi/kanban/model/monitoring-list"
+msgid "Updated at"
+msgstr "Geändert am"
+
+msgctxt "simialbi/kanban/model/monitoring-list"
+msgid "Updated by"
+msgstr "Geändert von"
+
+msgctxt "simialbi/kanban/model/monitoring-member"
+msgid "Created at"
+msgstr "Erstellt am"
+
+msgctxt "simialbi/kanban/model/monitoring-member"
+msgid "Created by"
+msgstr "Erstellt von"
+
+msgctxt "simialbi/kanban/model/monitoring-member"
+msgid "Id"
+msgstr "Id"
+
+msgctxt "simialbi/kanban/model/monitoring-member"
+msgid "List"
+msgstr "Liste"
+
+msgctxt "simialbi/kanban/model/monitoring-member"
+msgid "User"
+msgstr "Benutzer"
+
+msgctxt "simialbi/kanban/model/search-monitoring-list"
+msgid "Members"
+msgstr "Mitglieder"
+
 msgctxt "simialbi/kanban/model/task"
 msgid "Bucket"
 msgstr "Bucket"
@@ -277,6 +337,14 @@ msgstr "Beschreibung"
 msgctxt "simialbi/kanban/model/task"
 msgid "End date"
 msgstr "Fälligkeitsdatum"
+
+msgctxt "simialbi/kanban/model/task"
+msgid "Finished at"
+msgstr ""
+
+msgctxt "simialbi/kanban/model/task"
+msgid "Finished by"
+msgstr ""
 
 msgctxt "simialbi/kanban/model/task"
 msgid "Id"
@@ -411,6 +479,10 @@ msgid "List view"
 msgstr "Listenansicht"
 
 msgctxt "simialbi/kanban/plan"
+msgid "Monitoring"
+msgstr "Überwachung"
+
+msgctxt "simialbi/kanban/plan"
 msgid "My tasks"
 msgstr "Meine Aufgaben"
 
@@ -471,16 +543,20 @@ msgid "Create task per each user"
 msgstr "Aufgabe pro Benutzer"
 
 msgctxt "simialbi/kanban/task"
+msgid "Created at {created,date} {created,time} by {creator}, last modified {updated,date} {updated,time} by {modifier}"
+msgstr "Erstellt am {created,date} {created,time von {creator}, zuletzt geändert am {updated,date} {updated,time} von {modifier}"
+
+msgctxt "simialbi/kanban/task"
 msgid "Done"
 msgstr "Erledigt"
 
 msgctxt "simialbi/kanban/task"
-msgid "In progress"
-msgstr "In Arbeit"
+msgid "Finished at {finished,date} {finished,time} by {finisher}"
+msgstr "Erledigt am {finished,date} {finished,time} von {finisher}"
 
 msgctxt "simialbi/kanban/task"
-msgid "Last modified {date,date} {date,time} by {user}"
-msgstr "Zuletzt geändert am {date,date} {date,time} von {user}"
+msgid "In progress"
+msgstr "In Arbeit"
 
 msgctxt "simialbi/kanban/task"
 msgid "Late"
