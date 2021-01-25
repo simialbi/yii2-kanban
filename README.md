@@ -152,6 +152,13 @@ class User extends ActiveRecord implements UserInterface
     /**
      * {@inheritDoc}
      */
+    public function getMobile() {
+        return $this->mobile;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public static function findIdentities() {
         return static::find()->all();
     }
