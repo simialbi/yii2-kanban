@@ -44,7 +44,7 @@ msgstr "Go to ticket"
 
 msgctxt "simialbi/kanban"
 msgid "Include"
-msgstr ""
+msgstr "Include"
 
 msgctxt "simialbi/kanban"
 msgid "Loading..."
@@ -319,6 +319,14 @@ msgid "Members"
 msgstr "Members"
 
 msgctxt "simialbi/kanban/model/task"
+msgid "Assignee"
+msgstr "Assignee"
+
+msgctxt "simialbi/kanban/model/task"
+msgid "Board"
+msgstr "Board"
+
+msgctxt "simialbi/kanban/model/task"
 msgid "Bucket"
 msgstr "Bucket"
 
@@ -421,6 +429,10 @@ msgstr "Status"
 msgctxt "simialbi/kanban/model/task-copy-form"
 msgid "Subject"
 msgstr "New subject"
+
+msgctxt "simialbi/kanban/monitoring"
+msgid "Export date"
+msgstr "Export date"
 
 msgctxt "simialbi/kanban/plan"
 msgid "All plans"
@@ -573,4 +585,8 @@ msgstr "Not started"
 msgctxt "simialbi/kanban/task/notification"
 msgid "One of {params}"
 msgstr "One of {params}"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Board"
+msgstr "Board"
 

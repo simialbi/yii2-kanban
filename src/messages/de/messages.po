@@ -152,7 +152,7 @@ msgstr "Geändert von"
 
 msgctxt "simialbi/kanban/model/bucket"
 msgid "Board"
-msgstr "Board"
+msgstr "Plan"
 
 msgctxt "simialbi/kanban/model/bucket"
 msgid "Created at"
@@ -319,6 +319,14 @@ msgid "Members"
 msgstr "Mitglieder"
 
 msgctxt "simialbi/kanban/model/task"
+msgid "Assignee"
+msgstr "Mitglieder"
+
+msgctxt "simialbi/kanban/model/task"
+msgid "Board"
+msgstr "Plan"
+
+msgctxt "simialbi/kanban/model/task"
 msgid "Bucket"
 msgstr "Bucket"
 
@@ -421,6 +429,10 @@ msgstr "Fortschritt"
 msgctxt "simialbi/kanban/model/task-copy-form"
 msgid "Subject"
 msgstr "Name der neuen Aufgabe"
+
+msgctxt "simialbi/kanban/monitoring"
+msgid "Export date"
+msgstr "Export-Datum"
 
 msgctxt "simialbi/kanban/plan"
 msgid "All plans"
@@ -573,4 +585,8 @@ msgstr "Nicht begonnen"
 msgctxt "simialbi/kanban/task/notification"
 msgid "One of {params}"
 msgstr "Eines von {params}"
+
+msgctxt "simialbi/kanban/chart"
+msgid "Board"
+msgstr "Plan"
 
