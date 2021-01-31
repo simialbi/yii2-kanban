@@ -67,6 +67,10 @@ msgid "Assignee"
 msgstr "Assignee"
 
 msgctxt "simialbi/kanban/chart"
+msgid "Board"
+msgstr "Доска"
+
+msgctxt "simialbi/kanban/chart"
 msgid "Bucket"
 msgstr "Ведро"
 
@@ -585,8 +589,3 @@ msgstr "Not started"
 msgctxt "simialbi/kanban/task/notification"
 msgid "One of {params}"
 msgstr "One of {params}"
-
-msgctxt "simialbi/kanban/chart"
-msgid "Board"
-msgstr "Доска"
-
