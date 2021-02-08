@@ -9,6 +9,7 @@ use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
 use yii\helpers\ReplaceArrayValue;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
@@ -305,8 +306,13 @@ Pjax::begin([
                     ])->checkbox(['inline' => true, 'class' => 'custom-control-input']); ?>
                 </div>
                 <?php foreach ($model->checklistElements as $checklistElement): ?>
-                    <div class="kanban-task-checklist-element input-group input-group-sm mb-1">
+                    <div class="kanban-task-checklist-element input-group input-group-sm mb-1" data-id="<?= $checklistElement->id; ?>">
                         <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <a href="javascript:;" class="kanban-task-checklist-sort text-body">
+                                    <?= FAS::i('grip-lines'); ?>
+                                </a>
+                            </div>
                             <div class="input-group-text">
                                 <?= Html::hiddenInput('checklist[' . $checklistElement->id . '][is_done]', 0); ?>
                                 <?= Html::checkbox(
@@ -570,4 +576,33 @@ Pjax::begin([
 
 <?php
 Pjax::end();
-?>
+
+$baseUrl = Url::to(['/' . $this->context->module->id . '/sort']);
+$js = <<<JS
+$('.checklist').sortable({
+    items: '> .kanban-task-checklist-element',
+    handle: '.kanban-task-checklist-sort',
+    stop: function (event, ui) {
+        var \$element = ui.item;
+        var \$before = \$element.prev('.kanban-task-checklist-element');
+        var action = 'move-after';
+        var pk = null;
+
+        if (!\$before.length) {
+            action = 'move-as-first';
+        } else {
+            pk = \$before.data('id');
+        }
+
+        $.post('$baseUrl/' + action, {
+            modelClass: 'simialbi\\\\yii2\\\\kanban\\\\models\\\\ChecklistElement',
+            modelPk: \$element.data('id'),
+            pk: pk
+        }, function (data) {
+            console.log(data);
+        });
+    }
+});
+JS;
+
+$this->registerJs($js);

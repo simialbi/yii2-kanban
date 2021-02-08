@@ -354,6 +354,10 @@ h1, h2, h3, .h1, .h2, .h3 {
 }
 
 .kanban-task-checklist-element {
+    .kanban-task-checklist-sort {
+        cursor: grab;
+    }
+
     .krajee-datepicker {
         max-width: 25%;
     }
