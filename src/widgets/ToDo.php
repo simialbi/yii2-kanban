@@ -83,6 +83,7 @@ class ToDo extends Widget
             ])
             ->cache(60)
             ->alias('t')
+            ->with(['checklistElements', 'comments'])
             ->innerJoinWith('bucket bu')
             ->innerJoinWith('board b')
             ->innerJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{t}}.[[id]] = {{u}}.[[task_id]]')
@@ -90,14 +91,19 @@ class ToDo extends Widget
             ->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id])
             ->addOrderBy(new Expression('-[[endDate]] DESC'))
             ->addOrderBy(new Expression('-{{t}}.[[start_date]] DESC'))
-            ->addOrderBy(['{{t}}.[[created_at]]' => SORT_ASC]);
+            ->addOrderBy(['{{t}}.[[created_at]]' => SORT_ASC])
+            ->asArray(true);
 
+        $results = $tasks->all();
         $html = Html::beginTag('div', $this->options);
         if ($this->addBoardFilter) {
             $filters = Yii::$app->request->getBodyParam('ToDo', []);
-            $boards = ArrayHelper::map(ArrayHelper::getColumn($tasks->all(), 'board'), 'id', 'name');
+            $boards = ArrayHelper::map(ArrayHelper::getColumn($results, 'board'), 'id', 'name');
+
             if (isset($filters['boardId'])) {
-                $tasks->andFilterWhere(['{{b}}.[[id]]' => $filters['boardId']]);
+                $results = array_filter($results, function ($item) use ($filters) {
+                    return ArrayHelper::getValue($item, 'board.id') == $filters['boardId'];
+                });
             }
             $html .= Html::beginTag('div', [
                 'class' => ['sa-todo-filter', 'mb-3']
@@ -125,26 +131,29 @@ class ToDo extends Widget
         }
         $html .= Html::beginTag('div', $this->listOptions);
 
-        foreach ($tasks->all() as $task) {
-            /** @var Task $task */
+        foreach ($results as $task) {
             $options = $this->itemOptions;
-            $options['href'] = Url::to(['/schedule/plan/view', 'id' => $task->board->id, 'showTask' => $task->id]);
+            $options['href'] = Url::to(['/schedule/plan/view', 'id' => $task['board']['id'], 'showTask' => $task['id']]);
 
-            $content = Html::tag('h6', $task->subject, ['class' => ['m-0']]);
-            $small = $task->board->name;
-            if ($task->getChecklistElements()->count()) {
-                $small .= '&nbsp;&bull;&nbsp;' . $task->getChecklistStats();
+            $content = Html::tag('h6', $task['subject'], ['class' => ['m-0']]);
+            $small = $task['board']['name'];
+            if ($cnt = count($task['checklistElements']) > 0) {
+                $grouped = ArrayHelper::index($task['checklistElements'], null, 'is_done');
+                $done = count(ArrayHelper::getValue($grouped, '1', []));
+                $all = $cnt;
+
+                $small .= "&nbsp;&bull;&nbsp; $done/$all";
             }
-            if ($task->endDate) {
-                if ($task->endDate < time()) {
+            if ($task['endDate']) {
+                if ($task['endDate'] < time()) {
                     Html::addCssClass($options, 'list-group-item-danger');
-                } elseif ($task->start_date && $task->start_date <= time()) {
+                } elseif ($task['start_date'] && $task['start_date'] <= time()) {
                     Html::addCssClass($options, 'list-group-item-info');
                 }
                 $small .= '&nbsp;&bull;&nbsp;' . FAR::i('calendar') . ' ';
-                $small .= Yii::$app->formatter->asDate($task->endDate, 'short');
+                $small .= Yii::$app->formatter->asDate($task['endDate'], 'short');
             }
-            if ($task->getComments()->count()) {
+            if (!empty($task['comments'])) {
                 $small .= '&nbsp;&bull;&nbsp;' . FAR::i('sticky-note');
             }
             $content .= Html::tag('small', $small);
@@ -153,16 +162,16 @@ class ToDo extends Widget
             $html .= Html::beginTag('div', [
                 'class' => ['form-check']
             ]);
-            $html .= Html::checkbox("check[{$task->id}]", false, [
+            $html .= Html::checkbox("check[{$task['id']}]", false, [
                 'value' => Task::STATUS_DONE,
                 'class' => ['form-check-input'],
-                'id' => 'sa-kanban-status-' . $task->id,
+                'id' => 'sa-kanban-status-' . $task['id'],
                 'data' => [
-                    'task-id' => $task->id
+                    'task-id' => $task['id']
                 ]
             ]);
 
-            $html .= Html::label($content, 'sa-kanban-status-' . $task->id, [
+            $html .= Html::label($content, 'sa-kanban-status-' . $task['id'], [
                 'class' => ['form-check-label']
             ]);
             $html .= Html::endTag('div');
