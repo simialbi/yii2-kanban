@@ -90,7 +90,8 @@ Pjax::begin([
             <div class="col-12">
                 <div class="kanban-task-assignees">
                     <div class="dropdown">
-                        <?php $options = [
+                        <?php
+                        $options = [
                             'href' => 'javascript:;',
                             'data' => ['toggle' => 'dropdown'],
                             'class' => ['dropdown-toggle', 'text-decoration-none', 'text-reset', 'd-flex', 'flex-row']

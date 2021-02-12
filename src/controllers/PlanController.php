@@ -10,6 +10,7 @@ namespace simialbi\yii2\kanban\controllers;
 use simialbi\yii2\kanban\BoardEvent;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\Module;
 use Yii;
@@ -149,7 +150,7 @@ class PlanController extends Controller
             'or',
             ['like', '{{t}}.[[subject]]', $q],
             ['like', '{{t}}.[[description]]', $q],
-            ['like', '{{c}}.[[name]]', $q],
+            ['like', ChecklistElement::tableName() . '.[[name]]', $q],
             ['like', '{{co}}.[[text]]', $q]
         ]);
 

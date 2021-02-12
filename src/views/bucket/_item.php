@@ -1,7 +1,9 @@
 <?php
 
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\kanban\models\Task;
 use yii\bootstrap4\Html;
+use yii\helpers\Inflector;
 use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
@@ -10,8 +12,8 @@ use yii\widgets\Pjax;
 /* @var $boardId integer */
 /* @var $title string */
 /* @var $keyName string */
-/* @var $tasks \simialbi\yii2\kanban\models\Task[] */
-/* @var $completedTasks integer|\simialbi\yii2\kanban\models\Task[] */
+/* @var $tasks Task[] */
+/* @var $completedTasks integer|Task[] */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $sort boolean */
@@ -22,7 +24,7 @@ use yii\widgets\Pjax;
 
 <div class="kanban-bucket mr-md-4 pb-6 pb-md-0 d-flex flex-column flex-shrink-0" data-id="<?= $id; ?>"
      data-sort="<?= $sort ? 'true' : 'false'; ?>" data-action="<?= $action; ?>"
-     data-key-name="<?= \yii\helpers\Inflector::camel2id($keyName, '_'); ?>">
+     data-key-name="<?= Inflector::camel2id($keyName, '_'); ?>">
     <?php if ($renderContext): ?>
         <?= $this->render('_header', [
             'id' => $id,
@@ -33,7 +35,7 @@ use yii\widgets\Pjax;
     <?php endif; ?>
 
     <?php Pjax::begin([
-        'id' => 'createTaskPjax' . \yii\helpers\Inflector::slug($title),
+        'id' => 'createTaskPjax' . Inflector::slug($title),
         'options' => [
             'class' => ['d-none', 'd-md-block']
         ],
@@ -51,7 +53,7 @@ use yii\widgets\Pjax;
     <div class="kanban-tasks mt-4 flex-grow-1">
         <?php foreach ($tasks as $task): ?>
             <?php if (is_array($task)): ?>
-                <?php $t = new \simialbi\yii2\kanban\models\Task(); ?>
+                <?php $t = new Task(); ?>
                 <?php $t->setAttributes($task); ?>
                 <?php $task = $t; ?>
             <?php endif; ?>
@@ -64,7 +66,7 @@ use yii\widgets\Pjax;
     </div>
 
     <?php Pjax::begin([
-        'id' => 'createTaskPjaxMobile' . \yii\helpers\Inflector::slug($title),
+        'id' => 'createTaskPjaxMobile' . Inflector::slug($title),
         'options' => [
             'class' => ['d-md-none']
         ],
@@ -100,7 +102,7 @@ use yii\widgets\Pjax;
             <div class="kanban-tasks-mt-4 collapse show flex-grow-0" id="collapse-<?= $id; ?>">
                 <?php foreach ($completedTasks as $task): ?>
                     <?php if (is_array($task)): ?>
-                        <?php $t = new \simialbi\yii2\kanban\models\Task(); ?>
+                        <?php $t = new Task(); ?>
                         <?php $t->setAttributes($task); ?>
                         <?php $task = $t; ?>
                     <?php endif; ?>

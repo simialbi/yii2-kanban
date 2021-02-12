@@ -61,6 +61,7 @@ class TaskController extends Controller
                             'create',
                             'update',
                             'copy',
+                            'copy-per-user',
                             'delete',
                             'set-status',
                             'set-end-date',
@@ -448,6 +449,60 @@ class TaskController extends Controller
             'buckets' => $buckets,
             'users' => $this->module->users,
             'statuses' => $statuses
+        ]);
+    }
+
+    public function actionCopyPerUser($id)
+    {
+        $model = $this->findModel($id);
+        $assignees = Yii::$app->request->getBodyParam('assignees', []);
+
+        if (Yii::$app->request->isPost && !empty($assignees)) {
+            foreach ($assignees as $assignee) {
+                $newTask = new Task($model->toArray());
+                $newTask->id = null;
+                if (!$newTask->save()) {
+                    continue;
+                }
+                foreach ($model->checklistElements as $element) {
+                    $newElement = new ChecklistElement([
+                        'task_id' => $newTask->id,
+                        'name' => $element->name,
+                        'sort' => $element->sort
+                    ]);
+                    $newElement->save();
+                }
+                foreach ($model->attachments as $attachment) {
+                    $newAttachment = new Attachment([
+                        'task_id' => $newTask->id,
+                        'name' => $attachment->name,
+                        'path' => $attachment->path,
+                        'mime_type' => $attachment->mime_type,
+                        'size' => $attachment->size,
+                        'card_show' => $attachment->card_show
+                    ]);
+                    $newAttachment->save();
+                }
+                foreach ($model->links as $link) {
+                    $newLink = new Link([
+                        'task_id' => $newTask->id,
+                        'url' => $link->url
+                    ]);
+                    $newLink->save();
+                }
+                $assignment = new TaskUserAssignment([
+                    'task_id' => $newTask->id,
+                    'user_id' => $assignee
+                ]);
+                $assignment->save();
+            }
+
+            return $this->redirect(['plan/view', 'id' => $model->board->id]);
+        }
+
+        return $this->renderAjax('copy-per-user', [
+            'model' => $model,
+            'users' => $this->module->users,
         ]);
     }
 

@@ -246,6 +246,21 @@ Pjax::begin([
                         ]
                     ],
                     [
+                        'label' => FAS::i('user-plus', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban/task', 'Create task per each user'),
+                        'url' => [
+                            'task/copy-per-user',
+                            'id' => $model->id,
+                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                        ],
+                        'disabled' => $model->created_by != Yii::$app->user->id,
+                        'linkOptions' => [
+                            'data' => [
+                                'toggle' => 'modal',
+                                'target' => '#taskModal'
+                            ]
+                        ]
+                    ],
+                    [
                         'label' => FAS::i('link', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy link'),
                         'url' => 'javascript:;',
                         'linkOptions' => [
