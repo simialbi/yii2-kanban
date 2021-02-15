@@ -555,6 +555,10 @@ msgid "Comments"
 msgstr "Kommentare"
 
 msgctxt "simialbi/kanban/task"
+msgid "Create an individual copy of this task for each of the selected users and assign it."
+msgstr "Es wird eine individuelle Kopie der Aufgabe für die ausgewählten Benutzer erstellt."
+
+msgctxt "simialbi/kanban/task"
 msgid "Create task per each user"
 msgstr "Aufgabe pro Benutzer"
 

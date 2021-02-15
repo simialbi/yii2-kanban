@@ -58,6 +58,7 @@ use yii\widgets\Pjax;
                 <?php $task = $t; ?>
             <?php endif; ?>
             <?= $this->render('/task/item', [
+                'boardId' => $boardId,
                 'model' => $task,
                 'statuses' => $statuses,
                 'users' => $users
@@ -107,6 +108,7 @@ use yii\widgets\Pjax;
                         <?php $task = $t; ?>
                     <?php endif; ?>
                     <?= $this->render('/task/item', [
+                        'boardId' => $boardId,
                         'model' => $task,
                         'statuses' => $statuses,
                         'users' => $users

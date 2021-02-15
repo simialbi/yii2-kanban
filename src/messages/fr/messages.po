@@ -67,6 +67,10 @@ msgid "Assignee"
 msgstr "Membres"
 
 msgctxt "simialbi/kanban/chart"
+msgid "Board"
+msgstr "Plan"
+
+msgctxt "simialbi/kanban/chart"
 msgid "Bucket"
 msgstr "Bucket"
 
@@ -551,6 +555,10 @@ msgid "Comments"
 msgstr "Commentaires"
 
 msgctxt "simialbi/kanban/task"
+msgid "Create an individual copy of this task for each of the selected users and assign it."
+msgstr "Créer une copie individuelle de cette tâche pour chaque utilisateur sélectionné et l'attribuer."
+
+msgctxt "simialbi/kanban/task"
 msgid "Create task per each user"
 msgstr "Tâche par utilisateur"
 
@@ -585,7 +593,3 @@ msgstr "Pas commencé"
 msgctxt "simialbi/kanban/task/notification"
 msgid "One of {params}"
 msgstr "L'un des {params}"
-
-msgctxt "simialbi/kanban/chart"
-msgid "Board"
-msgstr "Plan"

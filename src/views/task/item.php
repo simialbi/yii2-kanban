@@ -14,6 +14,7 @@ use yii\web\JsExpression;
 use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
+/* @var $boardId integer|null */
 /* @var $model Task */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
@@ -266,7 +267,7 @@ Pjax::begin([
                         'linkOptions' => [
                             'onclick' => 'window.sa.kanban.copyTextToClipboard(\'' . Url::to([
                                     'plan/view',
-                                    'id' => $model->board->id,
+                                    'id' => $boardId ?: $model->board->id,
                                     'showTask' => $model->id,
                                     'group' => Yii::$app->request->getQueryParam('group', 'bucket')
                                 ], true) . '\')'
