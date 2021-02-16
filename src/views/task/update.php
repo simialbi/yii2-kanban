@@ -49,7 +49,7 @@ Pjax::begin([
                 'simialbi/kanban/task',
                 'Finished at {finished,date} {finished,time} by {finisher}',
                 [
-                    'finished' => $model->finished_at ? $model->finished_at : null,
+                    'finished' => $model->finished_at ? $model->finished_at : $model->updated_at,
                     'finisher' => $model->finisher ? $model->finisher->name : Yii::t('yii', '(not set)')
                 ]
             )

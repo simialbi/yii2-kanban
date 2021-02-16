@@ -219,6 +219,20 @@ Pjax::begin([
                 <?php
                 $items = [
                     [
+                        'label' => FAS::i('comment', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Add comment'),
+                        'url' => [
+                            'comment/create',
+                            'taskId' => $model->id,
+                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                        ],
+                        'linkOptions' => [
+                            'data' => [
+                                'toggle' => 'modal',
+                                'target' => '#taskModal'
+                            ]
+                        ]
+                    ],
+                    [
                         'label' => FAS::i('edit', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('yii', 'Update'),
                         'url' => [
                             'task/update',

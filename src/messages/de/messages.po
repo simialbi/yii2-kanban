@@ -11,6 +11,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgctxt "simialbi/kanban"
+msgid "Add comment"
+msgstr "Kommentar hinzufügen"
+
+msgctxt "simialbi/kanban"
 msgid "Assigned"
 msgstr "Zugewiesen"
 
@@ -44,7 +48,7 @@ msgstr "Gehe zum Ticket"
 
 msgctxt "simialbi/kanban"
 msgid "Include"
-msgstr ""
+msgstr "Mit einbinden"
 
 msgctxt "simialbi/kanban"
 msgid "Loading..."
@@ -352,11 +356,11 @@ msgstr "Fälligkeitsdatum"
 
 msgctxt "simialbi/kanban/model/task"
 msgid "Finished at"
-msgstr ""
+msgstr "Erledigt am"
 
 msgctxt "simialbi/kanban/model/task"
 msgid "Finished by"
-msgstr ""
+msgstr "Erledigt von"
 
 msgctxt "simialbi/kanban/model/task"
 msgid "Id"

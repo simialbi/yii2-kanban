@@ -11,6 +11,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgctxt "simialbi/kanban"
+msgid "Add comment"
+msgstr "Add comment"
+
+msgctxt "simialbi/kanban"
 msgid "Assigned"
 msgstr "Assigned"
 
@@ -244,7 +248,7 @@ msgstr "Id"
 
 msgctxt "simialbi/kanban/model/link"
 msgid "Show on card"
-msgstr "Show on card"
+msgstr "@@Show on card@@"
 
 msgctxt "simialbi/kanban/model/link"
 msgid "Task"

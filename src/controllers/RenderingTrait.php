@@ -388,6 +388,7 @@ trait RenderingTrait
     public function renderCompleted($bucketId = null, $userId = null, $date = null, $readonly = false, $filters = [])
     {
         $query = Task::find()
+            ->with('board')
             ->alias('t')
             ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
             ->where(['{{t}}.[[status]]' => Task::STATUS_DONE])
@@ -407,7 +408,9 @@ trait RenderingTrait
 
         $content = '';
         foreach ($query->all() as $task) {
+            /** @var $task \simialbi\yii2\kanban\models\Task */
             $content .= $this->renderPartial('/task/item', [
+                'boardId' => $task->board->id,
                 'model' => $task,
                 'statuses' => $this->module->statuses,
                 'users' => $this->module->users,
