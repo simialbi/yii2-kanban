@@ -10,6 +10,7 @@ namespace simialbi\yii2\kanban\controllers;
 use rmrevin\yii\fontawesome\FAR;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Task;
 use Yii;
 use yii\bootstrap4\Html;
@@ -154,7 +155,7 @@ trait RenderingTrait
             case 'assignee':
                 $query = $board->getTasks()
                     ->alias('t')
-                    ->select(['{{t}}.*', '{{u}}.[[user_id]]'])
+                    ->select(['{{t}}.*', '{{u}}.[[user_id]]', ChecklistElement::tableName() . '.[[sort]]'])
                     ->distinct(true)
                     ->joinWith('assignments u')
                     ->joinWith('checklistElements')
@@ -242,7 +243,8 @@ trait RenderingTrait
                     ->alias('t')
                     ->select([
                         '{{t}}.*',
-                        'end_date' => new Expression('DATE_FORMAT(FROM_UNIXTIME({{t}}.[[end_date]]), \'%Y-%m-%d\')')
+                        'end_date' => new Expression('DATE_FORMAT(FROM_UNIXTIME({{t}}.[[end_date]]), \'%Y-%m-%d\')'),
+                        ChecklistElement::tableName() . '.[[sort]]'
                     ])
                     ->distinct(true)
                     ->joinWith('assignments u')
@@ -276,7 +278,7 @@ trait RenderingTrait
                         ->joinWith('assignments u')
                         ->innerJoinWith('bucket b')
                         ->where(['{{t}}.[[status]]' => Task::STATUS_DONE])
-                        ->groupBy('user_id')
+                        ->groupBy(['user_id', 'end_date'])
                         ->indexBy('end_date')
                         ->andFilterWhere($filters)
                         ->column();
