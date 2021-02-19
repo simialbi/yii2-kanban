@@ -8,11 +8,19 @@ namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\models\Comment;
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\Module;
+use simialbi\yii2\kanban\TaskEvent;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
+/**
+ * Class CommentController
+ * @package simialbi\yii2\kanban\controllers
+ *
+ * @property-read Module $module
+ */
 class CommentController extends Controller
 {
     /**
@@ -50,6 +58,11 @@ class CommentController extends Controller
         $model = new Comment(['task_id' => $taskId]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $this->module->trigger(Module::EVENT_COMMENT_CREATED, new TaskEvent([
+                'task' => $model,
+                'data' => $model
+            ]));
+
             return $this->redirect(['plan/view', 'id' => $task->board->id, 'group' => $group]);
         }
 
