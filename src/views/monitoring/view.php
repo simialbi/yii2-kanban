@@ -179,6 +179,21 @@ foreach ($statuses as $status => $label) {
                     ],
                     [
                         'class' => '\kartik\grid\DataColumn',
+                        'format' => 'date',
+                        'attribute' => 'end_date',
+                        'filterType' => GridView::FILTER_DATE,
+                        'filterWidgetOptions' => [
+                            'pickerButton' => '<span class="input-group-text kv-date-picker">' . FAS::i('calendar-alt') . '</span>',
+                            'removeButton' => false,
+                            'pluginOptions' => [
+                                'format' => 'dd.mm.yyyy',
+                                'todayHighlight' => true
+                            ]
+                        ],
+                        'vAlign' => GridView::ALIGN_MIDDLE
+                    ],
+                    [
+                        'class' => '\kartik\grid\DataColumn',
                         'format' => 'datetime',
                         'attribute' => 'created_at',
                         'filterType' => GridView::FILTER_DATE,

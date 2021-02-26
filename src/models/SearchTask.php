@@ -6,7 +6,6 @@
 
 namespace simialbi\yii2\kanban\models;
 
-
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -23,6 +22,16 @@ class SearchTask extends Task
     public $assignee_id;
 
     /**
+     * @var integer
+     */
+    public $startTimeStamp;
+
+    /**
+     * @var integer
+     */
+    public $endTimeStamp;
+
+    /**
      * {@inheritDoc}
      */
     public function rules()
@@ -33,6 +42,8 @@ class SearchTask extends Task
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['description', 'string'],
             [['card_show_description', 'card_show_checklist', 'card_show_links'], 'boolean'],
+            ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'startTimeStamp'],
+            ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'endTimeStamp'],
             [['created_at', 'updated_at', 'finished_at'], 'date', 'format' => 'dd.MM.yyyy'],
             [['created_by', 'updated_by', 'finished_by'], 'integer'],
             ['assignee_id', 'each', 'rule' => ['integer']],
@@ -91,6 +102,8 @@ class SearchTask extends Task
             '{{t}}.[[bucket_id]]' => $this->bucket_id,
             '{{b}}.[[board_id]]' => $this->board_id,
             '{{a}}.[[user_id]]' => $this->assignee_id,
+            '{{t}}.[[start_date]]' => $this->startTimeStamp,
+            '{{t}}.[[end_date]]' => $this->endTimeStamp,
             '{{t}}.[[created_by]]' => $this->created_by,
             '{{t}}.[[updated_by]]' => $this->updated_by,
             '{{t}}.[[finished_by]]' => $this->finished_by,
@@ -113,7 +126,7 @@ class SearchTask extends Task
                 [
                     '<=',
                     '{{t}}.[[updated_at]]',
-                    (empty($this->created_at)) ? null : strtotime($this->updated_at . ' +1 day')
+                    (empty($this->updated_at)) ? null : strtotime($this->updated_at . ' +1 day')
                 ],
             ])
             ->andFilterWhere([
