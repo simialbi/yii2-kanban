@@ -304,7 +304,7 @@ Pjax::begin([
                 ];
                 if ($model->ticket_id) {
                     array_unshift($items, [
-                        'label' => Yii::t('simialbi/kanban', 'Go to ticket'),
+                        'label' => FAS::i('headset', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Go to ticket'),
                         'url' => ['/ticket/ticket/view', 'id' => $model->ticket_id],
                         'linkOptions' => [
                             'target' => '_blank'
