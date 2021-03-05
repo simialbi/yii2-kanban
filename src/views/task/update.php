@@ -363,15 +363,15 @@ Pjax::begin([
                 <div class="kanban-task-checklist-element input-group input-group-sm add-checklist-element mb-1">
                     <div class="input-group-prepend">
                         <div class="input-group-text">
-                            <?= Html::checkbox('checklist[new][][is_done]', false); ?>
+                            <?= Html::checkbox('checklist[new][0][is_done]', false); ?>
                         </div>
                     </div>
-                    <?= Html::input('text', 'checklist[new][][name]', null, [
+                    <?= Html::input('text', 'checklist[new][0][name]', null, [
                         'class' => ['form-control'],
                         'placeholder' => Yii::t('simialbi/kanban/model/checklist-element', 'Name')
                     ]); ?>
                     <?= DatePicker::widget([
-                        'name' => 'checklist[new][][end_date]',
+                        'name' => 'checklist[new][0][end_date]',
                         'value' => null,
                         'id' => 'task-' . $model->id . '-ce-new-end-date-1',
                         'bsVersion' => '4',

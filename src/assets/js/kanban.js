@@ -172,6 +172,16 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             $this.closest('.add-checklist-element').removeClass('add-checklist-element');
             $this.attr('placeholder', $this.val());
 
+            $addElement.find('input').each(function () {
+                var $input = $(this),
+                    name = $input.prop('name'),
+                    parts = name.match(/^checklist\[new\]\[(\d+)\]\[([a-z_]+)\]/),
+                    cnt = parseInt(parts[1]) + 1,
+                    fieldName = parts[2];
+
+                $input.prop('name', 'checklist[new][' + cnt + '][' + fieldName + ']');
+            });
+
             idParts[idParts.length - 1] = parseInt(idParts[idParts.length - 1]) + 1;
             $inputGroup.find('.remove-checklist-element').removeClass('disabled').prop('disabled', false);
             $addElement.find('input[type="text"]').val('');

@@ -282,7 +282,7 @@ class Task extends ActiveRecord
             return $this->end_date;
         }
 
-        $qry = $this->getChecklistElements()->where(['not', ['end_date' => null]])->orderBy(['end_date' => SORT_DESC]);
+        $qry = $this->getChecklistElements()->where(['not', ['end_date' => null]])->orderBy(['end_date' => SORT_ASC]);
         if ($qry->count()) {
             /** @var ChecklistElement $element */
             $element = $qry->one();
