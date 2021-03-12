@@ -96,10 +96,6 @@ Pjax::begin([
                             'data' => ['toggle' => 'dropdown'],
                             'class' => ['dropdown-toggle', 'text-decoration-none', 'text-reset', 'd-flex', 'flex-row']
                         ];
-                        if ($model->created_by != Yii::$app->user->id) {
-                            Html::addCssClass($options, 'disabled');
-                            $options['aria']['disabled'] = 'true';
-                        }
                         ?>
                         <?= Html::beginTag('a', $options); ?>
                             <?php foreach ($model->assignees as $assignee): ?>
@@ -127,35 +123,36 @@ Pjax::begin([
                         <?php
                         $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
                         foreach ($users as $user) {
-                            $linkOptions = [
-                                'class' => ['align-items-center', 'remove-assignee'],
-                                'style' => ['display' => 'none'],
-                                'onclick' => sprintf(
-                                    'window.sa.kanban.removeAssignee.call(this, %u);',
-                                    $user->getId()
-                                ),
-                                'data' => [
-                                    'id' => $user->getId(),
-                                    'name' => $user->name,
-                                    'image' => $user->image
-                                ]
-                            ];
-                            foreach ($model->assignees as $assignee) {
-                                if ($assignee->getId() === $user->getId()) {
-                                    Html::removeCssStyle($linkOptions, ['display']);
-                                    Html::addCssClass($linkOptions, 'is-assigned');
-                                    break;
-                                }
-                            }
-
-                            $items[] = [
+                            $item = [
                                 'label' => $this->render('_user', [
                                     'user' => $user,
                                     'assigned' => true
                                 ]),
-                                'linkOptions' => $linkOptions,
+                                'linkOptions' => [
+                                    'class' => ['align-items-center', 'remove-assignee'],
+                                    'style' => ['display' => 'none'],
+                                    'onclick' => sprintf(
+                                        'window.sa.kanban.removeAssignee.call(this, %u);',
+                                        $user->getId()
+                                    ),
+                                    'data' => [
+                                        'id' => $user->getId(),
+                                        'name' => $user->name,
+                                        'image' => $user->image
+                                    ]
+                                ],
+                                'disabled' => $model->created_by != Yii::$app->user->id,
                                 'url' => 'javascript:;'
                             ];
+                            foreach ($model->assignees as $assignee) {
+                                if ($assignee->getId() === $user->getId()) {
+                                    Html::removeCssStyle($item['linkOptions'], ['display']);
+                                    Html::addCssClass($item['linkOptions'], 'is-assigned');
+                                    break;
+                                }
+                            }
+
+                            $items[] = $item;
                         }
                         $items[] = '-';
                         $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];

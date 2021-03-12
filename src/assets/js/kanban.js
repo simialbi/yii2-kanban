@@ -385,7 +385,11 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             if (parseInt(code) === 9 || parseInt(code) === 13) {
                 evt.preventDefault();
                 addChecklistElement.apply(this);
-                $('.add-checklist-element input[type="text"]').focus();
+                if (parseInt(code) === 9 && !$this.hasClass('krajee-datepicker')) {
+                    $this.closest('.kanban-task-checklist-element').find('.krajee-datepicker').focus();
+                } else {
+                    $('.add-checklist-element input[type="text"]:not(".krajee-datepicker")').focus();
+                }
             }
         });
         $(document).on('change.sa.kanban', '.checklist input[type="text"]', function () {

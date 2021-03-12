@@ -740,10 +740,6 @@ class TaskController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->id != $model->created_by) {
-            throw new ForbiddenHttpException(Yii::t('yii', 'You are not allowed to perform this action.'));
-        }
-
         $model::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
             'task_id' => $model->id,
             'user_id' => $userId
