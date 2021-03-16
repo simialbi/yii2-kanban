@@ -381,7 +381,7 @@ Pjax::begin([
                             'linkOptions' => [
                                 'class' => ['align-items-center', 'add-assignee']
                             ],
-                            'disabled' => $model->created_by != Yii::$app->user->id,
+//                            'disabled' => $model->created_by != Yii::$app->user->id,
                             'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
                         ];
                     }
