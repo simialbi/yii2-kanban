@@ -73,6 +73,7 @@ class ToDo extends Widget
             ->select('end_date')
             ->from(ChecklistElement::tableName())
             ->where(new Expression('[[task_id]] = {{t}}.[[id]]'))
+            ->andWhere(['is_done' => false])
             ->orderBy(['end_date' => SORT_ASC])
             ->limit(1);
         $tasks = Task::find()
@@ -137,7 +138,8 @@ class ToDo extends Widget
 
             $content = Html::tag('h6', $task['subject'], ['class' => ['m-0']]);
             $small = $task['board']['name'];
-            if ($cnt = count($task['checklistElements']) > 0) {
+
+            if (($cnt = count($task['checklistElements'])) > 0) {
                 $grouped = ArrayHelper::index($task['checklistElements'], null, 'is_done');
                 $done = count(ArrayHelper::getValue($grouped, '1', []));
                 $all = $cnt;
