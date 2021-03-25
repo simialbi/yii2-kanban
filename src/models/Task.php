@@ -282,17 +282,18 @@ class Task extends ActiveRecord
             return $this->end_date;
         }
 
-        $qry = $this->getChecklistElements()
-            ->where(['not', ['end_date' => null]])
-            ->andWhere(['is_done' => false])
-            ->orderBy(['end_date' => SORT_ASC]);
-        if ($qry->count()) {
-            /** @var ChecklistElement $element */
-            $element = $qry->one();
-            return $element->end_date;
+        if (empty($this->checklistElements)) {
+            return null;
         }
+        /** @var ChecklistElement[] $checklistElements */
+        $grouped = ArrayHelper::index($this->checklistElements, null, 'is_done');
+        $checklistElements = ArrayHelper::getValue($grouped, '0', []);
+        if (empty($checklistElements)) {
+            return null;
+        }
+        ArrayHelper::multisort($checklistElements, 'end_date', SORT_ASC, SORT_NUMERIC);
 
-        return null;
+        return $checklistElements[0]->end_date;
     }
 
     /**

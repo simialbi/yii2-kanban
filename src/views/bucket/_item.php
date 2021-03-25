@@ -50,7 +50,7 @@ use yii\widgets\Pjax;
     <?php endif; ?>
     <?php Pjax::end(); ?>
 
-    <div class="kanban-tasks mt-4 flex-grow-1">
+    <div class="kanban-tasks mt-4">
         <?php foreach ($tasks as $task): ?>
             <?php if (is_array($task)): ?>
                 <?php $t = new Task(); ?>

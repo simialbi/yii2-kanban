@@ -36,7 +36,7 @@ use yii\widgets\Pjax;
 <?php $form = ActiveForm::begin([
     'action' => ['task/create',  'boardId' => $board->id, $keyName => $id],
     'options' => [
-        'class' => ['mt-2', 'mt-md-5']
+        'class' => ['mt-2', 'mt-md-4']
     ],
     'id' => 'createTaskForm',
     'fieldConfig' => function ($model, $attribute) {
