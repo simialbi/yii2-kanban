@@ -63,6 +63,11 @@ class CommentController extends Controller
                 'data' => $model
             ]));
 
+            $this->module->trigger(Module::EVENT_TASK_UPDATED, new TaskEvent([
+                'task' => $model,
+                'data' => $model
+            ]));
+
             return $this->redirect(['plan/view', 'id' => $task->board->id, 'group' => $group]);
         }
 

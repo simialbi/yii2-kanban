@@ -422,6 +422,11 @@ class TaskController extends Controller
                 }
             }
 
+            $this->module->trigger(Module::EVENT_TASK_UPDATED, new TaskEvent([
+                'task' => $model,
+                'data' => $model
+            ]));
+
             $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->board->id];
 
             return $this->redirect($previous);
