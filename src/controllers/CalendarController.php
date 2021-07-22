@@ -36,6 +36,10 @@ class CalendarController extends Controller
         $str = "BEGIN:VCALENDAR\r\n";
         $str .= "VERSION:2.0\r\n";
         $str .= "PRODID:-//simialbi/yii2/kanban//DE\r\n";
+        $str .= 'NAME:Kanban' . (Yii::$app->user->isGuest ? '' : ' ' . Yii::$app->user->identity->getName()) . "\r\n";
+        $str .= 'X-WR-NAME:Kanban' . (Yii::$app->user->isGuest ? '' : ' ' . Yii::$app->user->identity->getName()) . "\r\n";
+        $str .= "REFRESH-INTERVAL;VALUE=DURATION:PT15M\r\n";
+        $str .= "X-PUBLISHED-TTL:PT15M\r\n";
 
         $userId = Yii::$app->user->getId();
         $tasks = Task::find()
