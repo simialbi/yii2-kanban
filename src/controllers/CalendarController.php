@@ -9,8 +9,8 @@ namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\models\Task;
 use Yii;
-use yii\helpers\FileHelper;
 use yii\web\Controller;
+use yii\web\Response;
 
 /**
  * Class CalendarController
@@ -20,6 +20,10 @@ use yii\web\Controller;
  */
 class CalendarController extends Controller
 {
+    /**
+     * @inheritdoc
+     */
+    public $defaultAction = 'get-ics';
 
     /**
      * Creates an ics-File with all open and assigned tasks
@@ -29,13 +33,6 @@ class CalendarController extends Controller
      */
     public function actionGetIcs()
     {
-        $path = Yii::getAlias('@runtime/temp');
-        FileHelper::createDirectory($path);
-        $path = FileHelper::normalizePath($path . '/kanban.ics');
-
-        $fp = fopen($path, "w");
-
-
         $str = "BEGIN:VCALENDAR\r\n";
         $str .= "VERSION:2.0\r\n";
         $str .= "PRODID:-//simialbi/yii2/kanban//DE\r\n";
@@ -50,23 +47,21 @@ class CalendarController extends Controller
             ])
             ->all();
 
-
         foreach ($tasks as $task) {
-
             // send only if at least one date is present
-            if (is_null($task->start_date) && is_null($task->end_date)) {
+            if (!$task->start_date && !$task->end_date) {
                 continue;
             }
 
             $start = $task->start_date;
             $end = $task->end_date;
 
-            if (is_null($start)) {
+            if (!$start) {
                 $start = $end;
             }
 
             // edit endDate
-            if (!is_null($end)) {
+            if ($end) {
                 $end = $end + 86400;
             } else {
                 $end = $start + 86400;
@@ -75,23 +70,21 @@ class CalendarController extends Controller
             $description = $this->br2nl($task->description);
 
             $str .= "BEGIN:VEVENT\r\n";
-            $str .= "UID:$task->id\r\n";
-            $str .= "DTSTART:" . Yii::$app->formatter->asDate($start, 'yMMdd') . "\r\n";
-            $str .= "DTEND:" . Yii::$app->formatter->asDate($end, 'yMMdd') . "\r\n";
-            $str .= "SUMMARY:$task->subject\r\n";
+            $str .= "UID:{$task->id}\r\n";
+            $str .= 'DTSTART:' . Yii::$app->formatter->asDate($start, 'yyyyMMdd') . "\r\n";
+            $str .= 'DTEND:' . Yii::$app->formatter->asDate($end, 'yyyyMMdd') . "\r\n";
+            $str .= "SUMMARY:{$task->subject}\r\n";
             $str .= "DESCRIPTION:$description\r\n";
-            $str .= "X-ALT-DESC;FMTTYPE=text/html:$task->description\r\n";
+            $str .= "X-ALT-DESC;FMTTYPE=text/html:{$task->description}\r\n";
             $str .= "END:VEVENT\r\n";
         }
 
         $str .= "END:VCALENDAR\r\n";
 
-        if (count($tasks) > 0) {
-            fwrite($fp, $str);
-            Yii::$app->response->sendFile($path, null, ['mimeType' => 'text/calendar'])->send();
-        }
+        Yii::$app->response->format = Response::FORMAT_RAW;
+        Yii::$app->response->headers->set('Content-Type', 'text/calendar');
 
-        die;
+        return $str;
     }
 
 
@@ -102,30 +95,22 @@ class CalendarController extends Controller
      */
     private function br2nl($text = '')
     {
-        if ((string)$text == '') {
+        if (empty($text)) {
             return '';
         }
 
         // replace all empty lines
-        $text = str_replace('<p><br></p>', "\n", $text);
+        $text = str_replace('<p><br></p>', "\\n", $text);
 
         // replace all paragraphs with new lines
         $count = substr_count($text, '<p>');
-        $text = preg_replace('~<p>(.*?)</p>~', "$1\n\n", $text, $count - 1);
-        $text = preg_replace('~<p>(.*?)</p>~', "$1", $text);
+        $text = preg_replace('~<p>(.*?)</p>~', "$1\\n\\n", $text, $count - 1);
+        $text = preg_replace('~<p>(.*?)</p>~', '$1', $text);
 
         // replace remaining <br>
-        $text = str_replace(['<br>', '</br>', '<br />'], "\n", $text);
+        $text = str_replace(['<br>', '</br>', '<br />'], "\\n", $text);
 
         // strip all remainig tags
-        $text = strip_tags($text);
-
-        // escape new lines
-        $text = str_replace("\n", "\\n", $text);
-
-        // strip all remainig tags
-        $text = strip_tags($text);
-
-        return $text;
+        return strip_tags($text);
     }
 }
