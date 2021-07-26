@@ -59,12 +59,12 @@ class CommentController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->module->trigger(Module::EVENT_COMMENT_CREATED, new TaskEvent([
-                'task' => $model,
+                'task' => $task,
                 'data' => $model
             ]));
 
             $this->module->trigger(Module::EVENT_TASK_UPDATED, new TaskEvent([
-                'task' => $model,
+                'task' => $task,
                 'data' => $model
             ]));
 
