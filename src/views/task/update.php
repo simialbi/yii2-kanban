@@ -31,6 +31,7 @@ Pjax::begin([
 <div class="kanban-task-modal">
     <?php $form = ActiveForm::begin([
         'id' => 'taskModalForm',
+        'action' => ['task/update', 'id' => $model->id],
         'fieldConfig' => [
             'labelOptions' => [
                 'class' => ['col-form-label-sm', 'py-0']

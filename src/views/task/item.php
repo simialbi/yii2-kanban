@@ -281,7 +281,7 @@ Pjax::begin([
                         'linkOptions' => [
                             'onclick' => 'window.sa.kanban.copyTextToClipboard(\'' . Url::to([
                                     'plan/view',
-                                    'id' => $boardId ?: $model->board->id,
+                                    'id' => isset($boardId) ? $boardId : $model->board->id,
                                     'showTask' => $model->id,
                                     'group' => Yii::$app->request->getQueryParam('group', 'bucket')
                                 ], true) . '\')'

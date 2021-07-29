@@ -86,7 +86,7 @@ class Task extends ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'bucket_id', 'ticket_id'], 'integer'],
+            [['id', 'bucket_id', 'ticket_id', 'status'], 'integer'],
             ['subject', 'string', 'max' => 255],
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['start_date', 'date', 'timestampAttribute' => 'start_date'],
@@ -169,7 +169,7 @@ class Task extends ActiveRecord
      */
     public function beforeSave($insert)
     {
-        if ($this->isAttributeChanged('status') && $this->status === self::STATUS_DONE) {
+        if ($this->isAttributeChanged('status') && (int)$this->status === self::STATUS_DONE) {
             if (!$this->beforeFinish()) {
                 return false;
             }
@@ -183,7 +183,7 @@ class Task extends ActiveRecord
      */
     public function afterSave($insert, $changedAttributes)
     {
-        if (isset($changedAttributes['status']) && $this->status === self::STATUS_DONE) {
+        if (isset($changedAttributes['status']) && (int)$this->status === self::STATUS_DONE) {
             $this->afterFinish($changedAttributes);
         }
 
