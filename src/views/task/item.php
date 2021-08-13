@@ -1,8 +1,8 @@
 <?php
 
-use kartik\date\DatePicker;
 use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\datedropper\Datedropper;
 use simialbi\yii2\hideseek\HideSeek;
 use simialbi\yii2\kanban\models\Task;
 use yii\bootstrap4\ButtonDropdown;
@@ -99,17 +99,18 @@ Pjax::begin([
             <?php endif; ?>
             <?php foreach ($model->attachments as $attachment): ?>
                 <?php if ($attachment->card_show): ?>
-                    <?= Html::a(FAR::i($attachment->icon, ['class' => 'fa-fw']) . ' ' . $attachment->name, $attachment->path, [
-                        'class' => ['d-block', 'text-muted', 'text-truncate'],
-                        'style' => [
-                            'max-width' => '100%'
-                        ],
-                        'data' => ['pjax' => '0'],
-                        'target' => '_blank'
-                    ]); ?>
+                    <?= Html::a(FAR::i($attachment->icon, ['class' => 'fa-fw']) . ' ' . $attachment->name,
+                        $attachment->path, [
+                            'class' => ['d-block', 'text-muted', 'text-truncate'],
+                            'style' => [
+                                'max-width' => '100%'
+                            ],
+                            'data' => ['pjax' => '0'],
+                            'target' => '_blank'
+                        ]); ?>
                 <?php endif; ?>
             <?php endforeach; ?>
-            <div class="kanban-task-info d-flex flex-row align-items-center">
+            <div class="kanban-task-info d-flex flex-row align-items-center position-relative">
                 <?php if ($model->status === Task::STATUS_IN_PROGRESS): ?>
                     <small class="dropdown text-muted mr-3">
                         <a href="javascript:;" data-toggle="dropdown"
@@ -136,11 +137,9 @@ Pjax::begin([
                 <?php endif; ?>
                 <?php if ($model->endDate): ?>
                     <?php $options = [
-                        'label' => FAR::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate(
-                            $model->endDate,
-                            'short'
-                        ),
-                        'class' => ['btn', 'btn-sm', 'mr-3', 'px-0']
+                        'class' => ['btn', 'btn-sm', 'mr-3', 'px-0', 'position-relative'],
+                        'style' => ['z-index' => '1'],
+                        'onClick' => new JsExpression('jQuery(\'#task-end_date-' . $model->id . '\').dateDropper(\'show\');')
                     ]; ?>
                     <?php if ($model->endDate < time() && $model->status !== $model::STATUS_DONE): ?>
                         <?php Html::addCssClass($options, ['btn-danger', 'px-1']); ?>
@@ -149,38 +148,46 @@ Pjax::begin([
                         <?php Html::addCssClass($options, ['btn-info', 'px-1']); ?>
                         <?php Html::removeCssClass($options, 'px-0'); ?>
                     <?php endif; ?>
-                    <?= DatePicker::widget([
+                    <?= Datedropper::widget([
                         'model' => $model,
                         'options' => [
-                            'id' => 'task-end_date-' . $model->id
+                            'id' => 'task-end_date-' . $model->id,
+                            'class' => ['position-absolute', 'border-0'],
+                            'style' => [
+                                'width' => '59px',
+                                'height' => '2rem',
+                                'visibility' => 'hidden',
+                                'z-index' => '0'
+                            ]
                         ],
                         'attribute' => 'end_date',
-                        'bsVersion' => '4',
-                        'type' => DatePicker::TYPE_BUTTON,
-                        'buttonOptions' => $options,
-                        'pluginOptions' => [
-                            'todayHighlight' => true
-                        ],
-                        'pluginEvents' => [
-                            'changeDate' => new JsExpression('function (e) {
+                        'clientOptions' => [
+                            'format' => 'd.m.Y',
+                            'large' => true,
+                            'autofill' => false,
+                            'onChange' => new JsExpression('function (e) {
                                 var event = jQuery.Event(\'click\');
-                                var container = \'#\' + jQuery(this).closest(\'[data-pjax-container]\').prop(\'id\');
+                                var container = \'#\' + e.selector.closest(\'[data-pjax-container]\').prop(\'id\');
+                                var date = new Date(e.date.Y, e.date.n - 1, e.date.d);
 
                                 event.currentTarget = document.createElement(\'a\');
                                 event.currentTarget.href = \'' . Url::to([
-                                        'task/set-end-date',
-                                        'id' => $model->id
-                                    ]) . '&date=\' + (e.date.getTime() / 1000)
+                                    'task/set-end-date',
+                                    'id' => $model->id
+                                ]) . '&date=\' + ((date.getTime() / 1000) + (date.getTimezoneOffset() * -60))
                                 jQuery.pjax.click(event, container, {
                                     push: false,
                                     replace: false,
                                     skipOuterContainers: true,
                                     timeout: 0
                                 });
-                                jQuery(this).kvDatepicker(\'hide\');
                             }')
                         ]
                     ]); ?>
+                    <?= Html::button(
+                        FAS::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate($model->end_date, 'short'),
+                        $options
+                    ); ?>
                 <?php endif; ?>
                 <?php if ($model->ticket_id): ?>
                     <small class="text-muted mr-3">
@@ -219,7 +226,8 @@ Pjax::begin([
                 <?php
                 $items = [
                     [
-                        'label' => FAS::i('comment', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Add comment'),
+                        'label' => FAS::i('comment',
+                                ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Add comment'),
                         'url' => [
                             'comment/create',
                             'taskId' => $model->id,
@@ -247,7 +255,8 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('clone', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy task'),
+                        'label' => FAS::i('clone',
+                                ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy task'),
                         'url' => [
                             'task/copy',
                             'id' => $model->id,
@@ -261,7 +270,9 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('user-plus', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban/task', 'Create task per each user'),
+                        'label' => FAS::i('user-plus',
+                                ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban/task',
+                                'Create task per each user'),
                         'url' => [
                             'task/copy-per-user',
                             'id' => $model->id,
@@ -276,7 +287,8 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('link', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy link'),
+                        'label' => FAS::i('link', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban',
+                                'Copy link'),
                         'url' => 'javascript:;',
                         'linkOptions' => [
                             'onclick' => 'window.sa.kanban.copyTextToClipboard(\'' . Url::to([
@@ -288,7 +300,8 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('trash-alt', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('yii', 'Delete'),
+                        'label' => FAS::i('trash-alt', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('yii',
+                                'Delete'),
                         'url' => [
                             'task/delete',
                             'id' => $model->id,
@@ -304,7 +317,8 @@ Pjax::begin([
                 ];
                 if ($model->ticket_id) {
                     array_unshift($items, [
-                        'label' => FAS::i('headset', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Go to ticket'),
+                        'label' => FAS::i('headset',
+                                ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Go to ticket'),
                         'url' => ['/ticket/ticket/view', 'id' => $model->ticket_id],
                         'linkOptions' => [
                             'target' => '_blank'

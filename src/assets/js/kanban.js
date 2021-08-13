@@ -167,7 +167,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         if ($this.closest('.add-checklist-element').length) {
             var $addElement = $this.closest('.add-checklist-element').clone(),
                 $inputGroup = $this.closest('.input-group'),
-                $datePicker = $addElement.find('.krajee-datepicker'),
+                $datePicker = $addElement.find('.picker-trigger'),
                 idParts = $datePicker.prop('id').split('-');
             $this.closest('.add-checklist-element').removeClass('add-checklist-element');
             $this.attr('placeholder', $this.val());
@@ -185,12 +185,18 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             idParts[idParts.length - 1] = parseInt(idParts[idParts.length - 1]) + 1;
             $inputGroup.find('.remove-checklist-element').removeClass('disabled').prop('disabled', false);
             $addElement.find('input[type="text"]').val('');
-            $datePicker.prop('id', idParts.join('-')).kvDatepicker(eval($datePicker.data('krajeeKvdatepicker')))
+            $datePicker.prop('id', idParts.join('-'));
 
             $checklist.append($addElement);
+            $datePicker.removeClass('picker-trigger').data('datedropperId', null).dateDropper({
+                format: 'd.m.Y',
+                large: true,
+                autofill: false,
+                lang: $datePicker.data('lang')
+            });
         } else {
             if ($this.val() === '') {
-                if (!$this.hasClass('krajee-datepicker')) {
+                if (!$this.hasClass('picker-trigger')) {
                     $this.val($this.attr('placeholder'));
                 }
             } else {

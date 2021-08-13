@@ -1,7 +1,7 @@
 <?php
 
-use kartik\date\DatePicker;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\datedropper\Datedropper;
 use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
@@ -74,15 +74,10 @@ use yii\widgets\Pjax;
             'options' => [
                 'class' => ['form-group', 'mb-0']
             ]
-        ])->widget(DatePicker::class, [
-            'bsVersion' => '4',
-            'type' => DatePicker::TYPE_INPUT,
-            'pluginOptions' => [
-                'autoclose' => true,
-                'todayHighlight' => true
-            ],
-            'options' => [
-                'readonly' => true
+        ])->widget(Datedropper::class, [
+            'clientOptions' => [
+                'format' => 'd.m.Y',
+                'large' => true
             ]
         ]); ?>
         <?php if ($keyName !== 'userId'): ?>

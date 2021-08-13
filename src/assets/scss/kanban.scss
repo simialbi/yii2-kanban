@@ -358,12 +358,12 @@ h1, h2, h3, .h1, .h2, .h3 {
         cursor: grab;
     }
 
-    .krajee-datepicker {
+    .picker-trigger {
         max-width: 25%;
     }
 
     @media (max-width: map-get($grid-breakpoints, sm) - 1) {
-        .krajee-datepicker {
+        .picker-trigger {
             max-width: 33.33333333%;
         }
     }
