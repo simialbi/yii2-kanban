@@ -185,7 +185,7 @@ Pjax::begin([
                         ]
                     ]); ?>
                     <?= Html::button(
-                        FAS::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate($model->end_date, 'short'),
+                        FAS::i('calendar-alt') . ' ' . Yii::$app->formatter->asDate($model->endDate, 'short'),
                         $options
                     ); ?>
                 <?php endif; ?>

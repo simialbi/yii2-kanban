@@ -258,6 +258,7 @@ class Task extends ActiveRecord
     /**
      * Get checklist status information
      * @return string
+     * @throws \Exception
      */
     public function getChecklistStats()
     {
@@ -275,6 +276,7 @@ class Task extends ActiveRecord
     /**
      * Get the end date, either from task or checklist element
      * @return string|null
+     * @throws \Exception
      */
     public function getEndDate()
     {
@@ -299,6 +301,7 @@ class Task extends ActiveRecord
     /**
      * Get author
      * @return UserInterface
+     * @throws \Exception
      */
     public function getAuthor()
     {
@@ -308,6 +311,7 @@ class Task extends ActiveRecord
     /**
      * Get user last updated
      * @return UserInterface
+     * @throws \Exception
      */
     public function getUpdater()
     {
@@ -317,6 +321,7 @@ class Task extends ActiveRecord
     /**
      * Get user finished
      * @return UserInterface
+     * @throws \Exception
      */
     public function getFinisher()
     {
@@ -326,6 +331,7 @@ class Task extends ActiveRecord
     /**
      * Get users assigned to this task
      * @return array
+     * @throws \Exception
      */
     public function getAssignees()
     {

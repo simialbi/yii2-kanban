@@ -246,6 +246,9 @@ Pjax::begin([
                         'class' => ['form-group', 'col-6', 'col-md-3']
                     ]
                 ])->widget(Datedropper::class, [
+                    'options' => [
+                        'placeholder' => (null === $model->endDate) ? '' : $model->endDate
+                    ],
                     'clientOptions' => [
                         'format' => 'd.m.Y',
                         'large' => true
