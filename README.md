@@ -70,6 +70,26 @@ Configure the module in the modules section of your Yii configuration file.
 | `EVENT_COMMENT_CREATED`     | Will be triggered after a task got a new comment.                        |
 | `EVENT_ATTACHMENT_ADDED`    | Will be triggered after a task got one or more new attachments.          |
 
+### Setup console config and apply migrations
+
+Apply the migrations either with the following command: `yii migrate --migration-namespaces='simialbi\yii2\kanban\migrations'`
+or configure your console like this:
+
+```php
+[
+    'controllerMap' => [
+        'migrate' => [
+            'class' => 'yii\console\controllers\MigrateController',
+            'migrationNamespaces' => [
+                'simialbi\yii2\ticket\migrations'
+            ]
+        ]
+    ]
+]
+```
+
+and apply the `yii migrate` command.
+
 ### Create identity
 
 Create an identity class which implements `simialbi\yii2\models\UserInterface` e.g.:
