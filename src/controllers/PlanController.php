@@ -116,15 +116,11 @@ class PlanController extends Controller
         $model = $this->findModel($id);
         $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
 
-        $bucketContent = $this->renderBucketContent($model, $group, $readonly);
-
-        Url::remember(['plan/view', 'id' => $id, 'group' => $group], 'plan-view');
-
         return $this->render('view', [
             'boards' => Board::findByUserId(),
             'model' => $model,
             'readonly' => $readonly,
-            'buckets' => $bucketContent,
+            'group' => $group,
             'users' => $this->module->users,
             'showTask' => $showTask
         ]);

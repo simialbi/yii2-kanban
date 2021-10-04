@@ -1,6 +1,7 @@
 <?php
 
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ButtonDropdown;
 use yii\widgets\Pjax;
 
@@ -8,13 +9,19 @@ use yii\widgets\Pjax;
 /* @var $title string */
 /* @var $id integer */
 
+Frame::begin([
+    'options' => [
+        'id' => 'update-bucket-' . $id . '-frame'
+    ]
+]);
+
+//Pjax::begin([
+//    'id' => 'updateBucketPjax' . $id,
+//    'formSelector' => '#updateBucketForm' . $id,
+//    'enablePushState' => false,
+//    'clientOptions' => ['skipOuterContainers' => true]
+//]);
 ?>
-<?php Pjax::begin([
-    'id' => 'updateBucketPjax' . $id,
-    'formSelector' => '#updateBucketForm' . $id,
-    'enablePushState' => false,
-    'clientOptions' => ['skipOuterContainers' => true]
-]); ?>
 <div class="kanban-bucket-header d-flex flex-row align-items-center">
     <h5 class="m-0 mx-auto mx-md-0"><?= $title; ?></h5>
     <?=FAS::i('arrows-alt', [
@@ -58,4 +65,6 @@ use yii\widgets\Pjax;
         ]
     ]); ?>
 </div>
-<?php Pjax::end(); ?>
+<?php
+Frame::end();
+?>

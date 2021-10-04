@@ -5,40 +5,48 @@ use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\datedropper\Datedropper;
 use simialbi\yii2\hideseek\HideSeek;
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ButtonDropdown;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
-use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\web\JsExpression;
-use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $boardId integer|null */
 /* @var $model Task */
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $closeModal boolean */
 
-Pjax::begin([
-    'id' => 'taskPjax' . $model->hash,
-    'enablePushState' => false,
+Frame::begin([
     'options' => [
+        'id' => 'task-' . $model->id . '-frame',
         'class' => ['kanban-sortable'],
-        'data' => [
-            'id' => $model->id,
-            'event' => Json::encode([
-                'id' => $model->id,
-                'title' => $model->subject,
-                'allDay' => true,
-                'classNames' => ['border-0'],
-                'url' => Url::to(['task/update', 'id' => $model->id])
-            ])
-        ]
-    ],
-    'clientOptions' => [
-        'skipOuterContainers' => false
+        'data' => ['id' =>  $model->id]
     ]
 ]);
+
+//Pjax::begin([
+//    'id' => 'taskPjax' . $model->hash,
+//    'enablePushState' => false,
+//    'options' => [
+//        'class' => ['kanban-sortable'],
+//        'data' => [
+//            'id' => $model->id,
+//            'event' => Json::encode([
+//                'id' => $model->id,
+//                'title' => $model->subject,
+//                'allDay' => true,
+//                'classNames' => ['border-0'],
+//                'url' => Url::to(['task/update', 'id' => $model->id])
+//            ])
+//        ]
+//    ],
+//    'clientOptions' => [
+//        'skipOuterContainers' => false
+//    ]
+//]);
 ?>
     <div class="kanban-task card mb-2 status-<?= $model->status; ?>">
         <?php foreach ($model->attachments as $attachment): ?>
@@ -167,20 +175,14 @@ Pjax::begin([
                             'autofill' => false,
                             'onChange' => new JsExpression('function (e) {
                                 var event = jQuery.Event(\'click\');
-                                var container = \'#\' + e.selector.closest(\'[data-pjax-container]\').prop(\'id\');
+                                var container = e.selector.closest(\'turbo-frame\').get(0);
                                 var date = new Date(e.date.Y, e.date.n - 1, e.date.d);
 
-                                event.currentTarget = document.createElement(\'a\');
-                                event.currentTarget.href = \'' . Url::to([
+                                container.src = \'' . Url::to([
                                     'task/set-end-date',
                                     'id' => $model->id
-                                ]) . '&date=\' + ((date.getTime() / 1000) + (date.getTimezoneOffset() * -60))
-                                jQuery.pjax.click(event, container, {
-                                    push: false,
-                                    replace: false,
-                                    skipOuterContainers: true,
-                                    timeout: 0
-                                });
+                                ]) . '&date=\' + ((date.getTime() / 1000) + (date.getTimezoneOffset() * -60));
+                                container.reload();
                             }')
                         ]
                     ]); ?>
@@ -255,8 +257,10 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('clone',
-                                ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy task'),
+                        'label' => FAS::i(
+                            'clone',
+                            ['class' => ['mr-1']]
+                        )->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy task'),
                         'url' => [
                             'task/copy',
                             'id' => $model->id,
@@ -270,9 +274,10 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('user-plus',
-                                ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban/task',
-                                'Create task per each user'),
+                        'label' => FAS::i(
+                            'user-plus',
+                            ['class' => ['mr-1']]
+                        )->fixedWidth() . ' ' . Yii::t('simialbi/kanban/task', 'Create task per each user'),
                         'url' => [
                             'task/copy-per-user',
                             'id' => $model->id,
@@ -287,8 +292,10 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('link', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban',
-                                'Copy link'),
+                        'label' => FAS::i(
+                            'link',
+                            ['class' => ['mr-1']]
+                        )->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy link'),
                         'url' => 'javascript:;',
                         'linkOptions' => [
                             'onclick' => 'window.sa.kanban.copyTextToClipboard(\'' . Url::to([
@@ -300,8 +307,10 @@ Pjax::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('trash-alt', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('yii',
-                                'Delete'),
+                        'label' => FAS::i(
+                            'trash-alt',
+                            ['class' => ['mr-1']]
+                        )->fixedWidth() . ' ' . Yii::t('yii', 'Delete'),
                         'url' => [
                             'task/delete',
                             'id' => $model->id,
@@ -310,7 +319,8 @@ Pjax::begin([
                         'disabled' => $model->created_by != Yii::$app->user->id,
                         'linkOptions' => [
                             'data' => [
-                                'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')
+//                                'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+                                'turbo-frame' => 'bucket-' . $model->bucket_id . '-frame'
                             ]
                         ]
                     ]
@@ -435,5 +445,11 @@ Pjax::begin([
             </div>
         <?php endif; ?>
     </div>
+    <script>
+        <?php if ($closeModal): ?>
+        jQuery('#taskModal').modal('hide');
+        <?php endif; ?>
+        window.sa.kanban.initTask('#task-<?=$model->id;?>-frame');
+    </script>
 <?php
-Pjax::end();
+Frame::end();

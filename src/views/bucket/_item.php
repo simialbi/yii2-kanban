@@ -61,7 +61,8 @@ use yii\widgets\Pjax;
                 'boardId' => $boardId,
                 'model' => $task,
                 'statuses' => $statuses,
-                'users' => $users
+                'users' => $users,
+                'closeModal' => false
             ]); ?>
         <?php endforeach; ?>
     </div>

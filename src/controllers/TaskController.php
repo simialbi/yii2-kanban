@@ -141,7 +141,7 @@ class TaskController extends Controller
      * @param integer|null $status
      * @param integer|null $date
      * @param boolean $mobile
-     * @return string
+     * @return string|\yii\web\Response
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws InvalidConfigException
@@ -231,6 +231,16 @@ class TaskController extends Controller
                     ]));
                 } catch (Exception $e) {
                 }
+            }
+
+            switch ($group) {
+                default:
+                case 'group':
+                    return $this->renderAjax('/bucket/view', [
+                        'model' => $task->getBucket()->with(['openTasks'])->one(),
+                        'statuses' => $this->module->statuses,
+                        'users' => $this->module->users
+                    ]);
             }
 
             return $this->redirect(['plan/view', 'id' => $board->id, 'group' => $group]);
@@ -427,9 +437,15 @@ class TaskController extends Controller
                 'data' => $model
             ]));
 
-            $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->board->id];
+//            $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->board->id];
 
-            return $this->redirect($previous);
+            return $this->renderAjax('item', [
+                'boardId' => $model->board->id,
+                'model' => $model,
+                'statuses' => $this->module->statuses,
+                'users' => $this->module->users,
+                'closeModal' => true
+            ]);
         }
 
         $buckets = Bucket::find()
@@ -612,7 +628,7 @@ class TaskController extends Controller
      * Delete a task
      * @param integer $id Tasks id
      *
-     * @return Response
+     * @return Response|string
      * @throws NotFoundHttpException|ForbiddenHttpException|Throwable
      */
     public function actionDelete($id)
@@ -625,10 +641,10 @@ class TaskController extends Controller
 
         $model->delete();
 
-        return $this->redirect([
-            'plan/view',
-            'id' => $model->board->id,
-            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+        return $this->renderAjax('/bucket/view', [
+            'model' => $model->getBucket()->with(['openTasks'])->one(),
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 
@@ -679,7 +695,8 @@ class TaskController extends Controller
         return $this->renderAjax('item', [
             'model' => $model,
             'statuses' => $this->module->statuses,
-            'users' => $this->module->users
+            'users' => $this->module->users,
+            'closeModal' => false
         ]);
     }
 
@@ -703,7 +720,8 @@ class TaskController extends Controller
         return $this->renderAjax('item', [
             'model' => $model,
             'statuses' => $this->module->statuses,
-            'users' => $this->module->users
+            'users' => $this->module->users,
+            'closeModal' => false
         ]);
     }
 
@@ -758,7 +776,8 @@ class TaskController extends Controller
         return $this->renderAjax('item', [
             'model' => $model,
             'statuses' => $this->module->statuses,
-            'users' => $this->module->users
+            'users' => $this->module->users,
+            'closeModal' => false
         ]);
     }
 
@@ -792,7 +811,8 @@ class TaskController extends Controller
         return $this->renderAjax('item', [
             'model' => $model,
             'statuses' => $this->module->statuses,
-            'users' => $this->module->users
+            'users' => $this->module->users,
+            'closeModal' => false
         ]);
     }
 

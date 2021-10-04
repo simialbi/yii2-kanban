@@ -6,7 +6,6 @@ use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
-use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $board \simialbi\yii2\kanban\models\Board */
@@ -19,26 +18,23 @@ use yii\widgets\Pjax;
 /* @var $buckets \simialbi\yii2\kanban\models\Bucket[] */
 /* @var $statuses array */
 
+//Frame::begin([
+//    'options' => [
+//        'id' => 'create-task-bucket-' . $id . '-frame'
+//    ]
+//]);
 ?>
 
-<?php Pjax::begin([
-    'id' => 'createTaskPjax' . $bucketName,
-    'formSelector' => '#createTaskForm',
-    'enablePushState' => false,
-    'clientOptions' => ['skipOuterContainers' => true]
-]); ?>
-<?php if (!$mobile) : ?>
-    <?= Html::a('+', ['task/create', 'boardId' => $board->id, $keyName => $id], [
-        'class' => ['btn', 'btn-primary', 'btn-block']
-    ]); ?>
-<?php endif; ?>
-
 <?php $form = ActiveForm::begin([
-    'action' => ['task/create',  'boardId' => $board->id, $keyName => $id],
+    'action' => ['task/create', 'boardId' => $board->id, $keyName => $id],
     'options' => [
-        'class' => ['mt-2', 'mt-md-4']
+        'class' => ['mt-2', 'mt-md-4'],
+        'data' => [
+            'turbo-frame' => 'bucket-' . $id . '-frame'
+        ]
     ],
     'id' => 'createTaskForm',
+    'validateOnSubmit' => false,
     'fieldConfig' => function ($model, $attribute) {
         /* @var $model \yii\base\Model */
         return [
@@ -57,9 +53,9 @@ use yii\widgets\Pjax;
             'font-size' => '1rem',
             'right' => '.25rem'
         ],
-        'onclick' => 'jQuery(this).closest(\'form\').remove()',
         'data' => [
-            'dismiss' => 'card'
+            'target' => '#bucket-' . $id . '-create-task',
+            'toggle' => 'collapse'
         ],
         'aria' => [
             'label' => Yii::t('simialbi/kanban', 'Close')
@@ -75,6 +71,9 @@ use yii\widgets\Pjax;
                 'class' => ['form-group', 'mb-0']
             ]
         ])->widget(Datedropper::class, [
+            'options' => [
+                'id' => 'datedropper-create-task-' . $id,
+            ],
             'clientOptions' => [
                 'format' => 'd.m.Y',
                 'large' => true
@@ -150,6 +149,7 @@ use yii\widgets\Pjax;
                     ]));
                     ?>
                     <?= Dropdown::widget([
+                        'id' => 'dropdown-user-create-task-' . $id,
                         'items' => $items,
                         'encodeLabels' => false,
                         'options' => [
@@ -166,4 +166,7 @@ use yii\widgets\Pjax;
         ]) ?>
     </div>
 </div>
-<?php ActiveForm::end(); ?>
+<?php
+ActiveForm::end();
+//Frame::end();
+?>

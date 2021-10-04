@@ -9,9 +9,11 @@ namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\BucketEvent;
 use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\Module;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
@@ -34,7 +36,7 @@ class BucketController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create', 'update', 'delete'],
+                        'actions' => ['create', 'update', 'delete', 'view', 'view-assignee'],
                         'roles' => ['@']
                     ]
                 ]
@@ -45,35 +47,71 @@ class BucketController extends Controller
     /**
      * Create a new bucket
      * @param integer $boardId
-     * @return string
+     * @return string|\yii\web\Response
      */
     public function actionCreate($boardId)
     {
         $model = new Bucket(['board_id' => $boardId]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->renderAjax('_item', [
-                'statuses' => $this->module->statuses,
-                'users' => $this->module->users,
-                'id' => $model->id,
-                'boardId' => $model->board_id,
-                'title' => $model->name,
-                'tasks' => $model->tasks,
-                'completedTasks' => 0,
-                'keyName' => 'bucketId',
-                'action' => 'change-parent',
-                'sort' => true,
-                'renderContext' => true,
-                'readonly' => false
-            ]);
+            $this->module->trigger(Module::EVENT_BUCKET_CREATED, new BucketEvent([
+                'bucket' => $model
+            ]));
+            return $this->redirect(['plan/view', 'id' => $model->board_id]);
         }
-
-        $this->module->trigger(Module::EVENT_BUCKET_CREATED, new BucketEvent([
-            'bucket' => $model
-        ]));
 
         return $this->renderAjax('create', [
             'model' => $model
+        ]);
+    }
+
+    /**
+     * Render bucket
+     * @param integer $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionView($id)
+    {
+        $model = Bucket::find()
+            ->with(['openTasks'])
+            ->where(['id' => $id])
+            ->one();
+
+        return $this->renderPartial('view', [
+            'model' => $model,
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
+        ]);
+    }
+
+    /**
+     * @param integer|null $id
+     * @param integer $boardId
+     *
+     * @return string
+     */
+    public function actionViewAssignee($boardId, $id = null)
+    {
+        $query = Task::find()
+            ->alias('t')
+            ->distinct(true)
+            ->joinWith('assignments u')
+            ->joinWith('checklistElements')
+            ->joinWith('comments co')
+            ->innerJoinWith('bucket b')
+            ->with(['attachments', 'links'])
+            ->where(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
+            ->andWhere([
+                '{{b}}.[[board_id]]' => $boardId,
+                '{{u}}.[[user_id]]' => $id
+            ]);
+
+        return $this->renderPartial('view-assignee', [
+            'tasks' => $query->all(),
+            'user' => ArrayHelper::getValue($this->module->users, $id),
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
         ]);
     }
 
@@ -82,7 +120,7 @@ class BucketController extends Controller
      *
      * @param integer $id
      *
-     * @return string
+     * @return string|\yii\web\Response
      * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
@@ -99,6 +137,24 @@ class BucketController extends Controller
         return $this->renderAjax('update', [
             'model' => $model
         ]);
+    }
+
+    /**
+     * Finds the Event model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Bucket the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Bucket::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
     }
 
     /**
@@ -121,23 +177,5 @@ class BucketController extends Controller
             'id' => $model->board->id,
             'group' => Yii::$app->request->getQueryParam('group', 'bucket')
         ]);
-    }
-
-    /**
-     * Finds the Event model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     *
-     * @param integer $id
-     *
-     * @return Bucket the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Bucket::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
-        }
     }
 }

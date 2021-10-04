@@ -8,8 +8,8 @@ use yii\helpers\Url;
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
 /* @var $model \simialbi\yii2\kanban\models\Board */
-/* @var $buckets string */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $group string */
 /* @var $readonly boolean */
 /* @var $showTask integer|null */
 
@@ -36,10 +36,21 @@ $this->params['breadcrumbs'] = [
                 <div></div>
             </div>
             <div class="kanban-bottom-scrollbar">
-                <?= $this->render('buckets', [
-                    'model' => $model,
-                    'buckets' => $buckets
-                ]); ?>
+                <?php
+                switch ($group) {
+                    default:
+                    case 'bucket':
+                        echo $this->render('buckets', [
+                            'model' => $model
+                        ]);
+                        break;
+                    case 'assignee':
+                        echo $this->render('buckets-assignees', [
+                            'model' => $model
+                        ]);
+                        break;
+                }
+                ?>
 
                 <div class="d-md-none">
                     <div class="kanban-button-prev"><?= FAS::i('caret-left'); ?></div>
@@ -70,16 +81,12 @@ function onHide() {
 JS;
 Modal::begin([
     'id' => 'taskModal',
-    'options' => [
-        'class' => ['modal', 'remote', 'fade']
-    ],
+    'options' => ['class' => ['modal', 'remote', 'fade']],
     'clientOptions' => [
         'backdrop' => 'static',
         'keyboard' => false
     ],
-    'clientEvents' => [
-        'hidden.bs.modal' => new \yii\web\JsExpression($js)
-    ],
+    'clientEvents' => ['hidden.bs.modal' => new \yii\web\JsExpression($js)],
     'size' => Modal::SIZE_LARGE,
     'title' => null,
     'closeButton' => false
