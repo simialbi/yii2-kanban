@@ -12,7 +12,6 @@ use yii\web\JsExpression;
 
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
-/* @var $delegated string */
 /* @var $activeTab string */
 
 KanbanAsset::register($this);

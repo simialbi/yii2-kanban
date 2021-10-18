@@ -93,7 +93,6 @@ class PlanController extends Controller
 
         return $this->render('index', [
             'boards' => $boards,
-            'delegated' => '',
             'activeTab' => $activeTab
         ]);
     }
