@@ -83,6 +83,7 @@ class Board extends ActiveRecord
         }
 
         $query = static::find()
+            ->distinct(true)
             ->cache(60)
             ->alias('b')
             ->joinWith('assignments ba', false)

@@ -5,12 +5,13 @@ use marqu3s\summernote\Summernote;
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\datedropper\Datedropper;
 use simialbi\yii2\hideseek\HideSeek;
+use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
 use yii\helpers\ReplaceArrayValue;
 use yii\helpers\Url;
-use yii\widgets\Pjax;
+//use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Task */
@@ -18,20 +19,27 @@ use yii\widgets\Pjax;
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 
-Pjax::begin([
-    'id' => 'taskUpdatePjax',
-    'formSelector' => '#taskModalForm',
-    'enablePushState' => false,
-    'clientOptions' => [
-        'skipOuterContainers' => true
+Frame::begin([
+    'options' => [
+        'id' => 'task-' . $model->id . '-update-frame'
     ]
 ]);
+
+//Pjax::begin([
+//    'id' => 'taskUpdatePjax',
+//    'formSelector' => '#taskModalForm',
+//    'enablePushState' => false,
+//    'clientOptions' => [
+//        'skipOuterContainers' => true
+//    ]
+//]);
 ?>
 
     <div class="kanban-task-modal">
         <?php $form = ActiveForm::begin([
             'id' => 'taskModalForm',
             'action' => ['task/update', 'id' => $model->id],
+            'validateOnSubmit' => false,
             'fieldConfig' => [
                 'labelOptions' => [
                     'class' => ['col-form-label-sm', 'py-0']
@@ -41,7 +49,10 @@ Pjax::begin([
                 ]
             ],
             'options' => [
-                'enctype' => 'multipart/form-data'
+                'enctype' => 'multipart/form-data',
+                'data' => [
+                    'turbo-frame' => 'task-' . $model->id . '-frame'
+                ]
             ]
         ]); ?>
         <div class="modal-header">
@@ -231,6 +242,12 @@ Pjax::begin([
                         'class' => ['form-group', 'col-6', 'col-md-3']
                     ]
                 ])->dropDownList($statuses); ?>
+                <?php if ($model->start_date) {
+                    $model->start_date =  Yii::$app->formatter->asDate($model->start_date, 'dd.MM.yyyy');
+                } ?>
+                <?php if ($model->end_date) {
+                    $model->end_date =  Yii::$app->formatter->asDate($model->end_date, 'dd.MM.yyyy');
+                } ?>
                 <?= $form->field($model, 'start_date', [
                     'options' => [
                         'class' => ['form-group', 'col-6', 'col-md-3']
@@ -247,7 +264,7 @@ Pjax::begin([
                     ]
                 ])->widget(Datedropper::class, [
                     'options' => [
-                        'placeholder' => (null === $model->endDate) ? '' : $model->endDate
+                        'placeholder' => (null === $model->endDate) ? '' : Yii::$app->formatter->asDate($model->endDate, 'dd.MM.yyyy')
                     ],
                     'clientOptions' => [
                         'format' => 'd.m.Y',
@@ -336,7 +353,7 @@ Pjax::begin([
                             ); ?>
                             <?= Datedropper::widget([
                                 'name' => 'checklist[' . $checklistElement->id . '][end_date]',
-                                'value' => $checklistElement->end_date ? Yii::$app->formatter->asDate($checklistElement->end_date) : null,
+                                'value' => $checklistElement->end_date ? Yii::$app->formatter->asDate($checklistElement->end_date, 'dd.MM.yyyy') : null,
                                 'id' => 'task-' . $model->id . '-ce-' . $checklistElement->id . '-end-date',
                                 'options' => [
                                     'autocomplete' => 'off',
@@ -349,8 +366,9 @@ Pjax::begin([
                                     'large' => true,
                                     'autofill' => false,
                                     'minDate' => Yii::$app->formatter->asDate('now', 'MM/dd/yyyy'),
-                                    'maxDate' => ($model->end_date) ? Yii::$app->formatter->asDate($model->end_date,
-                                        'MM/dd/yyyy') : null
+                                    'maxDate' => ($model->end_date)
+                                        ? Yii::$app->formatter->asDate($model->end_date, 'MM/dd/yyyy')
+                                        : null
                                 ]
                             ]); ?>
                             <div class="input-group-append">
@@ -439,7 +457,11 @@ Pjax::begin([
                         'class' => 'custom-control-input'
                     ]); ?>
                     <?= Html::a(FAS::i('trash-alt'), ['attachment/delete', 'id' => $attachment->id], [
-                        'class' => ['remove-attachment']
+                        'class' => ['remove-attachment'],
+                        'data' => [
+                            'turbo' => 'true',
+                            'turbo-frame' => 'task-' . $model->id . '-update-frame'
+                        ]
                     ]); ?>
                     <?php $i++; ?>
                 </div>
@@ -583,7 +605,7 @@ Pjax::begin([
     </div>
 
 <?php
-Pjax::end();
+Frame::end();
 
 $baseUrl = Url::to(['/' . $this->context->module->id . '/sort']);
 $js = <<<JS

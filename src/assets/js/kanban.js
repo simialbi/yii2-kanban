@@ -22,15 +22,15 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 modal.find('.modal-content').load(href);
             });
 
-            $tabs.find('.nav-link').on('click', function (e) {
-                var $target = jQuery(e.target);
-                if ($target.data('src')) {
-                    e.preventDefault();
-                    var $container = jQuery($target.attr('href'));
-                    $container.load($target.data('src'));
-                    $target.tab('show');
-                }
-            });
+            // $tabs.find('.nav-link').on('click', function (e) {
+            //     var $target = jQuery(e.target);
+            //     if ($target.data('src')) {
+            //         e.preventDefault();
+            //         var $container = jQuery($target.attr('href'));
+            //         $container.load($target.data('src'));
+            //         $target.tab('show');
+            //     }
+            // });
 
             if ($tabs.length) {
                 $tabs.find('a[data-toggle="tab"]').on('shown.bs.tab', function () {
@@ -43,11 +43,111 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             } else {
                 initScrollBars();
             }
-            initTask();
             initSortable();
             initChecklist();
             initLinks();
         },
+        /**
+         * Initialize task
+         * @param {string|HTMLElement|jQuery} el
+         */
+        initTask: function (el) {
+            $('[data-toggle="tooltip"]').tooltip();
+            $(el).off('click.sa.kanban').on('click.sa.kanban', function (evt) {
+                if (!evt.target || !evt.target.tagName) {
+                    return;
+                }
+                var el = evt.target.tagName.toLowerCase();
+                if (el === 'div' || el === 'h6' || el === 'img' || $(el).closest('.kanban-task-description').length) {
+                    var $modal = $('#taskModal');
+
+                    $modal.modal('show');
+                    $modal.find('.modal-content').load($(this).find('.kanban-task-update-link').prop('href'));
+                }
+            });
+        },
+        /**
+         * Update sortable
+         */
+        updateSortable: function () {
+            var $tasks = $('.kanban-tasks');
+            $('.kanban-plan-sortable').sortable('refresh');
+
+            $tasks.each(function () {
+                var $this = $(this);
+                if ($this.data('uiSortable')) {
+                    $this.sortable('destroy');
+                }
+            });
+
+            $tasks.sortable({
+                items: '> .kanban-sortable',
+                connectWith: '.kanban-tasks',
+                distance: 5,
+                start: function (event, ui) {
+                    var $element = ui.item;
+                    activeBucket = $element.closest('.kanban-bucket');
+                },
+                stop: function (event, ui) {
+                    var $element = ui.item;
+                    var $oldParent = activeBucket;
+                    var $newParent = $element.closest('.kanban-bucket');
+                    var $before = $element.prev('.kanban-sortable');
+                    var action = 'move-after';
+                    var pk = null;
+                    var promise;
+
+                    if (!$before.length) {
+                        action = 'move-as-first';
+                    } else {
+                        pk = $before.data('id');
+                    }
+
+                    if ($oldParent.get(0) !== $newParent.get(0)) {
+                        var changeAction = $oldParent.data('action'),
+                            keyName = $oldParent.data('keyName'),
+                            sort = $oldParent.data('sort');
+                        var data = {
+                            modelClass: 'simialbi\\yii2\\kanban\\models\\Task',
+                            modelPk: $element.data('id')
+                        };
+                        data[keyName] = $newParent.data('id');
+                        promise = $.post(baseUrl + '/sort/' + changeAction, data);
+                        if (!sort) {
+                            // console.log($element);
+                            // return;
+                            promise.done(function () {
+                                var element = $element.get(0);
+                                if (null === element.src) {
+                                    element.src = baseUrl + '/task/view?id=' + $element.data('id');
+                                } else {
+                                    element.reload();
+                                }
+                            });
+                            return;
+                        }
+                    } else {
+                        var dfd = $.Deferred();
+                        promise = dfd.promise();
+                        dfd.resolve();
+                    }
+
+                    promise.done(function () {
+                        $.post(baseUrl + '/sort/' + action, {
+                            modelClass: 'simialbi\\yii2\\kanban\\models\\Task',
+                            modelPk: $element.data('id'),
+                            pk: pk
+                        }, function (data) {
+                            // console.log(data);
+                        });
+                    });
+                }
+            });
+        },
+        /**
+         * Get Swiper instance
+         * @return {Swiper}
+         */
         getSwiper: function () {
             return slider;
         },
@@ -232,23 +332,6 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         }
     }
 
-    function initTask()
-    {
-        $('[data-toggle="tooltip"]').tooltip();
-        $('.kanban-task').on('click.sa.kanban', function (evt) {
-            if (!evt.target || !evt.target.tagName) {
-                return;
-            }
-            var el = evt.target.tagName.toLowerCase();
-            if (el === 'div' || el === 'h6' || el === 'img' || $(el).closest('.kanban-task-description').length) {
-                var $modal = $('#taskModal');
-
-                $modal.modal('show');
-                $modal.find('.modal-content').load($(this).find('.kanban-task-update-link').prop('href'));
-            }
-        });
-    }
-
     function initSortable()
     {
         $('.kanban-plan-sortable').sortable({
@@ -271,76 +354,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                     modelPk: $element.data('id'),
                     pk: pk
                 }, function (data) {
-                    console.log(data);
-                });
-            }
-        });
-
-        $('.kanban-tasks').sortable({
-            items: '> .kanban-sortable',
-            connectWith: '.kanban-tasks',
-            distance: 5,
-            start: function (event, ui) {
-                var $element = ui.item;
-                activeBucket = $element.closest('.kanban-bucket');
-            },
-            stop: function (event, ui) {
-                var $element = ui.item;
-                var $oldParent = activeBucket;
-                var $newParent = $element.closest('.kanban-bucket');
-                var $before = $element.prev('.kanban-sortable');
-                var action = 'move-after';
-                var pk = null;
-                var promise;
-
-                if (!$before.length) {
-                    action = 'move-as-first';
-                } else {
-                    pk = $before.data('id');
-                }
-
-                if ($oldParent.get(0) !== $newParent.get(0)) {
-                    var changeAction = $oldParent.data('action'),
-                        keyName = $oldParent.data('keyName'),
-                        sort = $oldParent.data('sort');
-                    var data = {
-                        modelClass: 'simialbi\\yii2\\kanban\\models\\Task',
-                        modelPk: $element.data('id')
-                    };
-                    data[keyName] = $newParent.data('id');
-                    promise = $.post(baseUrl + '/sort/' + changeAction, data);
-                    if (!sort) {
-                        // console.log($element);
-                        // return;
-                        promise.done(function () {
-                            var event = jQuery.Event('click');
-                            var container = '#' + $element.prop('id');
-
-                            event.currentTarget = document.createElement('a');
-                            event.currentTarget.href = baseUrl + '/task/view?id=' + $element.data('id');
-                            jQuery.pjax.click(event, container, {
-                                replace: false,
-                                push: false,
-                                timeout: 0,
-                                skipOuterContainers: true
-                            });
-                        });
-                        return;
-                    }
-                } else {
-                    var dfd = $.Deferred();
-                    promise = dfd.promise();
-                    dfd.resolve();
-                }
-
-                promise.done(function () {
-                    $.post(baseUrl + '/sort/' + action, {
-                        modelClass: 'simialbi\\yii2\\kanban\\models\\Task',
-                        modelPk: $element.data('id'),
-                        pk: pk
-                    }, function (data) {
-                        console.log(data);
-                    });
+                    // console.log(data);
                 });
             }
         });

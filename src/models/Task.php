@@ -89,8 +89,8 @@ class Task extends ActiveRecord
             [['id', 'bucket_id', 'ticket_id', 'status'], 'integer'],
             ['subject', 'string', 'max' => 255],
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
-            ['start_date', 'date', 'timestampAttribute' => 'start_date'],
-            ['end_date', 'date', 'timestampAttribute' => 'end_date'],
+            ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'start_date'],
+            ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
             ['description', 'string'],
             [['card_show_description', 'card_show_checklist', 'card_show_links'], 'boolean'],
 
@@ -288,12 +288,14 @@ class Task extends ActiveRecord
             return null;
         }
         /** @var ChecklistElement[] $checklistElements */
-        $grouped = ArrayHelper::index($this->checklistElements, null, 'is_done');
+        $grouped = ArrayHelper::index($this->getChecklistElements()->where(['not', ['end_date' => null]])->all(), null, 'is_done');
         $checklistElements = ArrayHelper::getValue($grouped, '0', []);
         if (empty($checklistElements)) {
             return null;
         }
         ArrayHelper::multisort($checklistElements, 'end_date', SORT_ASC, SORT_NUMERIC);
+
+//        echo "<pre>"; var_dump(ArrayHelper::toArray($grouped, $checklistElements)); exit;
 
         return $checklistElements[0]->end_date;
     }

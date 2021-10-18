@@ -9,8 +9,8 @@ namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\BoardEvent;
 use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\kanban\models\BoardUserAssignment;
 use simialbi\yii2\kanban\models\Bucket;
-use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\Module;
 use Yii;
@@ -33,7 +33,6 @@ use yii\web\UploadedFile;
  */
 class PlanController extends Controller
 {
-    use RenderingTrait;
 
     /**
      * {@inheritDoc}
@@ -63,7 +62,7 @@ class PlanController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['view', 'search-tasks'],
+                        'actions' => ['view'],
                         'matchCallback' => function () {
                             return ArrayHelper::keyExists(
                                 Yii::$app->request->getQueryParam('id'),
@@ -92,11 +91,9 @@ class PlanController extends Controller
     {
         $boards = Board::findByUserId();
 
-        Url::remember(['plan/index'], 'plan-view');
-
         return $this->render('index', [
             'boards' => $boards,
-            'delegated' => $this->renderDelegatedTasks(),
+            'delegated' => '',
             'activeTab' => $activeTab
         ]);
     }
@@ -116,47 +113,13 @@ class PlanController extends Controller
         $model = $this->findModel($id);
         $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
 
-        $bucketContent = $this->renderBucketContent($model, $group, $readonly);
-
-        Url::remember(['plan/view', 'id' => $id, 'group' => $group], 'plan-view');
-
         return $this->render('view', [
             'boards' => Board::findByUserId(),
             'model' => $model,
             'readonly' => $readonly,
-            'buckets' => $bucketContent,
+            'group' => $group,
             'users' => $this->module->users,
             'showTask' => $showTask
-        ]);
-    }
-
-    /**
-     * @param integer $id
-     * @param string $group
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException
-     */
-    public function actionSearchTasks($id, $group = 'bucket')
-    {
-        $q = Yii::$app->request->getBodyParam('q');
-        if (empty($q)) {
-            return $this->redirect(['view', 'id' => $id]);
-        }
-
-        $model = $this->findModel($id);
-        $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
-
-        $bucketContent = $this->renderBucketContent($model, $group, $readonly, [
-            'or',
-            ['like', '{{t}}.[[subject]]', $q],
-            ['like', '{{t}}.[[description]]', $q],
-            ['like', ChecklistElement::tableName() . '.[[name]]', $q],
-            ['like', '{{co}}.[[text]]', $q]
-        ]);
-
-        return $this->renderAjax('buckets', [
-            'model' => $model,
-            'buckets' => $bucketContent
         ]);
     }
 
@@ -202,27 +165,31 @@ class PlanController extends Controller
             ];
 
             if (strtotime($endDate) < time()) {
-//                $calendarTask['title'] = FAR::i('calendar-alt') . ' ' . $calendarTask['title'];
                 $calendarTask['classNames'] = ['border-0', 'bg-danger'];
             }
             if ($task->status === Task::STATUS_DONE) {
                 $calendarTask['classNames'] = ['border-0', 'bg-success'];
             }
             if ($task->status !== Task::STATUS_NOT_BEGUN && $task->status !== Task::STATUS_DONE) {
-//                $calendarTask['title'] = FAS::i('star-half-alt') . ' ' . $calendarTask['title'];
                 $calendarTask['classNames'] = ['border-0', 'bg-dark'];
             }
 
             $calendarTasks[] = $calendarTask;
         }
 
-        Url::remember(['plan/schedule', 'id' => $id], 'plan-view');
-
         return $this->render('schedule', [
             'model' => $model,
-            'otherTasks' => $this->renderBucketContent($model, 'schedule', $readonly),
+            'otherTasks' => $model->getTasks()
+                ->where([
+                    'start_date' => null,
+                    'end_date' => null
+                ])
+                ->with(['bucket'])
+                ->orderBy(['bucket_id' => SORT_ASC])
+                ->andWhere(['not', ['status' => Task::STATUS_DONE]])->all(),
             'calendarTasks' => $calendarTasks,
             'users' => $this->module->users,
+            'statuses' =>  $this->module->statuses,
             'readonly' => $readonly
         ]);
     }
@@ -475,7 +442,7 @@ class PlanController extends Controller
      * @param integer $id
      * @param integer|string $userId
      *
-     * @return \yii\web\Response
+     * @return string
      * @throws NotFoundHttpException
      * @throws \yii\db\Exception
      */
@@ -488,18 +455,20 @@ class PlanController extends Controller
             'user_id' => $userId
         ])->execute();
 
-        $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->id];
-
-        return $this->redirect($previous);
+        return $this->renderAjax('assignees', [
+            'model' => $model,
+            'readonly' => !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count(),
+            'users' => $this->module->users
+        ]);
     }
 
     /**
-     * Assign user to plan
+     * Expel user from plan
      *
      * @param integer $id
      * @param integer|string $userId
      *
-     * @return \yii\web\Response
+     * @return string
      * @throws NotFoundHttpException
      * @throws \yii\db\Exception
      */
@@ -511,14 +480,16 @@ class PlanController extends Controller
             'board_id' => $model->id,
             'user_id' => $userId
         ])->execute();
-        $model::getDb()->createCommand()->delete('{{%kanban_task_user_assignment}}', [
-            'task_id' => ArrayHelper::getColumn($model->tasks, 'id'),
-            'user_id' => $userId
-        ])->execute();
+//        $model::getDb()->createCommand()->delete('{{%kanban_task_user_assignment}}', [
+//            'task_id' => ArrayHelper::getColumn($model->tasks, 'id'),
+//            'user_id' => $userId
+//        ])->execute();
 
-        $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->id];
-
-        return $this->redirect($previous);
+        return $this->renderAjax('assignees', [
+            'model' => $model,
+            'readonly' => !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count(),
+            'users' => $this->module->users
+        ]);
     }
 
     /**

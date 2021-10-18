@@ -4,12 +4,13 @@ use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
 use yii\bootstrap4\Modal;
 use yii\helpers\Url;
+use yii\web\JsExpression;
 
 /* @var $this \yii\web\View */
 /* @var $boards \simialbi\yii2\kanban\models\Board[] */
 /* @var $model \simialbi\yii2\kanban\models\Board */
-/* @var $buckets string */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $group string */
 /* @var $readonly boolean */
 /* @var $showTask integer|null */
 
@@ -36,10 +37,29 @@ $this->params['breadcrumbs'] = [
                 <div></div>
             </div>
             <div class="kanban-bottom-scrollbar">
-                <?= $this->render('buckets', [
-                    'model' => $model,
-                    'buckets' => $buckets
-                ]); ?>
+                <?php
+                switch ($group) {
+                    default:
+                    case 'bucket':
+                        echo $this->render('buckets', [
+                            'model' => $model,
+                            'readonly' => $readonly
+                        ]);
+                        break;
+                    case 'assignee':
+                        echo $this->render('buckets-assignees', [
+                            'model' => $model,
+                            'readonly' => $readonly
+                        ]);
+                        break;
+                    case 'status':
+                        echo $this->render('buckets-status', [
+                            'model' => $model,
+                            'readonly' => $readonly
+                        ]);
+                        break;
+                }
+                ?>
 
                 <div class="d-md-none">
                     <div class="kanban-button-prev"><?= FAS::i('caret-left'); ?></div>
@@ -68,20 +88,15 @@ function onHide() {
     });
 }
 JS;
-Modal::begin([
+echo Modal::widget([
     'id' => 'taskModal',
-    'options' => [
-        'class' => ['modal', 'remote', 'fade']
-    ],
+    'options' => ['class' => ['modal', 'remote', 'fade']],
     'clientOptions' => [
         'backdrop' => 'static',
         'keyboard' => false
     ],
-    'clientEvents' => [
-        'hidden.bs.modal' => new \yii\web\JsExpression($js)
-    ],
-    'size' => Modal::SIZE_LARGE,
+    'clientEvents' => ['hidden.bs.modal' => new JsExpression($js)],
+    'size' => Modal::SIZE_EXTRA_LARGE,
     'title' => null,
     'closeButton' => false
 ]);
-Modal::end();

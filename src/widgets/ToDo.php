@@ -134,7 +134,7 @@ class ToDo extends Widget
 
         foreach ($results as $task) {
             $options = $this->itemOptions;
-            $options['href'] = Url::to(['/schedule/plan/view', 'id' => $task['board']['id'], 'showTask' => $task['id']]);
+            $options['href'] = Url::to(['plan/view', 'id' => $task['board']['id'], 'showTask' => $task['id']]);
 
             $content = Html::tag('h6', $task['subject'], ['class' => ['m-0']]);
             $small = $task['board']['name'];
