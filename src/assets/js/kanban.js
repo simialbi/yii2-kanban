@@ -22,15 +22,15 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 modal.find('.modal-content').load(href);
             });
 
-            $tabs.find('.nav-link').on('click', function (e) {
-                var $target = jQuery(e.target);
-                if ($target.data('src')) {
-                    e.preventDefault();
-                    var $container = jQuery($target.attr('href'));
-                    $container.load($target.data('src'));
-                    $target.tab('show');
-                }
-            });
+            // $tabs.find('.nav-link').on('click', function (e) {
+            //     var $target = jQuery(e.target);
+            //     if ($target.data('src')) {
+            //         e.preventDefault();
+            //         var $container = jQuery($target.attr('href'));
+            //         $container.load($target.data('src'));
+            //         $target.tab('show');
+            //     }
+            // });
 
             if ($tabs.length) {
                 $tabs.find('a[data-toggle="tab"]').on('shown.bs.tab', function () {
@@ -53,7 +53,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
          */
         initTask: function (el) {
             $('[data-toggle="tooltip"]').tooltip();
-            $(el).on('click.sa.kanban', function (evt) {
+            $(el).off('click.sa.kanban').on('click.sa.kanban', function (evt) {
                 if (!evt.target || !evt.target.tagName) {
                     return;
                 }
@@ -117,17 +117,12 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                             // console.log($element);
                             // return;
                             promise.done(function () {
-                                var event = jQuery.Event('click');
-                                var container = '#' + $element.prop('id');
-
-                                event.currentTarget = document.createElement('a');
-                                event.currentTarget.href = baseUrl + '/task/view?id=' + $element.data('id');
-                                jQuery.pjax.click(event, container, {
-                                    replace: false,
-                                    push: false,
-                                    timeout: 0,
-                                    skipOuterContainers: true
-                                });
+                                var element = $element.get(0);
+                                if (null === element.src) {
+                                    element.src = baseUrl + '/task/view?id=' + $element.data('id');
+                                } else {
+                                    element.reload();
+                                }
                             });
                             return;
                         }

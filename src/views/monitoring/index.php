@@ -2,6 +2,7 @@
 
 use kartik\grid\GridView;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\Html;
 use yii\helpers\ArrayHelper;
 use yii\widgets\Pjax;
@@ -11,21 +12,19 @@ use yii\widgets\Pjax;
 /* @var $dataProvider \yii\data\ActiveDataProvider */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 
+Frame::begin([
+    'options' => [
+        'id' => 'monitoring-frame'
+    ]
+]);
+
 ?>
 
 <div class="kanban-monitoring-index">
-    <?php Pjax::begin([
-        'id' => 'monitoringPjax',
-        'enablePushState' => false,
-        'clientOptions' => [
-            'skipOuterContainers' => true
-        ]
-    ]); ?>
-
     <?= GridView::widget([
         'filterModel' => $searchModel,
         'dataProvider' => $dataProvider,
-        'pjax' => false,
+        'pjax' => true,
         'bordered' => false,
         'export' => false,
         'toolbar' => [
@@ -135,6 +134,6 @@ use yii\widgets\Pjax;
             ]
         ]
     ]); ?>
-
-    <?php Pjax::end(); ?>
 </div>
+<?php
+Frame::end();

@@ -36,7 +36,6 @@ class BucketController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create', 'update', 'delete', 'view', 'view-assignee'],
                         'roles' => ['@']
                     ]
                 ]
@@ -68,17 +67,44 @@ class BucketController extends Controller
     /**
      * Render bucket
      * @param integer $id
+     * @param boolean $readonly
      * @return string
-     * @throws NotFoundHttpException
      */
-    public function actionView($id)
+    public function actionView($id, $readonly = false)
     {
         $model = Bucket::find()
-            ->with(['openTasks'])
+            ->with([
+                'openTasks' => function ($query) use ($readonly) {
+                    /** @var $query \yii\db\ActiveQuery */
+                    if ($readonly) {
+                        $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+                    }
+                }
+            ])
             ->where(['id' => $id])
             ->one();
 
         return $this->renderPartial('view', [
+            'model' => $model,
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users,
+            'finishedTasks' => $model->getTasks()->where(['status' => Task::STATUS_DONE])->count('id')
+        ]);
+    }
+
+    /**
+     * Render bucket
+     * @param integer $id
+     * @return string
+     */
+    public function actionViewFinished($id)
+    {
+        $model = Bucket::find()
+            ->with(['finishedTasks'])
+            ->where(['id' => $id])
+            ->one();
+
+        return $this->renderPartial('view-finished', [
             'model' => $model,
             'statuses' => $this->module->statuses,
             'users' => $this->module->users
@@ -86,10 +112,11 @@ class BucketController extends Controller
     }
 
     /**
-     * @param integer|null $id
      * @param integer $boardId
+     * @param integer|null $id
      *
      * @return string
+     * @throws \Exception
      */
     public function actionViewAssignee($boardId, $id = null)
     {
@@ -108,8 +135,81 @@ class BucketController extends Controller
             ]);
 
         return $this->renderPartial('view-assignee', [
+            'id' => $id,
+            'boardId' => $boardId,
             'tasks' => $query->all(),
             'user' => ArrayHelper::getValue($this->module->users, $id),
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users,
+            'finishedTasks' => $query->where(['{{t}}.[[status]]' => Task::STATUS_DONE])->andWhere([
+                '{{b}}.[[board_id]]' => $boardId,
+                '{{u}}.[[user_id]]' => $id
+            ])->count('id')
+        ]);
+    }
+
+    /**
+     * @param integer $boardId
+     * @param integer|null $id
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function actionViewAssigneeFinished($boardId, $id = null)
+    {
+        $query = Task::find()
+            ->alias('t')
+            ->distinct(true)
+            ->joinWith('assignments u')
+            ->joinWith('checklistElements')
+            ->joinWith('comments co')
+            ->innerJoinWith('bucket b')
+            ->with(['attachments', 'links'])
+            ->where(['{{t}}.[[status]]' => Task::STATUS_DONE])
+            ->andWhere([
+                '{{b}}.[[board_id]]' => $boardId,
+                '{{u}}.[[user_id]]' => $id
+            ]);
+
+        return $this->renderPartial('view-assignee-finished', [
+            'id' => $id,
+            'boardId' => $boardId,
+            'tasks' => $query->all(),
+            'user' => ArrayHelper::getValue($this->module->users, $id),
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users
+        ]);
+    }
+
+    /**
+     * @param integer $status
+     * @param integer $boardId
+     * @param boolean $readonly
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function actionViewStatus($boardId, $status, $readonly = false)
+    {
+        $query = Task::find()
+            ->alias('t')
+            ->distinct(true)
+            ->joinWith('assignments u')
+            ->joinWith('checklistElements')
+            ->joinWith('comments co')
+            ->innerJoinWith('bucket b')
+            ->with(['attachments', 'links'])
+            ->where([
+                '{{t}}.[[status]]' => $status,
+                '{{b}}.[[board_id]]' => $boardId
+            ]);
+        if ($readonly) {
+            $query->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+        }
+
+        return $this->renderPartial('view-status', [
+            'tasks' => $query->all(),
+            'status' => $status,
             'statuses' => $this->module->statuses,
             'users' => $this->module->users
         ]);

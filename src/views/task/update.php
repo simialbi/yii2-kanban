@@ -11,7 +11,7 @@ use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
 use yii\helpers\ReplaceArrayValue;
 use yii\helpers\Url;
-use yii\widgets\Pjax;
+//use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Task */
@@ -457,7 +457,11 @@ Frame::begin([
                         'class' => 'custom-control-input'
                     ]); ?>
                     <?= Html::a(FAS::i('trash-alt'), ['attachment/delete', 'id' => $attachment->id], [
-                        'class' => ['remove-attachment']
+                        'class' => ['remove-attachment'],
+                        'data' => [
+                            'turbo' => 'true',
+                            'turbo-frame' => 'task-' . $model->id . '-update-frame'
+                        ]
                     ]); ?>
                     <?php $i++; ?>
                 </div>

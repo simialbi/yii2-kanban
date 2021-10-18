@@ -23,7 +23,17 @@ Frame::begin([
     'options' => [
         'id' => 'task-' . $model->id . '-frame',
         'class' => ['kanban-sortable'],
-        'data' => ['id' =>  $model->id]
+        'data' => [
+            'id' =>  $model->id,
+            'event' => [
+                'id' => $model->id,
+                'title' => $model->subject,
+                'allDay' => true,
+                'classNames' => ['border-0'],
+                'url' => Url::to(['task/update', 'id' => $model->id])
+            ]
+        ],
+        'alt' => $model->subject . ' ' . str_replace(["\r", "\n"], ' ', strip_tags($model->description))
     ]
 ]);
 
@@ -68,7 +78,11 @@ Frame::begin([
                     FAR::i('check-circle', ['class' => 'd-block']),
                     ['task/set-status', 'id' => $model->id, 'status' => Task::STATUS_DONE],
                     [
-                        'class' => ['h5', 'kanban-task-done-link', 'd-block', 'text-decoration-none']
+                        'class' => ['h5', 'kanban-task-done-link', 'd-block', 'text-decoration-none'],
+                        'data' => [
+                            'turbo-frame' => 'task-' . $model->id . '-frame',
+                            'turbo' => 'true'
+                        ]
                     ]
                 ); ?>
             </div>
@@ -134,7 +148,13 @@ Frame::begin([
                             }
                             $items[] = [
                                 'label' => $label,
-                                'url' => ['task/set-status', 'id' => $model->id, 'status' => $status]
+                                'url' => ['task/set-status', 'id' => $model->id, 'status' => $status],
+                                'linkOptions' => [
+                                    'data' => [
+                                        'turbo-frame' => 'task-' . $model->id . '-frame',
+                                        'turbo' => 'true'
+                                    ]
+                                ]
                             ];
                         }
                         echo Dropdown::widget([
@@ -320,6 +340,7 @@ Frame::begin([
                         'linkOptions' => [
                             'data' => [
 //                                'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+                                'turbo' => 'true',
                                 'turbo-frame' => 'bucket-' . $model->bucket_id . '-frame'
                             ]
                         ]
@@ -384,7 +405,11 @@ Frame::begin([
                                 'assigned' => true
                             ]),
                             'linkOptions' => [
-                                'class' => ['align-items-center', 'remove-assignee', 'is-assigned']
+                                'class' => ['align-items-center', 'remove-assignee', 'is-assigned'],
+                                'data' => [
+                                    'turbo-frame' => 'task-' . $model->id . '-frame',
+                                    'turbo' => 'true'
+                                ]
                             ],
                             'disabled' => $model->created_by != Yii::$app->user->id,
                             'url' => ['task/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
@@ -403,7 +428,11 @@ Frame::begin([
                                 'assigned' => false
                             ]),
                             'linkOptions' => [
-                                'class' => ['align-items-center', 'add-assignee']
+                                'class' => ['align-items-center', 'add-assignee'],
+                                'data' => [
+                                    'turbo-frame' => 'task-' . $model->id . '-frame',
+                                    'turbo' => 'true'
+                                ]
                             ],
 //                            'disabled' => $model->created_by != Yii::$app->user->id,
                             'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
@@ -449,7 +478,9 @@ Frame::begin([
         <?php if ($closeModal): ?>
         jQuery('#taskModal').modal('hide');
         <?php endif; ?>
-        window.sa.kanban.initTask('#task-<?=$model->id;?>-frame');
+        if (window.sa && window.sa.kanban) {
+            window.sa.kanban.initTask('#task-<?=$model->id;?>-frame');
+        }
     </script>
 <?php
 Frame::end();

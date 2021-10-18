@@ -3,6 +3,7 @@
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
 use simialbi\yii2\kanban\widgets\ToDo;
+use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\Html;
 use yii\bootstrap4\Modal;
 use yii\bootstrap4\Tabs;
@@ -94,9 +95,21 @@ $this->params['breadcrumbs'] = [$this->title];
     </div>
     <?php $this->endBlock(); ?>
     <?php $this->beginBlock('tab-delegated-tasks'); ?>
-    <?= $this->render('/task/delegated', [
-        'delegated' => $delegated,
-        'view' => null
+    <?= Frame::widget([
+        'options' => [
+            'id' => 'delegated-tasks-frame',
+            'src' => Url::to(['task/view-delegated']),
+            'loading' => 'lazy'
+        ]
+    ]); ?>
+    <?php $this->endBlock(); ?>
+    <?php $this->beginBlock('tab-monitoring'); ?>
+    <?= Frame::widget([
+        'options' => [
+            'id' => 'monitoring-frame',
+            'src' => Url::to(['monitoring/index']),
+            'loading' => 'lazy'
+        ]
     ]); ?>
     <?php $this->endBlock(); ?>
     <?php
@@ -122,7 +135,7 @@ JS;
         'clientEvents' => [
             'hidden.bs.modal' => new JsExpression($js)
         ],
-        'size' => Modal::SIZE_LARGE,
+        'size' => Modal::SIZE_EXTRA_LARGE,
         'title' => null,
         'closeButton' => false
     ]);
@@ -153,10 +166,7 @@ JS;
             ],
             [
                 'label' => Yii::t('simialbi/kanban/plan', 'Monitoring'),
-                'linkOptions' => [
-                    'data' => ['src' => Url::to(['monitoring/index'])]
-                ],
-                'content' => '',
+                'content' => $this->blocks['tab-monitoring'],
                 'active' => ($activeTab === 'monitoring'),
                 'visible' => Yii::$app->user->can('monitorKanbanTasks')
             ]
