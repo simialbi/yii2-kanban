@@ -124,10 +124,8 @@ class BucketController extends Controller
             ->alias('t')
             ->distinct(true)
             ->joinWith('assignments u')
-            ->joinWith('checklistElements')
-            ->joinWith('comments co')
             ->innerJoinWith('bucket b')
-            ->with(['attachments', 'links'])
+            ->with(['attachments', 'links', 'assignments', 'checklistElements', 'comments'])
             ->where(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
             ->andWhere([
                 '{{b}}.[[board_id]]' => $boardId,
@@ -144,7 +142,7 @@ class BucketController extends Controller
             'finishedTasks' => $query->where(['{{t}}.[[status]]' => Task::STATUS_DONE])->andWhere([
                 '{{b}}.[[board_id]]' => $boardId,
                 '{{u}}.[[user_id]]' => $id
-            ])->count('id')
+            ])->count()
         ]);
     }
 
@@ -161,10 +159,8 @@ class BucketController extends Controller
             ->alias('t')
             ->distinct(true)
             ->joinWith('assignments u')
-            ->joinWith('checklistElements')
-            ->joinWith('comments co')
             ->innerJoinWith('bucket b')
-            ->with(['attachments', 'links'])
+            ->with(['attachments', 'links', 'assignments', 'checklistElements', 'comments'])
             ->where(['{{t}}.[[status]]' => Task::STATUS_DONE])
             ->andWhere([
                 '{{b}}.[[board_id]]' => $boardId,
@@ -193,7 +189,7 @@ class BucketController extends Controller
     {
         $query = Task::find()
             ->alias('t')
-            ->distinct(true)
+//            ->distinct(true)
             ->joinWith('assignments u')
             ->joinWith('checklistElements')
             ->joinWith('comments co')
