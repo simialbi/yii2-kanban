@@ -172,22 +172,19 @@ class TaskController extends Controller
 
             $i = 0;
             foreach ($assignees as $assignee) {
-                try {
-                    if ($taskPerUser && $i++ > 0) {
-                        $task->setAttribute('id', null);
-                        $task = new Task($task->toArray());
-                        $task->save();
-                    }
-                    $task::getDb()->createCommand()->insert(
-                        '{{%kanban_task_user_assignment}}',
-                        ['task_id' => $task->id, 'user_id' => $assignee]
-                    )->execute();
-                    $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
-                        'task' => $task,
-                        'user' => ArrayHelper::getValue($this->module->users, $assignee)
-                    ]));
-                } catch (Exception $e) {
+                if ($taskPerUser && $i++ > 0) {
+                    $task->setAttribute('id', null);
+                    $task = new Task($task->toArray());
+                    $task->save();
                 }
+                $assignment = new TaskUserAssignment();
+                $assignment->task_id = $task->id;
+                $assignment->user_id = $assignee;
+                $assignment->save();
+                $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+                    'task' => $task,
+                    'user' => ArrayHelper::getValue($this->module->users, $assignee)
+                ]));
             }
 
             return $this->renderAjax('/bucket/view', [
@@ -277,25 +274,16 @@ class TaskController extends Controller
                 $element->save();
             }
 
-            try {
-                $model::getDb()->createCommand()->delete(
-                    '{{%kanban_task_user_assignment}}',
-                    ['and', ['task_id' => $model->id], ['not', ['user_id' => $assignees]]]
-                )->execute();
-            } catch (Exception $e) {
-            }
+            TaskUserAssignment::deleteAll(['and', ['task_id' => $model->id], ['not', ['user_id' => $assignees]]]);
             foreach ($assignees as $assignee) {
-                try {
-                    $model::getDb()->createCommand()->insert(
-                        '{{%kanban_task_user_assignment}}',
-                        ['task_id' => $model->id, 'user_id' => $assignee]
-                    )->execute();
-                    $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
-                        'task' => $model,
-                        'user' => ArrayHelper::getValue($this->module->users, $assignee)
-                    ]));
-                } catch (Exception $e) {
-                }
+                $assignment = new TaskUserAssignment();
+                $assignment->task_id = $model->id;
+                $assignment->user_id = $assignee;
+                $assignment->save();
+                $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+                    'task' => $model,
+                    'user' => ArrayHelper::getValue($this->module->users, $assignee)
+                ]));
             }
 
             if ($comment) {
@@ -735,10 +723,10 @@ class TaskController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
-            'task_id' => $model->id,
-            'user_id' => $userId
-        ])->execute();
+        $assignment = new TaskUserAssignment();
+        $assignment->task_id = $model->id;
+        $assignment->user_id = $userId;
+        $assignment->save();
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
@@ -770,10 +758,10 @@ class TaskController extends Controller
             throw new ForbiddenHttpException(Yii::t('yii', 'You are not allowed to perform this action.'));
         }
 
-        $model::getDb()->createCommand()->delete('{{%kanban_task_user_assignment}}', [
+        TaskUserAssignment::deleteAll([
             'task_id' => $model->id,
             'user_id' => $userId
-        ])->execute();
+        ]);
 
         $this->module->trigger(Module::EVENT_TASK_UNASSIGNED, new TaskEvent([
             'task' => $model,

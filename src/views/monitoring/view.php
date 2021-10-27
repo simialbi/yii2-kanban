@@ -181,13 +181,12 @@ foreach ($statuses as $status => $label) {
                         'class' => '\kartik\grid\DataColumn',
                         'format' => 'date',
                         'attribute' => 'end_date',
-                        'filterType' => GridView::FILTER_DATE,
+                        'filterType' => '\simialbi\yii2\datedropper\Datedropper',
                         'filterWidgetOptions' => [
-                            'pickerButton' => '<span class="input-group-text kv-date-picker">' . FAS::i('calendar-alt') . '</span>',
-                            'removeButton' => false,
-                            'pluginOptions' => [
-                                'format' => 'dd.mm.yyyy',
-                                'todayHighlight' => true
+                            'clientOptions' => [
+                                'format' => 'd.m.Y',
+                                'large' => true,
+                                'autofill' => false
                             ]
                         ],
                         'vAlign' => GridView::ALIGN_MIDDLE
@@ -196,13 +195,12 @@ foreach ($statuses as $status => $label) {
                         'class' => '\kartik\grid\DataColumn',
                         'format' => 'datetime',
                         'attribute' => 'created_at',
-                        'filterType' => GridView::FILTER_DATE,
+                        'filterType' => '\simialbi\yii2\datedropper\Datedropper',
                         'filterWidgetOptions' => [
-                            'pickerButton' => '<span class="input-group-text kv-date-picker">' . FAS::i('calendar-alt') . '</span>',
-                            'removeButton' => false,
-                            'pluginOptions' => [
-                                'format' => 'dd.mm.yyyy',
-                                'todayHighlight' => true
+                            'clientOptions' => [
+                                'format' => 'd.m.Y',
+                                'large' => true,
+                                'autofill' => false
                             ]
                         ],
                         'vAlign' => GridView::ALIGN_MIDDLE
@@ -211,13 +209,12 @@ foreach ($statuses as $status => $label) {
                         'class' => '\kartik\grid\DataColumn',
                         'format' => 'datetime',
                         'attribute' => 'updated_at',
-                        'filterType' => GridView::FILTER_DATE,
+                        'filterType' => '\simialbi\yii2\datedropper\Datedropper',
                         'filterWidgetOptions' => [
-                            'pickerButton' => '<span class="input-group-text kv-date-picker">' . FAS::i('calendar-alt') . '</span>',
-                            'removeButton' => false,
-                            'pluginOptions' => [
-                                'format' => 'dd.mm.yyyy',
-                                'todayHighlight' => true
+                            'clientOptions' => [
+                                'format' => 'd.m.Y',
+                                'large' => true,
+                                'autofill' => false
                             ]
                         ],
                         'vAlign' => GridView::ALIGN_MIDDLE

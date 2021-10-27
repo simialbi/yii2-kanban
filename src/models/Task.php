@@ -29,6 +29,8 @@ use yii\helpers\ArrayHelper;
  * @property integer $status
  * @property integer|string|\DateTime $start_date
  * @property integer|string|\DateTime $end_date
+ * @property boolean $is_recurring
+ * @property string $recurrence_pattern
  * @property string $description
  * @property boolean $card_show_description
  * @property boolean $card_show_checklist
@@ -61,23 +63,21 @@ class Task extends ActiveRecord
 {
     const EVENT_BEFORE_FINISH = 'beforeFinish';
     const EVENT_AFTER_FINISH = 'afterFinish';
-
-    /**
-     * @var string Hash
-     */
-    private $_hash;
-
     const STATUS_DONE = 0;
     const STATUS_IN_PROGRESS = 5;
     const STATUS_NOT_BEGUN = 10;
     const STATUS_LATE = 15;
+    /**
+     * @var string Hash
+     */
+    private $_hash;
 
     /**
      * {@inheritDoc}
      */
     public static function tableName()
     {
-        return '{{%kanban_task}}';
+        return '{{%kanban__task}}';
     }
 
     /**
@@ -91,14 +91,20 @@ class Task extends ActiveRecord
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'start_date'],
             ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
-            ['description', 'string'],
-            [['card_show_description', 'card_show_checklist', 'card_show_links'], 'boolean'],
+            [['description', 'recurrence_pattern'], 'string'],
+            [['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'], 'boolean'],
+
+            ['recurrence_pattern', 'match', 'pattern' => '#^FREQ=(MINUTELY|HOURLY|DAILY|WEEKLY|MONTHLY|YEARLY);#'],
 
             [['bucket_id', 'ticket_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['status', 'default', 'value' => self::STATUS_NOT_BEGUN],
             [['start_date', 'end_date', 'description'], 'default'],
-            [['card_show_description', 'card_show_checklist', 'card_show_links'], 'default', 'value' => false],
+            [
+                ['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'],
+                'default',
+                'value' => false
+            ],
 
             [['bucket_id', 'subject', 'status', 'card_show_description', 'card_show_checklist'], 'required']
         ];
@@ -150,6 +156,8 @@ class Task extends ActiveRecord
             'status' => Yii::t('simialbi/kanban/model/task', 'Status'),
             'start_date' => Yii::t('simialbi/kanban/model/task', 'Start date'),
             'end_date' => Yii::t('simialbi/kanban/model/task', 'End date'),
+            'is_recurring' => Yii::t('simialbi/kanban/model/task', 'Is recurring'),
+            'recurrence_pattern' => Yii::t('simialbi/kanban/model/task', 'Recurrence'),
             'description' => Yii::t('simialbi/kanban/model/task', 'Description'),
             'card_show_description' => Yii::t('simialbi/kanban/model/task', 'Show description on card'),
             'card_show_checklist' => Yii::t('simialbi/kanban/model/task', 'Show checklist on card'),
@@ -179,18 +187,6 @@ class Task extends ActiveRecord
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function afterSave($insert, $changedAttributes)
-    {
-        if (isset($changedAttributes['status']) && (int)$this->status === self::STATUS_DONE) {
-            $this->afterFinish($changedAttributes);
-        }
-
-        parent::afterSave($insert, $changedAttributes);
-    }
-
-    /**
      * This method is called before a task will be finished.
      *
      * The default implementation will trigger an [[EVENT_BEFORE_FINISH]] event.
@@ -217,6 +213,18 @@ class Task extends ActiveRecord
         $this->trigger(self::EVENT_BEFORE_FINISH, $event);
 
         return $event->isValid;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        if (isset($changedAttributes['status']) && (int)$this->status === self::STATUS_DONE) {
+            $this->afterFinish($changedAttributes);
+        }
+
+        parent::afterSave($insert, $changedAttributes);
     }
 
     /**
@@ -288,7 +296,8 @@ class Task extends ActiveRecord
             return null;
         }
         /** @var ChecklistElement[] $checklistElements */
-        $grouped = ArrayHelper::index($this->getChecklistElements()->where(['not', ['end_date' => null]])->all(), null, 'is_done');
+        $grouped = ArrayHelper::index($this->getChecklistElements()->where(['not', ['end_date' => null]])->all(), null,
+            'is_done');
         $checklistElements = ArrayHelper::getValue($grouped, '0', []);
         if (empty($checklistElements)) {
             return null;
@@ -298,6 +307,16 @@ class Task extends ActiveRecord
 //        echo "<pre>"; var_dump(ArrayHelper::toArray($grouped, $checklistElements)); exit;
 
         return $checklistElements[0]->end_date;
+    }
+
+    /**
+     * Get associated checklist elements
+     * @return \yii\db\ActiveQuery
+     */
+    public function getChecklistElements()
+    {
+        return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])
+            ->orderBy([ChecklistElement::tableName() . '.[[sort]]' => SORT_ASC]);
     }
 
     /**
@@ -375,16 +394,6 @@ class Task extends ActiveRecord
     public function getBoard()
     {
         return $this->hasOne(Board::class, ['id' => 'board_id'])->via('bucket');
-    }
-
-    /**
-     * Get associated checklist elements
-     * @return \yii\db\ActiveQuery
-     */
-    public function getChecklistElements()
-    {
-        return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])
-            ->orderBy([ChecklistElement::tableName() . '.[[sort]]' => SORT_ASC]);
     }
 
     /**

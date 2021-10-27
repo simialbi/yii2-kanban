@@ -272,6 +272,238 @@ Frame::begin([
                     ]
                 ]); ?>
             </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <?= $form->field($model, 'is_recurring', [
+                        'options' => [
+                            'class' => ['form-group']
+                        ]
+                    ])->checkbox(); ?>
+
+                    <div class="collapse<?php if ($model->is_recurring): ?> show<?php endif; ?>">
+                        <h6><?= Yii::t('simialbi/kanban/recurrence', 'Recurrence Pattern'); ?></h6>
+                        <div class="row">
+                            <div class="col-12 col-sm-5 col-md-4 col-lg-3 border-right">
+                                <?= Html::radioList(Html::getInputName($model, 'recurrence_pattern[FREQ]'), 'WEEKLY', [
+                                    'DAILY' => Yii::t('simialbi/kanban/recurrence', 'Daily'),
+                                    'WEEKLY' => Yii::t('simialbi/kanban/recurrence', 'Weekly'),
+                                    'MONTHLY' => Yii::t('simialbi/kanban/recurrence', 'Monthly'),
+                                    'YEARLY' => Yii::t('simialbi/kanban/recurrence', 'Yearly')
+                                ], [
+                                    'id' => Html::getInputId($model, 'recurrence_pattern[FREQ]')
+                                ]); ?>
+                            </div>
+                            <div class="col-12 col-sm-7 col-md-8 col-lg-9">
+                                <div id="recurrence-daily" style="display: none;">
+                                    <?= Yii::t('simialbi/kanban/recurrence', 'Recur every {input} day(s)', [
+                                        'input' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), 1, [
+                                            'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                            'style' => [
+                                                'display' => 'inline-block',
+                                                'vertical-algin' => 'middle',
+                                                'width' =>  '3rem'
+                                            ]
+                                        ])
+                                    ]); ?>
+                                </div>
+                                <div id="recurrence-weekly" style="display: none;">
+                                    <?= Yii::t('simialbi/kanban/recurrence', 'Recur every {input} week(s) on:', [
+                                        'input' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), 1, [
+                                            'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                            'style' => [
+                                                'display' => 'inline-block',
+                                                'vertical-algin' => 'middle',
+                                                'width' =>  '3rem'
+                                            ]
+                                        ])
+                                    ]); ?>
+
+                                    <?= Html::checkboxList(Html::getInputName($model, 'recurrence_pattern[BYDAY]'), null, [
+                                        'MO' => Yii::t('simialbi/kanban/recurrence', 'Monday'),
+                                        'TU' => Yii::t('simialbi/kanban/recurrence', 'Tuesday'),
+                                        'WE' => Yii::t('simialbi/kanban/recurrence', 'Wednesday'),
+                                        'TH' => Yii::t('simialbi/kanban/recurrence', 'Thursday'),
+                                        'FR' => Yii::t('simialbi/kanban/recurrence', 'Friday'),
+                                        'SA' => Yii::t('simialbi/kanban/recurrence', 'Saturday'),
+                                        'SU' => Yii::t('simialbi/kanban/recurrence', 'Sunday')
+                                    ], [
+                                        'class' => ['form-inline', 'justify-content-around', 'flex-wrap', 'mt-3']
+                                    ]); ?>
+                                </div>
+                                <div id="recurrence-monthly" style="display: none;">
+                                    <?= Html::radioList('pseudo', null, [
+                                        Yii::t('simialbi/kanban/recurrence', 'Day {input1} of every {input2} month(s).', [
+                                            'input1' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[BYMONTHDAY]'), date('j'), [
+                                                'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                'style' => [
+                                                    'width' =>  '3rem'
+                                                ]
+                                            ]),
+                                            'input2' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), 1, [
+                                                'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                'style' => [
+                                                    'width' =>  '3rem'
+                                                ]
+                                            ])
+                                        ]),
+                                        Yii::t('simialbi/kanban/recurrence', 'The {input1} {input2} of every {input3} month(s)', [
+                                            'input1' => Html::dropDownList(
+                                                Html::getInputName($model, 'recurrence_pattern[BYDAY][]'),
+                                                null,
+                                                [
+                                                    '1' => Yii::t('simialbi/kanban/recurrence', 'first'),
+                                                    '2' => Yii::t('simialbi/kanban/recurrence', 'second'),
+                                                    '3' => Yii::t('simialbi/kanban/recurrence', 'third'),
+                                                    '4' => Yii::t('simialbi/kanban/recurrence', 'fourth'),
+                                                    '5' => Yii::t('simialbi/kanban/recurrence', 'fifth'),
+                                                    '-1' => Yii::t('simialbi/kanban/recurrence', 'last')
+                                                ],
+                                                [
+                                                    'class' => ['form-control', 'form-control-sm', 'mx-1']
+                                                ]
+                                            ),
+                                            'input2' => Html::dropDownList(
+                                                Html::getInputName($model, 'recurrence_pattern[BYDAY][]'),
+                                                null,
+                                                [
+                                                    'MO' => Yii::t('simialbi/kanban/recurrence', 'Monday'),
+                                                    'TU' => Yii::t('simialbi/kanban/recurrence', 'Tuesday'),
+                                                    'WE' => Yii::t('simialbi/kanban/recurrence', 'Wednesday'),
+                                                    'TH' => Yii::t('simialbi/kanban/recurrence', 'Thursday'),
+                                                    'FR' => Yii::t('simialbi/kanban/recurrence', 'Friday'),
+                                                    'SA' => Yii::t('simialbi/kanban/recurrence', 'Saturday'),
+                                                    'SU' => Yii::t('simialbi/kanban/recurrence', 'Sunday')
+                                                ],
+                                                [
+                                                    'class' => ['form-control', 'form-control-sm', 'mx-1']
+                                                ]
+                                            ),
+                                            'input3' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), 1, [
+                                                'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                'style' => [
+                                                    'width' =>  '3rem'
+                                                ]
+                                            ])
+                                        ])
+                                    ], [
+                                        'encode' => false,
+                                        'itemOptions' => [
+                                            'labelOptions' => [
+                                                'class' => ['form-check-label', 'mb-3', 'form-inline']
+                                            ]
+                                        ]
+                                    ]); ?>
+                                </div>
+                                <div id="recurrence-yearly" style="display: none;">
+                                    <?= Yii::t('simialbi/kanban/recurrence', 'Recur every {input} year(s)', [
+                                        'input' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), 1, [
+                                            'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                            'style' => [
+                                                'display' => 'inline-block',
+                                                'width' => '3rem',
+                                                'vertical-align' => 'middle'
+                                            ]
+                                        ])
+                                    ]); ?>
+                                    <?= Html::radioList('pseudo', null, [
+                                        Yii::t('simialbi/kanban/recurrence', 'On: {input1} {input2}', [
+                                            'input1' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[BYMONTHDAY]'), date('j'), [
+                                                'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                'style' => [
+                                                    'width' => '3rem'
+                                                ]
+                                            ]),
+                                            'input2' => Html::dropDownList(
+                                                Html::getInputName($model, 'recurrence_pattern[BYMONTH]'),
+                                                date('n'),
+                                                [
+                                                    '1' => Yii::t('simialbi/kanban/recurrence', 'January'),
+                                                    '2' => Yii::t('simialbi/kanban/recurrence', 'February'),
+                                                    '3' => Yii::t('simialbi/kanban/recurrence', 'March'),
+                                                    '4' => Yii::t('simialbi/kanban/recurrence', 'April'),
+                                                    '5' => Yii::t('simialbi/kanban/recurrence', 'May'),
+                                                    '6' => Yii::t('simialbi/kanban/recurrence', 'June'),
+                                                    '7' => Yii::t('simialbi/kanban/recurrence', 'July'),
+                                                    '8' => Yii::t('simialbi/kanban/recurrence', 'August'),
+                                                    '9' => Yii::t('simialbi/kanban/recurrence', 'September'),
+                                                    '10' => Yii::t('simialbi/kanban/recurrence', 'October'),
+                                                    '11' => Yii::t('simialbi/kanban/recurrence', 'November'),
+                                                    '12' => Yii::t('simialbi/kanban/recurrence', 'December')
+                                                ],
+                                                [
+                                                    'class' => ['form-control', 'form-control-sm', 'mx-1']
+                                                ]
+                                            )
+                                        ]),
+                                        Yii::t('simialbi/kanban/recurrence', 'On the: {input1} {input2} of {input3}', [
+                                            'input1' => Html::dropDownList(
+                                                Html::getInputName($model, 'recurrence_pattern[BYDAY][]'),
+                                                null,
+                                                [
+                                                    '1' => Yii::t('simialbi/kanban/recurrence', 'first'),
+                                                    '2' => Yii::t('simialbi/kanban/recurrence', 'second'),
+                                                    '3' => Yii::t('simialbi/kanban/recurrence', 'third'),
+                                                    '4' => Yii::t('simialbi/kanban/recurrence', 'fourth'),
+                                                    '5' => Yii::t('simialbi/kanban/recurrence', 'fifth'),
+                                                    '-1' => Yii::t('simialbi/kanban/recurrence', 'last')
+                                                ],
+                                                [
+                                                    'class' => ['form-control', 'form-control-sm', 'mx-1']
+                                                ]
+                                            ),
+                                            'input2' => Html::dropDownList(
+                                                Html::getInputName($model, 'recurrence_pattern[BYDAY][]'),
+                                                null,
+                                                [
+                                                    'MO' => Yii::t('simialbi/kanban/recurrence', 'Monday'),
+                                                    'TU' => Yii::t('simialbi/kanban/recurrence', 'Tuesday'),
+                                                    'WE' => Yii::t('simialbi/kanban/recurrence', 'Wednesday'),
+                                                    'TH' => Yii::t('simialbi/kanban/recurrence', 'Thursday'),
+                                                    'FR' => Yii::t('simialbi/kanban/recurrence', 'Friday'),
+                                                    'SA' => Yii::t('simialbi/kanban/recurrence', 'Saturday'),
+                                                    'SU' => Yii::t('simialbi/kanban/recurrence', 'Sunday')
+                                                ],
+                                                [
+                                                    'class' => ['form-control', 'form-control-sm', 'mx-1']
+                                                ]
+                                            ),
+                                            'input3' => Html::dropDownList(
+                                                Html::getInputName($model, 'recurrence_pattern[BYMONTH]'),
+                                                date('n'),
+                                                [
+                                                    '1' => Yii::t('simialbi/kanban/recurrence', 'January'),
+                                                    '2' => Yii::t('simialbi/kanban/recurrence', 'February'),
+                                                    '3' => Yii::t('simialbi/kanban/recurrence', 'March'),
+                                                    '4' => Yii::t('simialbi/kanban/recurrence', 'April'),
+                                                    '5' => Yii::t('simialbi/kanban/recurrence', 'May'),
+                                                    '6' => Yii::t('simialbi/kanban/recurrence', 'June'),
+                                                    '7' => Yii::t('simialbi/kanban/recurrence', 'July'),
+                                                    '8' => Yii::t('simialbi/kanban/recurrence', 'August'),
+                                                    '9' => Yii::t('simialbi/kanban/recurrence', 'September'),
+                                                    '10' => Yii::t('simialbi/kanban/recurrence', 'October'),
+                                                    '11' => Yii::t('simialbi/kanban/recurrence', 'November'),
+                                                    '12' => Yii::t('simialbi/kanban/recurrence', 'December')
+                                                ],
+                                                [
+                                                    'class' => ['form-control', 'form-control-sm', 'mx-1']
+                                                ]
+                                            )
+                                        ])
+                                    ], [
+                                        'encode' => false,
+                                        'class' => ['mt-3'],
+                                        'itemOptions' => [
+                                            'labelOptions' => [
+                                                'class' => ['form-check-label', 'mb-3', 'form-inline']
+                                            ]
+                                        ]
+                                    ]); ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <?php $showDescription = $form->field($model, 'card_show_description', [
                     'options' => ['class' => ''],
@@ -608,8 +840,33 @@ Frame::begin([
 Frame::end();
 
 $baseUrl = Url::to(['/' . $this->context->module->id . '/sort']);
+$recurrenceId = Html::getInputId($model, 'is_recurring');
+$recurrenceFreqId = Html::getInputId($model, 'recurrence_pattern[FREQ]');
 $js = <<<JS
-$('.checklist').sortable({
+jQuery('#$recurrenceId').on('change', function () {
+    var \$this = jQuery(this),
+        \$collapse = \$this.closest('.form-group').next();
+    if (\$this.is(':checked')) {
+        \$collapse.collapse('show');
+    } else {
+        \$collapse.collapse('hide');
+    }
+});
+jQuery('#$recurrenceFreqId input[type=radio]').on('change', function () {
+    var \$this = jQuery(this),
+        els = {
+        DAILY: jQuery('#recurrence-daily'),
+        WEEKLY: jQuery('#recurrence-weekly'),
+        MONTHLY: jQuery('#recurrence-monthly'),
+        YEARLY: jQuery('#recurrence-yearly')
+    };
+    jQuery.each(els, function () {
+        this.hide();
+    });
+    els[\$this.val()].show();
+}).trigger('change');
+
+jQuery('.checklist').sortable({
     items: '> .kanban-task-checklist-element',
     handle: '.kanban-task-checklist-sort',
     stop: function (event, ui) {
@@ -624,7 +881,7 @@ $('.checklist').sortable({
             pk = \$before.data('id');
         }
 
-        $.post('$baseUrl/' + action, {
+        jQuery.post('$baseUrl/' + action, {
             modelClass: 'simialbi\\\\yii2\\\\kanban\\\\models\\\\ChecklistElement',
             modelPk: \$element.data('id'),
             pk: pk

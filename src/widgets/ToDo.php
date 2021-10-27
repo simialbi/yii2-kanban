@@ -87,7 +87,7 @@ class ToDo extends Widget
             ->with(['checklistElements', 'comments'])
             ->innerJoinWith('bucket bu')
             ->innerJoinWith('board b')
-            ->innerJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{t}}.[[id]] = {{u}}.[[task_id]]')
+            ->innerJoinWith('assignments u')
             ->where(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
             ->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id])
             ->addOrderBy(new Expression('-[[endDate]] DESC'))

@@ -185,7 +185,8 @@ Frame::begin([
                                 'width' => '59px',
                                 'height' => '2rem',
                                 'visibility' => 'hidden',
-                                'z-index' => '0'
+                                'z-index' => '0',
+                                'left' => ($model->status === Task::STATUS_IN_PROGRESS) ? '2.75rem' : '0'
                             ]
                         ],
                         'attribute' => 'end_date',

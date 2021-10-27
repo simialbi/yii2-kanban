@@ -67,7 +67,7 @@ class Board extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%kanban_board}}';
+        return '{{%kanban__board}}';
     }
 
     /**
@@ -160,11 +160,11 @@ class Board extends ActiveRecord
      */
     public function afterSave($insert, $changedAttributes)
     {
-        if ($insert) {
-            static::getDb()->createCommand()->insert('{{%kanban_board_user_assignment}}', [
-                'board_id' => $this->id,
-                'user_id' => Yii::$app->user->id
-            ])->execute();
+        if ($insert && !Yii::$app->user->isGuest) {
+            $assignment = new BoardUserAssignment();
+            $assignment->board_id = $this->id;
+            $assignment->user_id = Yii::$app->user->id;
+            $assignment->save();
         }
         parent::afterSave($insert, $changedAttributes);
     }

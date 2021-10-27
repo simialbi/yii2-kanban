@@ -367,6 +367,14 @@ msgid "Id"
 msgstr "Id"
 
 msgctxt "simialbi/kanban/model/task"
+msgid "Is recurring"
+msgstr "Ist wiederkehrend"
+
+msgctxt "simialbi/kanban/model/task"
+msgid "Recurrence"
+msgstr "Intervall"
+
+msgctxt "simialbi/kanban/model/task"
 msgid "Show checklist on card"
 msgstr "Auf Karte anzeigen"
 
@@ -546,6 +554,154 @@ msgctxt "simialbi/kanban/plan/notification"
 msgid "Board <b>{board}</b> updated"
 msgstr "Plan <b>{board}</b> bearbeitet"
 
+msgctxt "simialbi/kanban/recurrence"
+msgid "April"
+msgstr "April"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "August"
+msgstr "August"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Daily"
+msgstr "Täglich"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Day {input1} of every {input2} month(s)."
+msgstr "Am {input1}. Tag jedes {input2}. Monats"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "December"
+msgstr "Dezember"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "February"
+msgstr "Februar"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Friday"
+msgstr "Freitag"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "January"
+msgstr "Januar"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "July"
+msgstr "Juli"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "June"
+msgstr "Juni"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "March"
+msgstr "März"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "May"
+msgstr "Mai"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Monday"
+msgstr "Montag"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Monthly"
+msgstr "Monatlich"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "November"
+msgstr "November"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "October"
+msgstr "Oktober"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "On the: {input1} {input2} of {input3}"
+msgstr "Am: {input1} {input2} im {input3}"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "On: {input1} {input2}"
+msgstr "Am: {input1} . {input2}"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Recur every {input} day(s)"
+msgstr "Jeden/Alle {input} Tag(e)"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Recur every {input} week(s) on:"
+msgstr "Jede/Alle {input} Woche(n) am:"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Recur every {input} year(s)"
+msgstr "Jedes/Alle {input} Jahr(e)"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Recurrence Pattern"
+msgstr "Serienmuster"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Saturday"
+msgstr "Samstag"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "September"
+msgstr "September"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Sunday"
+msgstr "Sonntag"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "The {input1} {input2} of every {input3} month(s)"
+msgstr "Am {input1} {input2} jeden/alle {input3} Monat(e)"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Thursday"
+msgstr "Donnerstag"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Tuesday"
+msgstr "Dienstag"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Weekly"
+msgstr "Wöchentlich"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "Yearly"
+msgstr "Jährlich"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "fifth"
+msgstr "fünften"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "first"
+msgstr "ersten"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "fourth"
+msgstr "vierten"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "last"
+msgstr "letzten"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "second"
+msgstr "zweiten"
+
+msgctxt "simialbi/kanban/recurrence"
+msgid "third"
+msgstr "dritten"
+
 msgctxt "simialbi/kanban/task"
 msgid "Attachments"
 msgstr "Anhänge"
@@ -594,6 +750,3 @@ msgctxt "simialbi/kanban/task"
 msgid "Not started"
 msgstr "Nicht begonnen"
 
-msgctxt "simialbi/kanban/task/notification"
-msgid "One of {params}"
-msgstr "Eines von {params}"

@@ -38,7 +38,8 @@
         "simialbi/yii2-widget-chart": "^0.7.0",
         "simialbi/yii2-widget-datedropper": "^1.0.0",
         "simialbi/yii2-widget-hideseek": "^1.0.0",
-        "simialbi/yii2-widget-turbo": "^1.0.0"
+        "simialbi/yii2-widget-turbo": "^1.0.0",
+        "simshaun/recurr": "^5.0.0"
     },
 	"require-dev": {
         "ext-gd": "*",

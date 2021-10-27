@@ -31,7 +31,7 @@ class Link extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%kanban_link}}';
+        return '{{%kanban__link}}';
     }
 
     /**
