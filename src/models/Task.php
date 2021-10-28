@@ -8,10 +8,12 @@
 namespace simialbi\yii2\kanban\models;
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
+use Recurr\Rule;
 use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\ticket\models\Ticket;
 use Yii;
 use yii\base\ModelEvent;
+use yii\behaviors\AttributeTypecastBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -29,8 +31,9 @@ use yii\helpers\ArrayHelper;
  * @property integer $status
  * @property integer|string|\DateTime $start_date
  * @property integer|string|\DateTime $end_date
+ * @property string|Rule $recurrence_pattern
+ * @property integer $recurrence_parent_id
  * @property boolean $is_recurring
- * @property string $recurrence_pattern
  * @property string $description
  * @property boolean $card_show_description
  * @property boolean $card_show_checklist
@@ -58,6 +61,7 @@ use yii\helpers\ArrayHelper;
  * @property-read Attachment[] $attachments
  * @property-read Comment[] $comments
  * @property-read Ticket $ticket
+ * @property-read Task $recurrenceParent
  */
 class Task extends ActiveRecord
 {
@@ -86,15 +90,22 @@ class Task extends ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'bucket_id', 'ticket_id', 'status'], 'integer'],
+            [['id', 'bucket_id', 'ticket_id', 'status', 'recurrence_parent_id'], 'integer'],
             ['subject', 'string', 'max' => 255],
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'start_date'],
             ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
-            [['description', 'recurrence_pattern'], 'string'],
+            [['description'], 'string'],
             [['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'], 'boolean'],
 
-            ['recurrence_pattern', 'match', 'pattern' => '#^FREQ=(MINUTELY|HOURLY|DAILY|WEEKLY|MONTHLY|YEARLY);#'],
+            [
+                'recurrence_pattern',
+                'validateRecurrence',
+                'when' => function ($model) {
+                    /** @var static $model */
+                    return $model->is_recurring;
+                }
+            ],
 
             [['bucket_id', 'ticket_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
@@ -138,6 +149,30 @@ class Task extends ActiveRecord
                 'scope' => function () {
                     return Task::find()->where(['bucket_id' => $this->bucket_id]);
                 }
+            ],
+            'typecast' => [
+                'class' => AttributeTypecastBehavior::class,
+                'attributeTypes' => [
+                    'recurrence_pattern' => function ($value) {
+                        if ($value === null) {
+                            return null;
+                        }
+                        if (is_string($value)) {
+                            $start = (empty($this->start_date)) ? $this->created_at : $this->start_date;
+                            return Rule::createFromString(
+                                $value,
+                                Yii::$app->formatter->asDatetime($start, 'yyyy-MM-dd HH:mm:ss'),
+                                $this->end_date ? Yii::$app->formatter->asDate($this->end_date, 'yyyy-MM-dd HH:mm:ss') : null,
+                                YIi::$app->timeZone
+                            );
+                        }
+
+                        return $value;
+                    }
+                ],
+                'typecastAfterValidate' => false,
+                'typecastBeforeSave' => false,
+                'typecastAfterFind' => true
             ]
         ];
     }
@@ -170,6 +205,50 @@ class Task extends ActiveRecord
             'updated_at' => Yii::t('simialbi/kanban/model/task', 'Updated at'),
             'finished_at' => Yii::t('simialbi/kanban/model/task', 'Finished at')
         ];
+    }
+
+    /**
+     * Recurrence validator and transform to string
+     *
+     * @param string $attribute The attribute name
+     * @param array $params
+     * @param \yii\validators\Validator $validator
+     * @throws \Recurr\Exception\InvalidArgument|\Recurr\Exception\InvalidRRule|\yii\base\InvalidConfigException
+     */
+    public function validateRecurrence($attribute, $params, $validator)
+    {
+        if (is_array($this->$attribute) && ArrayHelper::isAssociative($this->$attribute)) {
+            $rule = new Rule();
+            $rule->setStartDate(new \DateTime(
+                Yii::$app->formatter->asDatetime($this->start_date, 'yyyy-MM-dd HH:mm:ss'),
+                new \DateTimeZone(Yii::$app->timeZone)
+            ));
+            $rule->setTimezone(Yii::$app->timeZone);
+            if (isset($this->{$attribute}['FREQ'])) {
+                $rule->setFreq($this->{$attribute}['FREQ']);
+            }
+            if (isset($this->{$attribute}['INTERVAL'])) {
+                $rule->setInterval($this->{$attribute}['INTERVAL']);
+            }
+            if (isset($this->{$attribute}['BYDAY'])) {
+                if (is_array($this->{$attribute}['BYDAY']) && ArrayHelper::isAssociative($this->{$attribute}['BYDAY'])) {
+                    $byDay = [$this->{$attribute}['BYDAY']['int'] . $this->{$attribute}['BYDAY']['string']];
+                } else {
+                    $byDay = (array)$this->{$attribute}['BYDAY'];
+                }
+                $rule->setByDay($byDay);
+            }
+            if (isset($this->{$attribute}['BYMONTHDAY'])) {
+                $rule->setByMonthDay((array)$this->{$attribute}['BYMONTHDAY']);
+            }
+            if (isset($this->{$attribute}['BYMONTH'])) {
+                $rule->setByMonth((array)$this->{$attribute}['BYMONTH']);
+            }
+
+            $this->{$attribute} = $rule->getString();
+        } elseif ($this->$attribute instanceof Rule) {
+            $this->{$attribute} = $this->{$attribute}->getString();
+        }
     }
 
     /**
@@ -430,5 +509,14 @@ class Task extends ActiveRecord
     public function getTicket()
     {
         return $this->hasOne(Ticket::class, ['id' => 'ticket_id']);
+    }
+
+    /**
+     * Get associated recurrence parent
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRecurrenceParent()
+    {
+        return $this->hasOne(static::class, ['id' => 'recurrence_parent_id']);
     }
 }

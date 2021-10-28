@@ -72,6 +72,9 @@ Frame::begin([
         <div class="kanban-task-content card-body">
             <div class="d-flex justify-content-between">
                 <h6 class="card-title">
+                    <?php if ($model->is_recurring): ?>
+                        <?= FAS::i('infinity'); ?>
+                    <?php endif; ?>
                     <?= Html::encode($model->subject); ?>
                 </h6>
                 <?= Html::a(
