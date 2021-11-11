@@ -431,17 +431,6 @@ class TaskController extends Controller
                 'data' => $model
             ]));
 
-//            var_dump($model->id, $model->recurrence_parent_id, $model->getOriginalRecord());
-
-//            $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->board->id];
-//            if ($model->isRecurrentInstance()) {
-//                var_dump($model->getOriginalRecord()->toArray());
-//                exit;
-//            } else {
-//                exit('test 2');
-//            }
-
-            //*
             return $this->renderAjax('item', [
                 'boardId' => $model->board->id,
                 'model' => $model,
@@ -449,15 +438,6 @@ class TaskController extends Controller
                 'users' => $this->module->users,
                 'closeModal' => true
             ]);
-            /*/
-            return $this->renderAjax('/bucket/view', [
-                'model' => $model->getBucket()->with(['openTasks'])->one(),
-                'statuses' => $this->module->statuses,
-                'users' => $this->module->users,
-                'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
-                'closeModal' => true
-            ]);
-            //*/
         }
 
         $buckets = Bucket::find()
@@ -748,15 +728,6 @@ class TaskController extends Controller
                 'task' => $model
             ]));
         }
-
-        /*
-        return $this->renderAjax('item', [
-            'model' => $model,
-            'statuses' => $this->module->statuses,
-            'users' => $this->module->users,
-            'closeModal' => false
-        ]);
-        /*/
         return $this->renderAjax('/bucket/view', [
             'model' => $model->getBucket()->with(['openTasks'])->one(),
             'statuses' => $this->module->statuses,
@@ -764,7 +735,6 @@ class TaskController extends Controller
             'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
             'closeModal' => true
         ]);
-        //*/
     }
 
     /**
@@ -783,16 +753,7 @@ class TaskController extends Controller
         $model->end_date = Yii::$app->formatter->asDate($date, 'dd.MM.yyyy');
         $model->save();
 
-        /*
-        return $this->renderAjax('item', [
-            'model' => $model,
-            'statuses' => $this->module->statuses,
-            'users' => $this->module->users,
-            'closeModal' => false
-        ]);
-        /*/
         Yii::$app->response->setStatusCode(204);
-        //*/
     }
 
     /**
