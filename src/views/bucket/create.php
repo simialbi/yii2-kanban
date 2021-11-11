@@ -2,7 +2,6 @@
 
 use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ActiveForm;
-use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Bucket */

@@ -10,17 +10,6 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
 
         init: function () {
             var $tabs = $('#plan-tabs');
-            $('#taskModal').on('show.bs.modal', function (evt) {
-                var link = $(evt.relatedTarget);
-                var href = link.prop('href');
-
-                if (!href) {
-                    return;
-                }
-
-                var modal = $(this);
-                modal.find('.modal-content').load(href);
-            });
 
             // $tabs.find('.nav-link').on('click', function (e) {
             //     var $target = jQuery(e.target);
@@ -57,13 +46,27 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 if (!evt.target || !evt.target.tagName) {
                     return;
                 }
-                var el = evt.target.tagName.toLowerCase();
-                if (el === 'div' || el === 'h6' || el === 'img' || $(el).closest('.kanban-task-description').length) {
-                    var $modal = $('#taskModal');
-
-                    $modal.modal('show');
-                    $modal.find('.modal-content').load($(this).find('.kanban-task-update-link').prop('href'));
+                var el = evt.target.tagName.toLowerCase(),
+                    $el = $(evt.target);
+                if (el === 'div' || el === 'h6' || el === 'img' || $el.closest('.kanban-task-description').length) {
+                    $(this).find('.kanban-task-update-link').trigger('click');
+                    // $modal.find('.modal-content').load($(this).find('.kanban-task-update-link').prop('href'));
                 }
+            });
+            $(el).find('[data-ajax="true"]').on('click.sa.kanban', function (evt) {
+                var $this = $(this);
+                evt.preventDefault();
+                if ($this.data('confirm')) {
+                    evt.stopPropagation();
+                    if (!confirm($this.data('confirm'))) {
+                        return;
+                    }
+                }
+                $.ajax({
+                    url: $this.attr('href')
+                }).done(function () {
+                    $this.closest('.kanban-bucket').get(0).reload();
+                });
             });
         },
         /**

@@ -18,15 +18,20 @@ use yii\web\JsExpression;
 /* @var $statuses array */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $closeModal boolean */
+/* @var $group string|null */
+
+if (!isset($group)) {
+    $group = 'bucket';
+}
 
 Frame::begin([
     'options' => [
-        'id' => 'task-' . $model->id . '-frame',
+        'id' => 'task-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '-frame',
         'class' => ['kanban-sortable'],
         'data' => [
-            'id' =>  $model->id,
+            'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
             'event' => [
-                'id' => $model->id,
+                'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
                 'title' => $model->subject,
                 'allDay' => true,
                 'classNames' => ['border-0'],
@@ -36,27 +41,6 @@ Frame::begin([
         'alt' => $model->subject . ' ' . str_replace(["\r", "\n"], ' ', strip_tags($model->description))
     ]
 ]);
-
-//Pjax::begin([
-//    'id' => 'taskPjax' . $model->hash,
-//    'enablePushState' => false,
-//    'options' => [
-//        'class' => ['kanban-sortable'],
-//        'data' => [
-//            'id' => $model->id,
-//            'event' => Json::encode([
-//                'id' => $model->id,
-//                'title' => $model->subject,
-//                'allDay' => true,
-//                'classNames' => ['border-0'],
-//                'url' => Url::to(['task/update', 'id' => $model->id])
-//            ])
-//        ]
-//    ],
-//    'clientOptions' => [
-//        'skipOuterContainers' => false
-//    ]
-//]);
 ?>
     <div class="kanban-task card mb-2 status-<?= $model->status; ?>">
         <?php foreach ($model->attachments as $attachment): ?>
@@ -72,11 +56,18 @@ Frame::begin([
         <div class="kanban-task-content card-body">
             <div class="d-flex justify-content-between">
                 <h6 class="card-title">
+                    <?php if ($model->isRecurrentInstance()): ?>
+                        <?= FAS::i('infinity')->transform('shrink-4.5')->mask('circle'); ?>
+                    <?php endif; ?>
                     <?= Html::encode($model->subject); ?>
                 </h6>
                 <?= Html::a(
                     FAR::i('check-circle', ['class' => 'd-block']),
-                    ['task/set-status', 'id' => $model->id, 'status' => Task::STATUS_DONE],
+                    [
+                        'task/set-status',
+                        'id' => ($model->isRecurrentInstance()) ? $model->recurrence_parent_id : $model->id,
+                        'status' => Task::STATUS_DONE
+                    ],
                     [
                         'class' => ['h5', 'kanban-task-done-link', 'd-block', 'text-decoration-none'],
                         'data' => [
@@ -121,15 +112,18 @@ Frame::begin([
             <?php endif; ?>
             <?php foreach ($model->attachments as $attachment): ?>
                 <?php if ($attachment->card_show): ?>
-                    <?= Html::a(FAR::i($attachment->icon, ['class' => 'fa-fw']) . ' ' . $attachment->name,
-                        $attachment->path, [
+                    <?= Html::a(
+                        FAR::i($attachment->icon, ['class' => 'fa-fw']) . ' ' . $attachment->name,
+                        $attachment->path,
+                        [
                             'class' => ['d-block', 'text-muted', 'text-truncate'],
                             'style' => [
                                 'max-width' => '100%'
                             ],
                             'data' => ['pjax' => '0'],
                             'target' => '_blank'
-                        ]); ?>
+                        ]
+                    ); ?>
                 <?php endif; ?>
             <?php endforeach; ?>
             <div class="kanban-task-info d-flex flex-row align-items-center position-relative">
@@ -148,7 +142,11 @@ Frame::begin([
                             }
                             $items[] = [
                                 'label' => $label,
-                                'url' => ['task/set-status', 'id' => $model->id, 'status' => $status],
+                                'url' => [
+                                    'task/set-status',
+                                    'id' => ($model->isRecurrentInstance()) ? $model->recurrence_parent_id : $model->id,
+                                    'status' => $status
+                                ],
                                 'linkOptions' => [
                                     'data' => [
                                         'turbo-frame' => 'task-' . $model->id . '-frame',
@@ -167,7 +165,7 @@ Frame::begin([
                     <?php $options = [
                         'class' => ['btn', 'btn-sm', 'mr-3', 'px-0', 'position-relative'],
                         'style' => ['z-index' => '1'],
-                        'onClick' => new JsExpression('jQuery(\'#task-end_date-' . $model->id . '\').dateDropper(\'show\');')
+                        'onClick' => new JsExpression('jQuery(\'#task-end_date-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '\').dateDropper(\'show\');')
                     ]; ?>
                     <?php if ($model->endDate < time() && $model->status !== $model::STATUS_DONE): ?>
                         <?php Html::addCssClass($options, ['btn-danger', 'px-1']); ?>
@@ -179,13 +177,14 @@ Frame::begin([
                     <?= Datedropper::widget([
                         'model' => $model,
                         'options' => [
-                            'id' => 'task-end_date-' . $model->id,
+                            'id' => 'task-end_date-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id),
                             'class' => ['position-absolute', 'border-0'],
                             'style' => [
                                 'width' => '59px',
                                 'height' => '2rem',
                                 'visibility' => 'hidden',
-                                'z-index' => '0'
+                                'z-index' => '0',
+                                'left' => ($model->status === Task::STATUS_IN_PROGRESS) ? '2.75rem' : '0'
                             ]
                         ],
                         'attribute' => 'end_date',
@@ -194,15 +193,17 @@ Frame::begin([
                             'large' => true,
                             'autofill' => false,
                             'onChange' => new JsExpression('function (e) {
-                                var event = jQuery.Event(\'click\');
-                                var container = e.selector.closest(\'turbo-frame\').get(0);
+                                var container = e.selector.closest(\'#bucket-' . $model->bucket_id . '-frame\').get(0);
                                 var date = new Date(e.date.Y, e.date.n - 1, e.date.d);
 
-                                container.src = \'' . Url::to([
-                                    'task/set-end-date',
-                                    'id' => $model->id
-                                ]) . '&date=\' + ((date.getTime() / 1000) + (date.getTimezoneOffset() * -60));
-                                container.reload();
+                                jQuery.ajax({
+                                    url: \'' . Url::to([
+                                        'task/set-end-date',
+                                        'id' => ($model->isRecurrentInstance()) ? $model->recurrence_parent_id : $model->id
+                                    ]) . '&date=\' + ((date.getTime() / 1000) + (date.getTimezoneOffset() * -60))
+                                }).done(function () {
+                                    container.reload();
+                                });
                             }')
                         ]
                     ]); ?>
@@ -235,121 +236,181 @@ Frame::begin([
                 <?php endif; ?>
                 <?= Html::a(FAS::i('edit'), [
                     'task/update',
-                    'id' => $model->id,
-                    'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                    'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id
                 ], [
                     'class' => ['btn', 'btn-sm', 'ml-auto', 'kanban-task-update-link'],
                     'data' => [
                         'pjax' => '0',
+                        'turbo-frame' => 'task-modal-frame',
                         'toggle' => 'modal',
-                        'target' => '#taskModal'
+                        'target' => '#task-modal'
                     ]
                 ]); ?>
                 <?php
                 $items = [
                     [
-                        'label' => FAS::i('comment',
-                                ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Add comment'),
+                        'label' => FAS::i('comment', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Add comment'),
                         'url' => [
                             'comment/create',
-                            'taskId' => $model->id,
-                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                            'taskId' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
+                            'group' => $group
                         ],
                         'linkOptions' => [
                             'data' => [
+                                'pjax' => '0',
+                                'turbo-frame' => 'task-modal-frame',
                                 'toggle' => 'modal',
-                                'target' => '#taskModal'
+                                'target' => '#task-modal'
                             ]
                         ]
                     ],
+                    [
+                        'label' => FAS::i('history', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'View history'),
+                        'url' => [
+                            'task/history',
+                            'id' => $model->recurrence_parent_id
+                        ],
+                        'visible' => $model->isRecurrentInstance(),
+                        'linkOptions' => [
+                            'data' => [
+                                'pjax' => '0',
+                                'turbo-frame' => 'task-modal-frame',
+                                'toggle' => 'modal',
+                                'target' => '#task-modal'
+                            ]
+                        ]
+                    ],
+                    '-',
                     [
                         'label' => FAS::i('edit', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('yii', 'Update'),
                         'url' => [
                             'task/update',
-                            'id' => $model->id,
-                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                            'id' => ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id)
                         ],
                         'linkOptions' => [
                             'data' => [
+                                'pjax' => '0',
+                                'turbo-frame' => 'task-modal-frame',
                                 'toggle' => 'modal',
-                                'target' => '#taskModal'
+                                'target' => '#task-modal'
                             ]
                         ]
                     ],
                     [
-                        'label' => FAS::i(
-                            'clone',
-                            ['class' => ['mr-1']]
-                        )->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy task'),
+                        'label' => FAS::i('pen-square', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Update series'),
+                        'url' => [
+                            'task/update',
+                            'id' => $model->recurrence_parent_id,
+                            'updateSeries' => true
+                        ],
+                        'visible' => $model->isRecurrentInstance(),
+                        'linkOptions' => [
+                            'data' => [
+                                'pjax' => '0',
+                                'turbo-frame' => 'task-modal-frame',
+                                'toggle' => 'modal',
+                                'target' => '#task-modal'
+                            ]
+                        ]
+                    ],
+                    '-',
+                    [
+                        'label' => FAS::i('clone', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy task'),
                         'url' => [
                             'task/copy',
-                            'id' => $model->id,
-                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                            'id' => ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id),
+                            'group' => $group
                         ],
                         'linkOptions' => [
                             'data' => [
+                                'pjax' => '0',
+                                'turbo-frame' => 'task-modal-frame',
                                 'toggle' => 'modal',
-                                'target' => '#taskModal'
+                                'target' => '#task-modal'
                             ]
                         ]
                     ],
                     [
-                        'label' => FAS::i(
-                            'user-plus',
-                            ['class' => ['mr-1']]
-                        )->fixedWidth() . ' ' . Yii::t('simialbi/kanban/task', 'Create task per each user'),
+                        'label' => FAS::i('user-plus', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban/task', 'Create task per each user'),
                         'url' => [
                             'task/copy-per-user',
-                            'id' => $model->id,
-                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                            'id' => ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id),
+                            'group' => $group
                         ],
                         'disabled' => $model->created_by != Yii::$app->user->id,
                         'linkOptions' => [
                             'data' => [
+                                'pjax' => '0',
+                                'turbo-frame' => 'task-modal-frame',
                                 'toggle' => 'modal',
-                                'target' => '#taskModal'
+                                'target' => '#task-modal'
                             ]
                         ]
                     ],
                     [
-                        'label' => FAS::i(
-                            'link',
-                            ['class' => ['mr-1']]
-                        )->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy link'),
+                        'label' => FAS::i('link', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Copy link'),
                         'url' => 'javascript:;',
                         'linkOptions' => [
                             'onclick' => 'window.sa.kanban.copyTextToClipboard(\'' . Url::to([
                                     'plan/view',
                                     'id' => isset($boardId) ? $boardId : $model->board->id,
-                                    'showTask' => $model->id,
+                                    'showTask' => ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id),
                                     'group' => Yii::$app->request->getQueryParam('group', 'bucket')
                                 ], true) . '\')'
                         ]
                     ],
+                    '-',
                     [
-                        'label' => FAS::i(
-                            'trash-alt',
-                            ['class' => ['mr-1']]
-                        )->fixedWidth() . ' ' . Yii::t('yii', 'Delete'),
+                        'label' => FAS::i('trash-alt', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('yii', 'Delete'),
                         'url' => [
                             'task/delete',
-                            'id' => $model->id,
-                            'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                            'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id
                         ],
                         'disabled' => $model->created_by != Yii::$app->user->id,
                         'linkOptions' => [
                             'data' => [
-//                                'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-                                'turbo' => 'true',
-                                'turbo-frame' => 'bucket-' . $model->bucket_id . '-frame'
+                                'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+                                'ajax' => 'true'
+                            ]
+                        ]
+                    ],
+                    [
+                        'label' => FAS::i('trash', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Delete series'),
+                        'url' => [
+                            'task/delete',
+                            'id' => $model->recurrence_parent_id,
+                            'deleteSeries' => true
+                        ],
+                        'visible' => $model->isRecurrentInstance(),
+                        'linkOptions' => [
+                            'data' => [
+                                'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+                                'ajax' => 'true'
                             ]
                         ]
                     ]
                 ];
                 if ($model->ticket_id) {
                     array_unshift($items, [
-                        'label' => FAS::i('headset',
-                                ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Go to ticket'),
+                        'label' => FAS::i('headset', [
+                            'class' => ['mr-1']
+                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Go to ticket'),
                         'url' => ['/ticket/ticket/view', 'id' => $model->ticket_id],
                         'linkOptions' => [
                             'target' => '_blank'
@@ -476,10 +537,10 @@ Frame::begin([
     </div>
     <script>
         <?php if ($closeModal): ?>
-        jQuery('#taskModal').modal('hide');
+        jQuery('#task-modal').modal('hide');
         <?php endif; ?>
         if (window.sa && window.sa.kanban) {
-            window.sa.kanban.initTask('#task-<?=$model->id;?>-frame');
+            window.sa.kanban.initTask('#task-<?=($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id);?>-frame');
         }
     </script>
 <?php

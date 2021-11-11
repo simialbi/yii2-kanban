@@ -2,7 +2,7 @@
 
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
-use yii\bootstrap4\Modal;
+use simialbi\yii2\turbo\Modal;
 use yii\helpers\Url;
 use yii\web\JsExpression;
 
@@ -72,11 +72,11 @@ $this->params['breadcrumbs'] = [
 if ($showTask) {
     $link = Url::to(['task/update', 'id' => $showTask]);
     $js = <<<JS
-var link = jQuery('<a href="$link" data-toggle="modal" data-target="#taskModal" />');
+var link = jQuery('<a href="$link" data-toggle="modal" data-target="#task-modal" data-turbo-frame="task-modal-frame" />');
 link.appendTo('body').trigger('click').remove();
 JS;
 
-    $this->registerJs($js);
+    $this->registerJs($js, $this::POS_LOAD);
 }
 $js = <<<JS
 function onHide() {
@@ -89,14 +89,18 @@ function onHide() {
 }
 JS;
 echo Modal::widget([
-    'id' => 'taskModal',
-    'options' => ['class' => ['modal', 'remote', 'fade']],
-    'clientOptions' => [
-        'backdrop' => 'static',
-        'keyboard' => false
+    'options' => [
+        'id' => 'task-modal',
+        'options' => [
+            'class' => ['modal', 'remote', 'fade']
+        ],
+        'clientOptions' => [
+            'backdrop' => 'static',
+            'keyboard' => false
+        ],
+        'clientEvents' => ['hidden.bs.modal' => new JsExpression($js)],
+        'size' => \yii\bootstrap4\Modal::SIZE_EXTRA_LARGE,
+        'title' => null,
+        'closeButton' => false
     ],
-    'clientEvents' => ['hidden.bs.modal' => new JsExpression($js)],
-    'size' => Modal::SIZE_EXTRA_LARGE,
-    'title' => null,
-    'closeButton' => false
 ]);

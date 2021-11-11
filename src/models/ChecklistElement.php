@@ -33,7 +33,7 @@ class ChecklistElement extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%kanban_checklist_element}}';
+        return '{{%kanban__checklist_element}}';
     }
 
     /**

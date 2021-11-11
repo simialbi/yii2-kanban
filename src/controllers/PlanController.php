@@ -12,6 +12,7 @@ use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\BoardUserAssignment;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\models\TaskUserAssignment;
 use simialbi\yii2\kanban\Module;
 use Yii;
 use yii\db\Expression;
@@ -285,7 +286,7 @@ class PlanController extends Controller
             ->from(['p' => $model::tableName()])
             ->innerJoin(['b' => Bucket::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
             ->innerJoin(['t' => Task::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
-            ->leftJoin(['u' => '{{%kanban_task_user_assignment}}'], '{{u}}.[[task_id]] = {{t}}.[[id]]')
+            ->leftJoin(['u' => TaskUserAssignment::tableName()], '{{u}}.[[task_id]] = {{t}}.[[id]]')
             ->groupBy(['{{u}}.[[user_id]]', '{{t}}.[[status]]'])
             ->where(['{{p}}.[[id]]' => $id])
             ->andWhere([
@@ -449,10 +450,10 @@ class PlanController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model::getDb()->createCommand()->insert('{{%kanban_board_user_assignment}}', [
-            'board_id' => $model->id,
-            'user_id' => $userId
-        ])->execute();
+        $assignment = new BoardUserAssignment();
+        $assignment->board_id = $model->id;
+        $assignment->user_id = $userId;
+        $assignment->save();
 
         return $this->renderAjax('assignees', [
             'model' => $model,
@@ -475,14 +476,9 @@ class PlanController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model::getDb()->createCommand()->delete('{{%kanban_board_user_assignment}}', [
-            'board_id' => $model->id,
-            'user_id' => $userId
-        ])->execute();
-//        $model::getDb()->createCommand()->delete('{{%kanban_task_user_assignment}}', [
-//            'task_id' => ArrayHelper::getColumn($model->tasks, 'id'),
-//            'user_id' => $userId
-//        ])->execute();
+        $model = BoardUserAssignment::findOne(['board_id' => $id, 'user_id' => $userId]);
+
+        $model->delete();
 
         return $this->renderAjax('assignees', [
             'model' => $model,

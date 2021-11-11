@@ -8,10 +8,13 @@
 namespace simialbi\yii2\kanban\models;
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
+use Recurr\Rule;
+use simialbi\yii2\kanban\behaviors\RepeatableBehavior;
 use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\ticket\models\Ticket;
 use Yii;
 use yii\base\ModelEvent;
+use yii\behaviors\AttributeTypecastBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -29,6 +32,9 @@ use yii\helpers\ArrayHelper;
  * @property integer $status
  * @property integer|string|\DateTime $start_date
  * @property integer|string|\DateTime $end_date
+ * @property string|Rule $recurrence_pattern
+ * @property integer $recurrence_parent_id
+ * @property boolean $is_recurring
  * @property string $description
  * @property boolean $card_show_description
  * @property boolean $card_show_checklist
@@ -40,6 +46,9 @@ use yii\helpers\ArrayHelper;
  * @property integer|string $created_at
  * @property integer|string $updated_at
  * @property integer|string $finished_at
+ *
+ * @method boolean isRecurrentInstance() If this model is an instance of an recurrent task
+ * @method static getOriginalRecord() The original record if model is recurrent instance
  *
  * @property-read string $hash
  * @property-read string $checklistStats
@@ -56,28 +65,27 @@ use yii\helpers\ArrayHelper;
  * @property-read Attachment[] $attachments
  * @property-read Comment[] $comments
  * @property-read Ticket $ticket
+ * @property-read Task $recurrenceParent
  */
 class Task extends ActiveRecord
 {
     const EVENT_BEFORE_FINISH = 'beforeFinish';
     const EVENT_AFTER_FINISH = 'afterFinish';
-
-    /**
-     * @var string Hash
-     */
-    private $_hash;
-
     const STATUS_DONE = 0;
     const STATUS_IN_PROGRESS = 5;
     const STATUS_NOT_BEGUN = 10;
     const STATUS_LATE = 15;
+    /**
+     * @var string Hash
+     */
+    private $_hash;
 
     /**
      * {@inheritDoc}
      */
     public static function tableName()
     {
-        return '{{%kanban_task}}';
+        return '{{%kanban__task}}';
     }
 
     /**
@@ -86,19 +94,38 @@ class Task extends ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'bucket_id', 'ticket_id', 'status'], 'integer'],
+            [['id', 'bucket_id', 'ticket_id', 'status', 'recurrence_parent_id'], 'integer'],
             ['subject', 'string', 'max' => 255],
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'start_date'],
             ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
-            ['description', 'string'],
-            [['card_show_description', 'card_show_checklist', 'card_show_links'], 'boolean'],
+            [['description'], 'string'],
+            [['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'], 'boolean'],
+
+            [
+                'recurrence_pattern',
+                'validateRecurrence',
+                'when' => function ($model) {
+                    /** @var static $model */
+                    return $model->is_recurring;
+                }
+            ],
+            ['recurrence_pattern', 'filter', 'filter' => function () {
+                return null;
+            }, 'when' => function ($model) {
+                /** @var static $model */
+                return !$model->is_recurring;
+            }],
 
             [['bucket_id', 'ticket_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['status', 'default', 'value' => self::STATUS_NOT_BEGUN],
             [['start_date', 'end_date', 'description'], 'default'],
-            [['card_show_description', 'card_show_checklist', 'card_show_links'], 'default', 'value' => false],
+            [
+                ['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'],
+                'default',
+                'value' => false
+            ],
 
             [['bucket_id', 'subject', 'status', 'card_show_description', 'card_show_checklist'], 'required']
         ];
@@ -132,6 +159,44 @@ class Task extends ActiveRecord
                 'scope' => function () {
                     return Task::find()->where(['bucket_id' => $this->bucket_id]);
                 }
+            ],
+            'typecast' => [
+                'class' => AttributeTypecastBehavior::class,
+                'attributeTypes' => [
+                    'recurrence_pattern' => function ($value) {
+                        if ($value === null) {
+                            return null;
+                        }
+                        if (is_string($value)) {
+                            $start = (empty($this->start_date)) ? $this->created_at : $this->start_date;
+                            return Rule::createFromString(
+                                $value,
+                                Yii::$app->formatter->asDatetime($start, 'yyyy-MM-dd HH:mm:ss'),
+                                $this->end_date ? Yii::$app->formatter->asDate($this->end_date, 'yyyy-MM-dd HH:mm:ss') : null,
+                                YIi::$app->timeZone
+                            );
+                        }
+
+                        return $value;
+                    }
+                ],
+                'typecastAfterValidate' => false,
+                'typecastBeforeSave' => false,
+                'typecastAfterFind' => true
+            ],
+            'typecast2' => [
+                'class' => AttributeTypecastBehavior::class,
+                'attributeTypes' => [
+                    'card_show_description' => AttributeTypecastBehavior::TYPE_INTEGER,
+                    'card_show_checklist' => AttributeTypecastBehavior::TYPE_INTEGER,
+                    'card_show_links' => AttributeTypecastBehavior::TYPE_INTEGER
+                ],
+                'typecastAfterValidate' => true,
+                'typecastBeforeSave' => false,
+                'typecastAfterFind' => false
+            ],
+            'repeatable' => [
+                'class' => RepeatableBehavior::class
             ]
         ];
     }
@@ -150,6 +215,8 @@ class Task extends ActiveRecord
             'status' => Yii::t('simialbi/kanban/model/task', 'Status'),
             'start_date' => Yii::t('simialbi/kanban/model/task', 'Start date'),
             'end_date' => Yii::t('simialbi/kanban/model/task', 'End date'),
+            'is_recurring' => Yii::t('simialbi/kanban/model/task', 'Is recurring'),
+            'recurrence_pattern' => Yii::t('simialbi/kanban/model/task', 'Recurrence'),
             'description' => Yii::t('simialbi/kanban/model/task', 'Description'),
             'card_show_description' => Yii::t('simialbi/kanban/model/task', 'Show description on card'),
             'card_show_checklist' => Yii::t('simialbi/kanban/model/task', 'Show checklist on card'),
@@ -165,6 +232,50 @@ class Task extends ActiveRecord
     }
 
     /**
+     * Recurrence validator and transform to string
+     *
+     * @param string $attribute The attribute name
+     * @param array $params
+     * @param \yii\validators\Validator $validator
+     * @throws \Recurr\Exception\InvalidArgument|\Recurr\Exception\InvalidRRule|\yii\base\InvalidConfigException
+     */
+    public function validateRecurrence($attribute, $params, $validator)
+    {
+        if (is_array($this->$attribute) && ArrayHelper::isAssociative($this->$attribute)) {
+            $rule = new Rule();
+            $rule->setStartDate(new \DateTime(
+                Yii::$app->formatter->asDatetime($this->start_date, 'yyyy-MM-dd HH:mm:ss'),
+                new \DateTimeZone(Yii::$app->timeZone)
+            ));
+            $rule->setTimezone(Yii::$app->timeZone);
+            if (isset($this->{$attribute}['FREQ'])) {
+                $rule->setFreq($this->{$attribute}['FREQ']);
+            }
+            if (isset($this->{$attribute}['INTERVAL'])) {
+                $rule->setInterval($this->{$attribute}['INTERVAL']);
+            }
+            if (isset($this->{$attribute}['BYDAY'])) {
+                if (is_array($this->{$attribute}['BYDAY']) && ArrayHelper::isAssociative($this->{$attribute}['BYDAY'])) {
+                    $byDay = [$this->{$attribute}['BYDAY']['int'] . $this->{$attribute}['BYDAY']['string']];
+                } else {
+                    $byDay = (array)$this->{$attribute}['BYDAY'];
+                }
+                $rule->setByDay($byDay);
+            }
+            if (isset($this->{$attribute}['BYMONTHDAY'])) {
+                $rule->setByMonthDay((array)$this->{$attribute}['BYMONTHDAY']);
+            }
+            if (isset($this->{$attribute}['BYMONTH'])) {
+                $rule->setByMonth((array)$this->{$attribute}['BYMONTH']);
+            }
+
+            $this->{$attribute} = $rule->getString();
+        } elseif ($this->$attribute instanceof Rule) {
+            $this->{$attribute} = $this->{$attribute}->getString();
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function beforeSave($insert)
@@ -176,18 +287,6 @@ class Task extends ActiveRecord
         }
 
         return parent::beforeSave($insert);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function afterSave($insert, $changedAttributes)
-    {
-        if (isset($changedAttributes['status']) && (int)$this->status === self::STATUS_DONE) {
-            $this->afterFinish($changedAttributes);
-        }
-
-        parent::afterSave($insert, $changedAttributes);
     }
 
     /**
@@ -217,6 +316,18 @@ class Task extends ActiveRecord
         $this->trigger(self::EVENT_BEFORE_FINISH, $event);
 
         return $event->isValid;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        if (isset($changedAttributes['status']) && (int)$this->status === self::STATUS_DONE) {
+            $this->afterFinish($changedAttributes);
+        }
+
+        parent::afterSave($insert, $changedAttributes);
     }
 
     /**
@@ -288,7 +399,11 @@ class Task extends ActiveRecord
             return null;
         }
         /** @var ChecklistElement[] $checklistElements */
-        $grouped = ArrayHelper::index($this->getChecklistElements()->where(['not', ['end_date' => null]])->all(), null, 'is_done');
+        $grouped = ArrayHelper::index(
+            $this->getChecklistElements()->where(['not', ['end_date' => null]])->all(),
+            null,
+            'is_done'
+        );
         $checklistElements = ArrayHelper::getValue($grouped, '0', []);
         if (empty($checklistElements)) {
             return null;
@@ -298,6 +413,16 @@ class Task extends ActiveRecord
 //        echo "<pre>"; var_dump(ArrayHelper::toArray($grouped, $checklistElements)); exit;
 
         return $checklistElements[0]->end_date;
+    }
+
+    /**
+     * Get associated checklist elements
+     * @return \yii\db\ActiveQuery
+     */
+    public function getChecklistElements()
+    {
+        return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])
+            ->orderBy([ChecklistElement::tableName() . '.[[sort]]' => SORT_ASC]);
     }
 
     /**
@@ -378,16 +503,6 @@ class Task extends ActiveRecord
     }
 
     /**
-     * Get associated checklist elements
-     * @return \yii\db\ActiveQuery
-     */
-    public function getChecklistElements()
-    {
-        return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])
-            ->orderBy([ChecklistElement::tableName() . '.[[sort]]' => SORT_ASC]);
-    }
-
-    /**
      * Get associated links
      * @return \yii\db\ActiveQuery
      */
@@ -421,5 +536,14 @@ class Task extends ActiveRecord
     public function getTicket()
     {
         return $this->hasOne(Ticket::class, ['id' => 'ticket_id']);
+    }
+
+    /**
+     * Get associated recurrence parent
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRecurrenceParent()
+    {
+        return $this->hasOne(static::class, ['id' => 'recurrence_parent_id']);
     }
 }

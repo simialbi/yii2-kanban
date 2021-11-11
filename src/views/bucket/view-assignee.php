@@ -41,7 +41,8 @@ echo $this->render('_header', [
                 'model' => $task,
                 'statuses' => $statuses,
                 'users' => $users,
-                'closeModal' => false
+                'closeModal' => false,
+                'group' => 'assignee'
             ]);
         }
         ?>

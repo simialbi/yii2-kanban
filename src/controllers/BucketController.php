@@ -189,7 +189,6 @@ class BucketController extends Controller
     {
         $query = Task::find()
             ->alias('t')
-//            ->distinct(true)
             ->joinWith('assignments u')
             ->joinWith('checklistElements')
             ->joinWith('comments co')

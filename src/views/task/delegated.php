@@ -68,7 +68,8 @@ Frame::begin([
                     <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>
                     <?php foreach ($userTasks as $task): ?>
 
-                        <a href="<?= Url::to(['task/update', 'id' => $task->id]); ?>" data-toggle="modal" data-target="#taskModal"
+                        <a href="<?= Url::to(['task/update', 'id' => $task->id]); ?>" data-toggle="modal"
+                           data-target="#task-modal" data-turbo-frame="task-modal-frame"
                            class="list-group-item list-group-item-action<?php if ($task->end_date && $task->end_date < time()) { echo " list-group-item-danger"; } ?>">
                             <h6 class="m-0"><?= Html::encode($task->subject); ?></h6>
                             <small>

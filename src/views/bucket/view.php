@@ -9,7 +9,12 @@ use yii\helpers\Url;
 /* @var $model \simialbi\yii2\kanban\models\Bucket */
 /* @var $statuses array */
 /* @var $users array */
+/* @var $closeModal boolean */
 /* @var $finishedTasks int */
+
+if (!isset($closeModal)) {
+    $closeModal = false;
+}
 
 Frame::begin([
     'options' => [
@@ -60,6 +65,9 @@ Frame::begin([
         ?>
     </div>
     <script>
+        <?php if ($closeModal) : ?>
+            jQuery('#task-modal').modal('hide');
+        <?php endif; ?>
         window.sa.kanban.updateSortable();
     </script>
 

@@ -68,7 +68,13 @@ class CommentController extends Controller
                 'data' => $model
             ]));
 
-            return $this->redirect(['plan/view', 'id' => $task->board->id, 'group' => $group]);
+            return $this->renderAjax('/task/item', [
+                'boardId' => $task->board->id,
+                'model' => $task,
+                'statuses' => $this->module->statuses,
+                'users' => $this->module->users,
+                'closeModal' => true
+            ]);
         }
 
         return $this->renderAjax('create', [

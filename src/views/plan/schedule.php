@@ -2,7 +2,7 @@
 
 use simialbi\yii2\kanban\KanbanAsset;
 use simialbi\yii2\kanban\widgets\Calendar;
-use yii\bootstrap4\Modal;
+use simialbi\yii2\turbo\Modal;
 use yii\helpers\Url;
 use yii\web\JsExpression;
 
@@ -50,8 +50,9 @@ $this->params['breadcrumbs'] = [
                     ],
                     'eventRender' => new JsExpression('function (info) {
                         jQuery(info.el).attr({
+                            \'data-turbo-frame\': \'task-modal-frame\',
                             \'data-toggle\': \'modal\',
-                            \'data-target\': \'#taskModal\'
+                            \'data-target\': \'#task-modal\'
                         });
                     }'),
                     'eventDrop' => new JsExpression('function (info) {
@@ -120,16 +121,18 @@ $this->params['breadcrumbs'] = [
 </div>
 <?php
 Modal::begin([
-    'id' => 'taskModal',
     'options' => [
+        'id' => 'task-modal',
+        'options' => [
         'class' => ['modal', 'remote', 'fade']
-    ],
-    'clientOptions' => [
-        'backdrop' => 'static',
-        'keyboard' => false
-    ],
-    'size' => Modal::SIZE_EXTRA_LARGE,
-    'title' => null,
-    'closeButton' => false
+            ],
+        'clientOptions' => [
+            'backdrop' => 'static',
+            'keyboard' => false
+        ],
+        'size' => \yii\bootstrap4\Modal::SIZE_EXTRA_LARGE,
+        'title' => null,
+        'closeButton' => false
+    ]
 ]);
 Modal::end();

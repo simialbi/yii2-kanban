@@ -23,6 +23,7 @@ use simialbi\yii2\ticket\models\Ticket;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\db\Exception;
+use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
@@ -69,7 +70,7 @@ class TaskController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['view', 'view-completed', 'view-delegated']
+                        'actions' => ['view', 'view-completed', 'view-delegated', 'history']
                     ]
                 ]
             ]
@@ -97,6 +98,32 @@ class TaskController extends Controller
     }
 
     /**
+     * View recurrence task history
+     * @param integer $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionHistory($id)
+    {
+        $model = $this->findModel($id);
+
+        $query = new Query();
+        $query->select([
+            'date' => 'execution_date',
+            'status'
+        ])
+            ->from('{{%kanban__task_recurrent_task}}')
+            ->where(['task_id' => $id])
+            ->orderBy(['execution_date' => SORT_DESC]);
+
+        return $this->renderAjax('history', [
+            'model' => $model,
+            'statuses' => $this->module->statuses,
+            'history' => $query->all()
+        ]);
+    }
+
+    /**
      * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
@@ -107,6 +134,9 @@ class TaskController extends Controller
      */
     protected function findModel($id)
     {
+//        if (preg_match('#^r-\d+$#', $id)) {
+//            $id = preg_replace('#[^\d]#', '', $id);
+//        }
         if (($model = Task::findOne($id)) !== null) {
             return $model;
         } else {
@@ -172,22 +202,19 @@ class TaskController extends Controller
 
             $i = 0;
             foreach ($assignees as $assignee) {
-                try {
-                    if ($taskPerUser && $i++ > 0) {
-                        $task->setAttribute('id', null);
-                        $task = new Task($task->toArray());
-                        $task->save();
-                    }
-                    $task::getDb()->createCommand()->insert(
-                        '{{%kanban_task_user_assignment}}',
-                        ['task_id' => $task->id, 'user_id' => $assignee]
-                    )->execute();
-                    $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
-                        'task' => $task,
-                        'user' => ArrayHelper::getValue($this->module->users, $assignee)
-                    ]));
-                } catch (Exception $e) {
+                if ($taskPerUser && $i++ > 0) {
+                    $task->setAttribute('id', null);
+                    $task = new Task($task->toArray());
+                    $task->save();
                 }
+                $assignment = new TaskUserAssignment();
+                $assignment->task_id = $task->id;
+                $assignment->user_id = $assignee;
+                $assignment->save();
+                $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+                    'task' => $task,
+                    'user' => ArrayHelper::getValue($this->module->users, $assignee)
+                ]));
             }
 
             return $this->renderAjax('/bucket/view', [
@@ -232,16 +259,22 @@ class TaskController extends Controller
     /**
      * Update a task
      * @param integer $id Tasks id
+     * @param boolean $updateSeries Update the series?
      * @return string
      * @throws NotFoundHttpException
      * @throws InvalidConfigException
      * @throws \yii\base\Exception
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $updateSeries = false)
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($updateSeries) {
+            $model = $model->getOriginalRecord();
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->save(false);
             $checklistElements = Yii::$app->request->getBodyParam('checklist', []);
             $newChecklistElements = ArrayHelper::remove($checklistElements, 'new', []);
             $assignees = Yii::$app->request->getBodyParam('assignees', []);
@@ -277,25 +310,16 @@ class TaskController extends Controller
                 $element->save();
             }
 
-            try {
-                $model::getDb()->createCommand()->delete(
-                    '{{%kanban_task_user_assignment}}',
-                    ['and', ['task_id' => $model->id], ['not', ['user_id' => $assignees]]]
-                )->execute();
-            } catch (Exception $e) {
-            }
+            TaskUserAssignment::deleteAll(['task_id' => $model->id]);
             foreach ($assignees as $assignee) {
-                try {
-                    $model::getDb()->createCommand()->insert(
-                        '{{%kanban_task_user_assignment}}',
-                        ['task_id' => $model->id, 'user_id' => $assignee]
-                    )->execute();
-                    $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
-                        'task' => $model,
-                        'user' => ArrayHelper::getValue($this->module->users, $assignee)
-                    ]));
-                } catch (Exception $e) {
-                }
+                $assignment = new TaskUserAssignment();
+                $assignment->task_id = $model->id;
+                $assignment->user_id = $assignee;
+                $assignment->save();
+                $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
+                    'task' => $model,
+                    'user' => ArrayHelper::getValue($this->module->users, $assignee)
+                ]));
             }
 
             if ($comment) {
@@ -407,8 +431,17 @@ class TaskController extends Controller
                 'data' => $model
             ]));
 
-//            $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->board->id];
+//            var_dump($model->id, $model->recurrence_parent_id, $model->getOriginalRecord());
 
+//            $previous = Url::previous('plan-view') ?: ['plan/view', 'id' => $model->board->id];
+//            if ($model->isRecurrentInstance()) {
+//                var_dump($model->getOriginalRecord()->toArray());
+//                exit;
+//            } else {
+//                exit('test 2');
+//            }
+
+            //*
             return $this->renderAjax('item', [
                 'boardId' => $model->board->id,
                 'model' => $model,
@@ -416,6 +449,15 @@ class TaskController extends Controller
                 'users' => $this->module->users,
                 'closeModal' => true
             ]);
+            /*/
+            return $this->renderAjax('/bucket/view', [
+                'model' => $model->getBucket()->with(['openTasks'])->one(),
+                'statuses' => $this->module->statuses,
+                'users' => $this->module->users,
+                'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
+                'closeModal' => true
+            ]);
+            //*/
         }
 
         $buckets = Bucket::find()
@@ -439,11 +481,18 @@ class TaskController extends Controller
             'model' => $model,
             'buckets' => $buckets,
             'users' => $this->module->users,
+            'updateSeries' => $updateSeries,
             'statuses' => $statuses
         ]);
     }
 
-    public function actionCopyPerUser($id)
+    /**
+     * Copy a task for each user
+     * @param string $id The id of the task
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionCopyPerUser($id, $group = 'bucket')
     {
         $model = $this->findModel($id);
         $assignees = Yii::$app->request->getBodyParam('assignees', []);
@@ -488,12 +537,43 @@ class TaskController extends Controller
                 $assignment->save();
             }
 
-            return $this->redirect(['plan/view', 'id' => $model->board->id]);
+            switch ($group) {
+                case 'bucket':
+                    return $this->renderAjax('/bucket/view', [
+                        'model' => $model->getBucket()->with(['openTasks'])->one(),
+                        'statuses' => $this->module->statuses,
+                        'users' => $this->module->users,
+                        'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
+                        'closeModal' => true
+                    ]);
+                case 'assignee':
+                    return $this->redirect(['plan/view', 'id' => $model->board->id, 'group' => 'assignee']);
+                case 'status':
+                    $query = Task::find()
+                        ->alias('t')
+                        ->joinWith('assignments u')
+                        ->joinWith('checklistElements')
+                        ->joinWith('comments co')
+                        ->innerJoinWith('bucket b')
+                        ->with(['attachments', 'links'])
+                        ->where([
+                            '{{t}}.[[status]]' => $model->status,
+                            '{{b}}.[[board_id]]' => $model->bucket->board_id
+                        ]);
+                    return $this->renderAjax('/bucket/view-status', [
+                        'tasks' => $query->all(),
+                        'status' => $model->status,
+                        'statuses' => $this->module->statuses,
+                        'users' => $this->module->users,
+                        'closeModal' => true
+                    ]);
+            }
         }
 
         return $this->renderAjax('copy-per-user', [
             'model' => $model,
             'users' => $this->module->users,
+            'group' => $group
         ]);
     }
 
@@ -597,26 +677,30 @@ class TaskController extends Controller
     /**
      * Delete a task
      * @param integer $id Tasks id
+     * @param boolean $deleteSeries Delete the whole series?
      *
-     * @return Response|string
+     * @return string
      * @throws NotFoundHttpException|ForbiddenHttpException|\Throwable
      */
-    public function actionDelete($id)
+    public function actionDelete($id, $deleteSeries = false)
     {
         $model = $this->findModel($id);
+
+        if ($deleteSeries) {
+            $model = $model->getOriginalRecord();
+        }
 
         if (Yii::$app->user->id != $model->created_by) {
             throw new ForbiddenHttpException(Yii::t('yii', 'You are not allowed to perform this action.'));
         }
 
-        $model->delete();
-
-        return $this->renderAjax('/bucket/view', [
-            'model' => $model->getBucket()->with(['openTasks'])->one(),
-            'statuses' => $this->module->statuses,
-            'users' => $this->module->users,
-            'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id')
-        ]);
+        try {
+            $model->delete();
+        } finally {
+            // prevent error caused by ContinuousNumericalSortableBehavior
+            Yii::$app->response->setStatusCode(204);
+            return;
+        }
     }
 
     /**
@@ -634,6 +718,8 @@ class TaskController extends Controller
 
         $model->status = $status;
         $model->save();
+
+        $model->refresh();
 
         if ($model->ticket_id && ($ticket = $model->ticket)) {
             switch ($model->status) {
@@ -663,12 +749,22 @@ class TaskController extends Controller
             ]));
         }
 
+        /*
         return $this->renderAjax('item', [
             'model' => $model,
             'statuses' => $this->module->statuses,
             'users' => $this->module->users,
             'closeModal' => false
         ]);
+        /*/
+        return $this->renderAjax('/bucket/view', [
+            'model' => $model->getBucket()->with(['openTasks'])->one(),
+            'statuses' => $this->module->statuses,
+            'users' => $this->module->users,
+            'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
+            'closeModal' => true
+        ]);
+        //*/
     }
 
     /**
@@ -677,7 +773,6 @@ class TaskController extends Controller
      * @param integer $id Tasks id
      * @param integer $date New end date
      *
-     * @return string
      * @throws NotFoundHttpException
      * @throws InvalidConfigException
      */
@@ -688,12 +783,16 @@ class TaskController extends Controller
         $model->end_date = Yii::$app->formatter->asDate($date, 'dd.MM.yyyy');
         $model->save();
 
+        /*
         return $this->renderAjax('item', [
             'model' => $model,
             'statuses' => $this->module->statuses,
             'users' => $this->module->users,
             'closeModal' => false
         ]);
+        /*/
+        Yii::$app->response->setStatusCode(204);
+        //*/
     }
 
     /**
@@ -735,10 +834,10 @@ class TaskController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model::getDb()->createCommand()->insert('{{%kanban_task_user_assignment}}', [
-            'task_id' => $model->id,
-            'user_id' => $userId
-        ])->execute();
+        $assignment = new TaskUserAssignment();
+        $assignment->task_id = $model->id;
+        $assignment->user_id = $userId;
+        $assignment->save();
 
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
@@ -770,10 +869,10 @@ class TaskController extends Controller
             throw new ForbiddenHttpException(Yii::t('yii', 'You are not allowed to perform this action.'));
         }
 
-        $model::getDb()->createCommand()->delete('{{%kanban_task_user_assignment}}', [
+        TaskUserAssignment::deleteAll([
             'task_id' => $model->id,
             'user_id' => $userId
-        ])->execute();
+        ]);
 
         $this->module->trigger(Module::EVENT_TASK_UNASSIGNED, new TaskEvent([
             'task' => $model,

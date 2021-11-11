@@ -34,7 +34,7 @@ class MonitoringMember extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%kanban_monitoring_member}}';
+        return '{{%kanban__monitoring_member}}';
     }
 
     /**

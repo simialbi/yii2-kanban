@@ -70,7 +70,7 @@ class MonitoringForm extends Model
             // TODO throw
             return false;
         }
-        $model->unlinkAll('members');
+        $model->unlinkAll('members', true);
         foreach ($this->members as $memberId) {
             $member = new MonitoringMember([
                 'list_id' => $model->id,

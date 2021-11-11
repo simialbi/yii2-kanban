@@ -8,6 +8,11 @@ use yii\helpers\ArrayHelper;
 /* @var $status integer */
 /* @var $users array */
 /* @var $statuses array */
+/* @var $closeModal boolean */
+
+if (!isset($closeModal)) {
+    $closeModal = false;
+}
 
 Frame::begin([
     'options' => [
@@ -32,12 +37,16 @@ echo $this->render('_header', [
             'model' => $task,
             'statuses' => $statuses,
             'users' => $users,
-            'closeModal' => false
+            'closeModal' => false,
+            'group' => 'status'
         ]);
     }
     ?>
 </div>
 <script>
+    <?php if ($closeModal): ?>
+        jQuery('#task-modal').modal('hide');
+    <?php endif; ?>
     window.sa.kanban.updateSortable();
 </script>
 <?php

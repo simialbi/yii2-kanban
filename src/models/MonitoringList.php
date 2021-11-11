@@ -34,7 +34,7 @@ class MonitoringList extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%kanban_monitoring_list}}';
+        return '{{%kanban__monitoring_list}}';
     }
 
     /**

@@ -4,8 +4,8 @@ use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
 use simialbi\yii2\kanban\widgets\ToDo;
 use simialbi\yii2\turbo\Frame;
+use simialbi\yii2\turbo\Modal;
 use yii\bootstrap4\Html;
-use yii\bootstrap4\Modal;
 use yii\bootstrap4\Tabs;
 use yii\helpers\Url;
 use yii\web\JsExpression;
@@ -123,20 +123,22 @@ function onHide() {
 }
 JS;
     Modal::begin([
-        'id' => 'taskModal',
         'options' => [
-            'class' => ['modal', 'remote', 'fade']
-        ],
-        'clientOptions' => [
-            'backdrop' => 'static',
-            'keyboard' => false
-        ],
-        'clientEvents' => [
-            'hidden.bs.modal' => new JsExpression($js)
-        ],
-        'size' => Modal::SIZE_EXTRA_LARGE,
-        'title' => null,
-        'closeButton' => false
+            'id' => 'task-modal',
+            'options' => [
+                'class' => ['modal', 'remote', 'fade']
+            ],
+            'clientOptions' => [
+                'backdrop' => 'static',
+                'keyboard' => false
+            ],
+            'clientEvents' => [
+                'hidden.bs.modal' => new JsExpression($js)
+            ],
+            'size' => \yii\bootstrap4\Modal::SIZE_EXTRA_LARGE,
+            'title' => null,
+            'closeButton' => false
+        ]
     ]);
     Modal::end();
     ?>

@@ -23,7 +23,7 @@ class TaskUserAssignment extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%kanban_task_user_assignment}}';
+        return '{{%kanban__task_user_assignment}}';
     }
 
     /**

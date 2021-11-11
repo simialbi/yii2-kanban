@@ -2,21 +2,18 @@
 
 use kartik\select2\Select2;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\helpers\ReplaceArrayValue;
-use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\MonitoringForm */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 
-Pjax::begin([
-    'id' => 'monitoringPjax',
-    'formSelector' => '#monitoringModalForm',
-    'enablePushState' => false,
-    'clientOptions' => [
-        'skipOuterContainers' => true
+Frame::begin([
+    'options' => [
+        'id' => 'task-modal-frame'
     ]
 ]);
 ?>
@@ -95,4 +92,4 @@ Pjax::begin([
     <?php ActiveForm::end(); ?>
 </div>
 <?php
-Pjax::end();
+Frame::end();

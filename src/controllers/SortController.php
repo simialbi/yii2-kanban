@@ -8,6 +8,7 @@
 namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\models\TaskUserAssignment;
 use simialbi\yii2\kanban\Module;
 use simialbi\yii2\kanban\TaskEvent;
 use Yii;
@@ -41,14 +42,12 @@ class SortController extends \arogachev\sortable\controllers\SortController
         $userId = Yii::$app->request->getBodyParam('user_id');
         $db = call_user_func([$this->_model, 'getDb']);
         /** @var $db \yii\db\Connection */
-        $db->createCommand()->delete('{{%kanban_task_user_assignment}}', [
-            'task_id' => $this->_model->primaryKey
-        ])->execute();
+        TaskUserAssignment::deleteAll(['task_id' => $this->_model->primaryKey]);
         if (!empty($userId)) {
-            $db->createCommand()->insert('{{%kanban_task_user_assignment}}', [
-                'task_id' => $this->_model->primaryKey,
-                'user_id' => $userId
-            ])->execute();
+            $assignment = new TaskUserAssignment();
+            $assignment->task_id = $this->_model->primaryKey;
+            $assignment->user_id = $userId;
+            $assignment->save();
         }
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $this->_model,
