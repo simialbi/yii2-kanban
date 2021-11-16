@@ -57,7 +57,7 @@ Frame::begin([
                     'simialbi/kanban/task',
                     'Finished at {finished,date} {finished,time} by {finisher}',
                     [
-                        'finished' => $model->finished_at ? $model->finished_at : $model->updated_at,
+                        'finished' => $model->finished_at ?: $model->updated_at,
                         'finisher' => $model->finisher ? $model->finisher->name : Yii::t('yii', '(not set)')
                     ]
                 )
@@ -66,9 +66,9 @@ Frame::begin([
                     'Created at {created,date} {created,time} by {creator}, last modified {updated,date} {updated,time} by {modifier}',
                     [
                         'created' => $model->created_at,
-                        'creator' => $model->author->name,
+                        'creator' => $model->author ? $model->author->name : Yii::t('yii', '(not set)'),
                         'updated' => $model->updated_at,
-                        'modifier' => $model->updater->name
+                        'modifier' => $model->updater ? $model->updater->name : Yii::t('yii', '(not set)')
                     ]
                 ); ?>
             <?php if ($model->is_recurring && $model->recurrence_pattern instanceof \Recurr\Rule) {

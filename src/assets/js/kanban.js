@@ -146,6 +146,21 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                     });
                 }
             });
+            $(el).find('[data-ajax="true"]').on('click.sa.kanban', function (evt) {
+                var $this = $(this);
+                evt.preventDefault();
+                if ($this.data('confirm')) {
+                    evt.stopPropagation();
+                    if (!confirm($this.data('confirm'))) {
+                        return;
+                    }
+                }
+                $.ajax({
+                    url: $this.attr('href')
+                }).done(function () {
+                    $this.closest('.kanban-bucket').get(0).reload();
+                });
+            });
         },
         /**
          * Get Swiper instance
@@ -411,7 +426,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 if (parseInt(code) === 9 && !$this.hasClass('krajee-datepicker')) {
                     $this.closest('.kanban-task-checklist-element').find('.krajee-datepicker').focus();
                 } else {
-                    $('.add-checklist-element input[type="text"]:not(".krajee-datepicker")').focus();
+                    $('.add-checklist-element input[type="text"]').not('.krajee-datepicker').focus();
                 }
             }
         });
