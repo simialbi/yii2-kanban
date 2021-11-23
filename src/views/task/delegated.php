@@ -56,37 +56,38 @@ Frame::begin([
     <?php if ($view === 'list'): ?>
         <div class="card mt-2">
             <?php foreach ($tasks as $userId => $userTasks): ?>
-                <div class="card-header">
-                    <h4 class="card-title m-0">
-                        <?= $this->render('_user', [
-                            'assigned' => false,
-                            'user' => $users[$userId]
-                        ]); ?>
-                    </h4>
-                </div>
-                <div class="list-group list-group-flush">
-                    <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>
-                    <?php foreach ($userTasks as $task): ?>
-
-                        <a href="<?= Url::to(['task/update', 'id' => $task->id]); ?>" data-toggle="modal"
-                           data-target="#task-modal" data-turbo-frame="task-modal-frame"
-                           class="list-group-item list-group-item-action<?php if ($task->end_date && $task->end_date < time()) { echo " list-group-item-danger"; } ?>">
-                            <h6 class="m-0"><?= Html::encode($task->subject); ?></h6>
-                            <small>
-                                <?= $task->board->name; ?>
-                                <?php if ($count = count($task->checklistElements)): ?>
-                                    &nbsp;&bull;&nbsp;<?= $task->getChecklistStats(); ?>
-                                <?php endif; ?>
-                                <?php if ($task->end_date): ?>
-                                    &nbsp;&bull;&nbsp; <?= FAR::i('calendar'); ?> <?= Yii::$app->formatter->asDate($task->end_date, 'short'); ?>
-                                <?php endif; ?>
-                                <?php if (count($task->comments)): ?>
-                                    &nbsp;&bull;&nbsp; <?= FAR::i('sticky-note'); ?>
-                                <?php endif; ?>
-                            </small>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
+                <?php if (isset($users[$userId])): ?>
+                    <div class="card-header">
+                        <h4 class="card-title m-0">
+                            <?= $this->render('_user', [
+                                'assigned' => false,
+                                'user' => $users[$userId]
+                            ]); ?>
+                        </h4>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>
+                        <?php foreach ($userTasks as $task): ?>
+                            <a href="<?= Url::to(['task/update', 'id' => $task->id]); ?>" data-toggle="modal"
+                               data-target="#task-modal" data-turbo-frame="task-modal-frame"
+                               class="list-group-item list-group-item-action<?php if ($task->end_date && $task->end_date < time()) { echo " list-group-item-danger"; } ?>">
+                                <h6 class="m-0"><?= Html::encode($task->subject); ?></h6>
+                                <small>
+                                    <?= $task->board->name; ?>
+                                    <?php if ($count = count($task->checklistElements)): ?>
+                                        &nbsp;&bull;&nbsp;<?= $task->getChecklistStats(); ?>
+                                    <?php endif; ?>
+                                    <?php if ($task->end_date): ?>
+                                        &nbsp;&bull;&nbsp; <?= FAR::i('calendar'); ?> <?= Yii::$app->formatter->asDate($task->end_date, 'short'); ?>
+                                    <?php endif; ?>
+                                    <?php if (count($task->comments)): ?>
+                                        &nbsp;&bull;&nbsp; <?= FAR::i('sticky-note'); ?>
+                                    <?php endif; ?>
+                                </small>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
     <?php else: ?>
@@ -98,27 +99,30 @@ Frame::begin([
                 <div class="kanban-bottom-scrollbar">
                     <div class="d-flex flex-row kanban-plan-sortable">
                         <?php foreach ($tasks as $userId => $userTasks): ?>
-                            <div class="kanban-bucket mr-md-4 pb-6 pb-md-0 d-flex flex-column flex-shrink-0">
-                                <?= $this->render('/bucket/_header', [
-                                    'id' => $userId,
-                                    'title' => $this->render('_user', [
-                                        'assigned' => false,
-                                        'user' => $users[$userId]
-                                    ])
-                                ]); ?>
-                                <div class="kanban-tasks flex-grow-1 mt-4">
-                                    <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>
-                                    <?php foreach ($userTasks as $task): ?>
-                                        <?= $this->render('/task/item', [
-                                            'boardId' => $task->bucket->board_id,
-                                            'model' => $task,
-                                            'statuses' => $statuses,
-                                            'users' => $users,
-                                            'closeModal' => false
-                                        ]); ?>
-                                    <?php endforeach; ?>
+                            <?php if (isset($users[$userId])): ?>
+                                <div class="kanban-bucket mr-md-4 pb-6 pb-md-0 d-flex flex-column flex-shrink-0">
+                                    <?= $this->render('/bucket/_header', [
+                                        'id' => $userId,
+                                        'title' => $this->render('_user', [
+                                            'assigned' => false,
+                                            'user' => $users[$userId]
+                                        ])
+                                    ]); ?>
+                                    <div class="kanban-tasks flex-grow-1 mt-4">
+                                        <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>
+                                        <?php foreach ($userTasks as $task): ?>
+                                            <?= $this->render('/task/item', [
+                                                'boardId' => $task->bucket->board_id,
+                                                'model' => $task,
+                                                'statuses' => $statuses,
+                                                'users' => $users,
+                                                'closeModal' => false,
+                                                'group' => 'bucket'
+                                            ]); ?>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
-                            </div>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
 
