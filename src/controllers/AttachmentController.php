@@ -75,6 +75,7 @@ class AttachmentController extends Controller
             'model' => $task,
             'buckets' => $buckets,
             'users' => $this->module->users,
+            'updateSeries' => false,
             'statuses' => $this->module->statuses
         ]);
     }
