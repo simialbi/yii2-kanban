@@ -14,7 +14,6 @@ use yii\base\Behavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\db\Expression;
 use yii\db\Query;
 use yii\di\Instance;
 use yii\helpers\ArrayHelper;
@@ -74,6 +73,13 @@ class RepeatableBehavior extends Behavior
     public $recurrenceDoneRelationProperty = 'task_id';
 
     /**
+     * @var array An array of relation names to keep in recurrent instance
+     */
+    public $keepRelations = [
+        'assignments'
+    ];
+
+    /**
      * @var bool If instance of this task is recurrent
      */
     private $_isRecurrentInstance = false;
@@ -100,13 +106,16 @@ class RepeatableBehavior extends Behavior
         if (!$this->isRecurrentInstance()) {
             if ($this->owner->{$this->recurrenceParentIdProperty}) {
                 /** @var \yii\db\ActiveRecord $record */
-                $record = call_user_func([$this->owner, 'findOne'], $this->owner->getAttribute($this->recurrenceParentIdProperty))->getOriginalRecord();
+                $record = call_user_func([$this->owner, 'findOne'],
+                    $this->owner->getAttribute($this->recurrenceParentIdProperty))->getOriginalRecord();
                 /** @var \Recurr\Rule $rule */
                 $rule = $record->{$this->recurrencePatternProperty};
 
                 $exDates = [];
                 foreach ($rule->getExDates() as $exDate) {
-                    if (Yii::$app->formatter->asDate($exDate->date, 'yyyy-MM-dd') !== Yii::$app->formatter->asDate($this->owner->{$this->endDateProperty}, 'yyyy-MM-dd')) {
+                    if (Yii::$app->formatter->asDate($exDate->date,
+                            'yyyy-MM-dd') !== Yii::$app->formatter->asDate($this->owner->{$this->endDateProperty},
+                            'yyyy-MM-dd')) {
                         $exDates[] = Yii::$app->formatter->asDate($exDate->date, 'yyyy-MM-dd');
                     }
                 }
@@ -247,7 +256,9 @@ class RepeatableBehavior extends Behavior
         $this->owner->setAttribute($this->statusProperty, $status);
 
         foreach ($this->owner->getRelatedRecords() as $relatedRecordName => $relatedRecord) {
-            unset($this->owner->{$relatedRecordName});
+            if (!in_array($relatedRecordName, $this->keepRelations)) {
+                unset($this->owner->{$relatedRecordName});
+            }
         }
     }
 

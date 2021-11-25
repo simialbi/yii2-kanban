@@ -9,17 +9,15 @@ namespace simialbi\yii2\kanban\widgets;
 
 use kartik\select2\Select2;
 use rmrevin\yii\fontawesome\FAR;
+use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
 use simialbi\yii2\kanban\KanbanSwiperAsset;
-use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\turbo\Frame;
 use simialbi\yii2\turbo\Modal;
 use simialbi\yii2\widgets\Widget;
 use Yii;
 use yii\bootstrap4\Html;
-use yii\db\Expression;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\JsExpression;
@@ -85,20 +83,7 @@ class ToDo extends Widget
         $this->view->registerAssetBundle(KanbanSwiperAsset::class);
         $this->view->registerAssetBundle(KanbanAsset::class);
 
-        $checklistQuery = new Query();
-        $checklistQuery
-            ->select('end_date')
-            ->from(ChecklistElement::tableName())
-            ->where(new Expression('[[task_id]] = {{t}}.[[id]]'))
-            ->andWhere(['is_done' => false])
-            ->orderBy(['end_date' => SORT_ASC])
-            ->limit(1);
         $tasks = Task::find()
-            ->select([
-                '{{t}}.*',
-                'cEndDate' => $checklistQuery,
-                'endDate' => new Expression('IF({{t}}.[[end_date]], {{t}}.[[end_date]], (SELECT [[cEndDate]]))')
-            ])
             ->cache(60)
             ->alias('t')
             ->with(['checklistElements', 'comments'])
@@ -106,13 +91,23 @@ class ToDo extends Widget
             ->innerJoinWith('board b')
             ->innerJoinWith('assignments u')
             ->where(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
-            ->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id])
-            ->addOrderBy(new Expression('-[[endDate]] DESC'))
-            ->addOrderBy(new Expression('-{{t}}.[[start_date]] DESC'))
-            ->addOrderBy(['{{t}}.[[created_at]]' => SORT_ASC])
-            ->asArray(true);
+            ->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
 
         $results = $tasks->all();
+        usort($results, function ($a, $b) {
+            /** @var $a Task */
+            /** @var $b Task */
+            if ($a->endDate === $b->endDate) {
+                return 0;
+            }
+            if ($a->endDate === null && $b->endDate !== null) {
+                return 1;
+            }
+            if ($a->endDate !== null && $b->endDate === null) {
+                return -1;
+            }
+            return ($a->endDate < $b->endDate) ? -1 : 1;
+        });
 
         ob_start();
         if ($this->renderModal) {
@@ -182,7 +177,11 @@ JS;
 
         foreach ($results as $task) {
             $options = $this->itemOptions;
-            $options['href'] = Url::to(["/{$this->kanbanModuleName}/task/update", 'id' => $task['id'], 'return' => 'todo']);
+            $options['href'] = Url::to([
+                "/{$this->kanbanModuleName}/task/update",
+                'id' => $task['id'],
+                'return' => 'todo'
+            ]);
             $options['data'] = [
                 'toggle' => 'modal',
                 'pjax' => '0',
@@ -190,7 +189,11 @@ JS;
                 'target' => '#task-modal'
             ];
 
-            $content = Html::tag('h6', $task['subject'], ['class' => ['m-0']]);
+            $subject = $task['subject'];
+            if ($task->isRecurrentInstance()) {
+                $subject = FAS::i('infinity')->transform('shrink-4.5')->mask('circle') . $subject;
+            }
+            $content = Html::tag('h6', $subject, ['class' => ['m-0']]);
             $small = $task['board']['name'];
 
             if (($cnt = count($task['checklistElements'])) > 0) {
