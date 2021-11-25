@@ -9,8 +9,12 @@ namespace simialbi\yii2\kanban\widgets;
 
 use kartik\select2\Select2;
 use rmrevin\yii\fontawesome\FAR;
+use simialbi\yii2\kanban\KanbanAsset;
+use simialbi\yii2\kanban\KanbanSwiperAsset;
 use simialbi\yii2\kanban\models\ChecklistElement;
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\turbo\Frame;
+use simialbi\yii2\turbo\Modal;
 use simialbi\yii2\widgets\Widget;
 use Yii;
 use yii\bootstrap4\Html;
@@ -63,11 +67,24 @@ class ToDo extends Widget
     public $addBoardFilter = false;
 
     /**
+     * @var string Kanban module name
+     */
+    public $kanbanModuleName = 'kanban';
+
+    /**
+     * @var boolean Whether to render the modal or not
+     */
+    public $renderModal = true;
+
+    /**
      * {@inheritDoc}
      * @throws \yii\base\InvalidConfigException
      */
     public function run()
     {
+        $this->view->registerAssetBundle(KanbanSwiperAsset::class);
+        $this->view->registerAssetBundle(KanbanAsset::class);
+
         $checklistQuery = new Query();
         $checklistQuery
             ->select('end_date')
@@ -96,7 +113,38 @@ class ToDo extends Widget
             ->asArray(true);
 
         $results = $tasks->all();
-        $html = Html::beginTag('div', $this->options);
+
+        ob_start();
+        if ($this->renderModal) {
+            $js = <<<JS
+function onHide() {
+    jQuery('.note-editor', this).each(function () {
+        var summernote = jQuery(this).prev().data('summernote');
+        if (summernote) {
+            summernote.destroy();
+        }
+    });
+}
+JS;
+            echo Modal::widget([
+                'options' => [
+                    'id' => 'task-modal',
+                    'options' => [
+                        'class' => ['modal', 'remote', 'fade']
+                    ],
+                    'clientOptions' => [
+                        'backdrop' => 'static',
+                        'keyboard' => false
+                    ],
+                    'clientEvents' => ['hidden.bs.modal' => new JsExpression($js)],
+                    'size' => \yii\bootstrap4\Modal::SIZE_EXTRA_LARGE,
+                    'title' => null,
+                    'closeButton' => false
+                ],
+            ]);
+        }
+        Frame::begin(['options' => ['id' => 'kanban-todo-frame']]);
+        echo Html::beginTag('div', $this->options);
         if ($this->addBoardFilter) {
             $filters = Yii::$app->request->getBodyParam('ToDo', []);
             $boards = ArrayHelper::map(ArrayHelper::getColumn($results, 'board'), 'id', 'name');
@@ -106,13 +154,13 @@ class ToDo extends Widget
                     return ArrayHelper::getValue($item, 'board.id') == $filters['boardId'];
                 });
             }
-            $html .= Html::beginTag('div', [
+            echo Html::beginTag('div', [
                 'class' => ['sa-todo-filter', 'mb-3']
             ]);
-            $html .= Html::beginForm(['plan/index', 'activeTab' => 'todo'], 'POST', [
+            echo Html::beginForm(["/{$this->kanbanModuleName}/plan/index", 'activeTab' => 'todo'], 'POST', [
                 'id' => $this->options['id'] . '-filter-form'
             ]);
-            $html .= Select2::widget([
+            echo Select2::widget([
                 'name' => 'ToDo[boardId]',
                 'value' => ArrayHelper::getValue($filters, 'boardId'),
                 'theme' => Select2::THEME_BOOTSTRAP,
@@ -127,14 +175,20 @@ class ToDo extends Widget
                     'change' => new JsExpression('function () { jQuery(this).closest(\'form\').submit(); }')
                 ]
             ]);
-            $html .= Html::endForm();
-            $html .= Html::endTag('div');
+            echo Html::endForm();
+            echo Html::endTag('div');
         }
-        $html .= Html::beginTag('div', $this->listOptions);
+        echo Html::beginTag('div', $this->listOptions);
 
         foreach ($results as $task) {
             $options = $this->itemOptions;
-            $options['href'] = Url::to(['plan/view', 'id' => $task['board']['id'], 'showTask' => $task['id']]);
+            $options['href'] = Url::to(["/{$this->kanbanModuleName}/task/update", 'id' => $task['id'], 'return' => 'todo']);
+            $options['data'] = [
+                'toggle' => 'modal',
+                'pjax' => '0',
+                'turbo-frame' => 'task-modal-frame',
+                'target' => '#task-modal'
+            ];
 
             $content = Html::tag('h6', $task['subject'], ['class' => ['m-0']]);
             $small = $task['board']['name'];
@@ -160,11 +214,11 @@ class ToDo extends Widget
             }
             $content .= Html::tag('small', $small);
 
-            $html .= Html::beginTag('a', $options);
-            $html .= Html::beginTag('div', [
+            echo Html::beginTag('a', $options);
+            echo Html::beginTag('div', [
                 'class' => ['form-check']
             ]);
-            $html .= Html::checkbox("check[{$task['id']}]", false, [
+            echo Html::checkbox("check[{$task['id']}]", false, [
                 'value' => Task::STATUS_DONE,
                 'class' => ['form-check-input'],
                 'id' => 'sa-kanban-status-' . $task['id'],
@@ -173,19 +227,21 @@ class ToDo extends Widget
                 ]
             ]);
 
-            $html .= Html::label($content, 'sa-kanban-status-' . $task['id'], [
+            echo Html::label($content, 'sa-kanban-status-' . $task['id'], [
                 'class' => ['form-check-label']
             ]);
-            $html .= Html::endTag('div');
-            $html .= Html::endTag('a');
+            echo Html::endTag('div');
+            echo Html::endTag('a');
         }
 
-        $html .= Html::endTag('div');
-        $html .= Html::endTag('div');
+        echo Html::endTag('div');
+        echo Html::endTag('div');
+
+        Frame::end();
 
         $this->registerPlugin();
 
-        return $html;
+        return ob_get_clean();
     }
 
     /**
@@ -194,11 +250,12 @@ class ToDo extends Widget
     protected function registerPlugin($pluginName = null, $selector = null)
     {
         $id = $this->options['id'];
-        $url = Url::to(['/schedule/task/set-status']);
+        $url = Url::to(["/{$this->kanbanModuleName}/task/set-status"]);
         $js = <<<JS
-jQuery('#$id label').on('click', function (e) {
+jQuery('#$id label').on('click.sa.kanban', function (e) {
+    // debugger;
     e.preventDefault();
-    window.location.replace(jQuery(this).closest('a').prop('href'));
+    // window.location.replace(jQuery(this).closest('a').prop('href'));
 });
 jQuery('#$id input[type="checkbox"]').on('click', function (e) {
     e.stopImmediatePropagation();

@@ -20,6 +20,7 @@ use yii\helpers\Url;
 /* @var $statuses array */
 /* @var $updateSeries boolean */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $return string */
 
 Frame::begin([
     'options' => [
@@ -33,7 +34,8 @@ Frame::begin([
             'action' => [
                 'task/update',
                 'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
-                'updateSeries' => $updateSeries
+                'updateSeries' => $updateSeries,
+                'return' => $return
             ],
             'validateOnSubmit' => false,
             'fieldConfig' => [
@@ -47,7 +49,9 @@ Frame::begin([
             'options' => [
                 'enctype' => 'multipart/form-data',
                 'data' => [
-                    'turbo-frame' => 'task-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '-frame'
+                    'turbo-frame' => ($return === 'todo')
+                        ? 'kanban-todo-frame'
+                        : 'task-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '-frame'
                 ]
             ]
         ]); ?>

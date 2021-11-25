@@ -265,7 +265,7 @@ class TaskController extends Controller
      * @throws InvalidConfigException
      * @throws \yii\base\Exception
      */
-    public function actionUpdate($id, $updateSeries = false)
+    public function actionUpdate($id, $updateSeries = false, $return = 'card')
     {
         $model = $this->findModel($id);
 
@@ -431,6 +431,11 @@ class TaskController extends Controller
                 'data' => $model
             ]));
 
+            if ($return === 'todo') {
+                return $this->renderAjax('todo', [
+                    'kanbanModuleName' => $this->module->id
+                ]);
+            }
             return $this->renderAjax('item', [
                 'boardId' => $model->board->id,
                 'model' => $model,
@@ -462,7 +467,8 @@ class TaskController extends Controller
             'buckets' => $buckets,
             'users' => $this->module->users,
             'updateSeries' => $updateSeries,
-            'statuses' => $statuses
+            'statuses' => $statuses,
+            'return' => $return
         ]);
     }
 
