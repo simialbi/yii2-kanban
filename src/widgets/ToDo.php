@@ -191,7 +191,12 @@ JS;
 
             $subject = $task['subject'];
             if ($task->isRecurrentInstance()) {
-                $subject = FAS::i('infinity')->transform('shrink-4.5')->mask('circle') . $subject;
+                $subject = FAS::i('infinity', [
+                    'data' => [
+                        'fa-transform' => 'shrink-4.5',
+                        'fa-mask' => 'fas fa-circle'
+                    ]
+                ]) . $subject;
             }
             $content = Html::tag('h6', $subject, ['class' => ['m-0']]);
             $small = $task['board']['name'];

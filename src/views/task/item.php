@@ -57,7 +57,10 @@ Frame::begin([
             <div class="d-flex justify-content-between">
                 <h6 class="card-title">
                     <?php if ($model->isRecurrentInstance()): ?>
-                        <?= FAS::i('infinity')->transform('shrink-4.5')->mask('circle'); ?>
+                        <?= FAS::i('infinity', [
+                            'fa-transform' => 'shrink-4.5',
+                            'fa-mask' => 'fas fa-circle'
+                        ]); ?>
                     <?php endif; ?>
                     <?= Html::encode($model->subject); ?>
                 </h6>

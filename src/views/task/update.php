@@ -825,24 +825,35 @@ Frame::begin([
                         <?php foreach ($model->comments as $comment): ?>
                             <div class="kanban-task-comment media<?php if ($i++ !== 0): ?> mt-3<?php endif; ?>">
                                 <div class="kanban-user mr-3">
-                                    <?php if ($comment->author->image): ?>
-                                        <?= Html::img($comment->author->image, [
-                                            'class' => ['rounded-circle'],
-                                            'title' => Html::encode($comment->author->name),
-                                            'data' => [
-                                                'toggle' => 'tooltip'
-                                            ]
-                                        ]); ?>
+                                    <?php if ($comment->author): ?>
+                                        <?php if ($comment->author->image): ?>
+                                            <?= Html::img($comment->author->image, [
+                                                'class' => ['rounded-circle'],
+                                                'title' => Html::encode($comment->author->name),
+                                                'data' => [
+                                                    'toggle' => 'tooltip'
+                                                ]
+                                            ]); ?>
+                                        <?php else: ?>
+                                            <span class="kanban-visualisation" data-toggle="tooltip"
+                                                  title="<?= Html::encode($comment->author->name); ?>">
+                                                <?= strtoupper(substr($comment->author->name, 0, 1)); ?>
+                                            </span>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="kanban-visualisation" data-toggle="tooltip"
-                                              title="<?= Html::encode($comment->author->name); ?>">
-                                        <?= strtoupper(substr($comment->author->name, 0, 1)); ?>
-                                    </span>
+                                              title="Unknown">
+                                            U
+                                        </span>
                                     <?php endif; ?>
                                 </div>
                                 <div class="media-body">
                                 <span class="text-muted d-flex flex-row justify-content-between">
-                                    <span><?= Html::encode($comment->author->name); ?></span>
+                                    <?php if ($comment->author): ?>
+                                        <span><?= Html::encode($comment->author->name); ?></span>
+                                    <?php else: ?>
+                                        <span>Unknown</span>
+                                    <?php endif; ?>
                                     <span>
                                         <?= Yii::$app->formatter->asDatetime($comment->created_at, 'medium'); ?>
                                     </span>
