@@ -76,7 +76,8 @@ class AttachmentController extends Controller
             'buckets' => $buckets,
             'users' => $this->module->users,
             'updateSeries' => false,
-            'statuses' => $this->module->statuses
+            'statuses' => $this->module->statuses,
+            'return' => 'card'
         ]);
     }
 
