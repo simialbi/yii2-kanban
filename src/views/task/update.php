@@ -276,7 +276,7 @@ Frame::begin([
                     ]
                 ]); ?>
             </div>
-            <div class="row mb-3">
+            <div class="row mb-3 <?php if ($model->isRecurrentInstance()) : ?>d-none<?php endif; ?>">
                 <div class="col-12">
                     <?= $form->field($model, 'is_recurring', [
                         'options' => [
