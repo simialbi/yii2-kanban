@@ -436,6 +436,9 @@ class TaskController extends Controller
                     'kanbanModuleName' => $this->module->id
                 ]);
             }
+
+            $model = Task::findOne(['id' => $model->id]);
+
             return $this->renderAjax('item', [
                 'boardId' => $model->board->id,
                 'model' => $model,

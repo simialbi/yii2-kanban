@@ -18,14 +18,7 @@ use yii\bootstrap4\Html;
 /* @var $buckets \simialbi\yii2\kanban\models\Bucket[] */
 /* @var $statuses array */
 
-//Frame::begin([
-//    'options' => [
-//        'id' => 'create-task-bucket-' . $id . '-frame'
-//    ]
-//]);
-?>
-
-<?php $form = ActiveForm::begin([
+$form = ActiveForm::begin([
     'action' => ['task/create', 'boardId' => $board->id, $keyName => $id],
     'options' => [
         'class' => ['mt-2', 'mt-md-4'],
@@ -44,7 +37,8 @@ use yii\bootstrap4\Html;
             ]
         ];
     }
-]); ?>
+]);
+?>
 <div class="card">
     <?= Html::button('<span aria-hidden="true">' . FAS::i('times') . '</span>', [
         'type' => 'button',
@@ -139,11 +133,11 @@ use yii\bootstrap4\Html;
                     array_unshift($items, HideSeek::widget([
                         'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
                         'options' => [
-                            'id' => 'kanban-create-task-assignees',
+                            'id' => 'kanban-create-task-assignees-' . $id,
                             'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
                         ],
                         'clientOptions' => [
-                            'list' => '.kanban-create-task-assignees',
+                            'list' => '#dropdown-user-create-task-' . $id,
                             'ignore' => '.search-field,.dropdown-header'
                         ]
                     ]));
@@ -168,5 +162,3 @@ use yii\bootstrap4\Html;
 </div>
 <?php
 ActiveForm::end();
-//Frame::end();
-?>

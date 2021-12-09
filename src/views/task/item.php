@@ -304,25 +304,6 @@ Frame::begin([
                         ]
                     ],
                     [
-                        'label' => FAS::i('history', [
-                            'class' => ['mr-1']
-                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'View history'),
-                        'url' => [
-                            'task/history',
-                            'id' => $model->recurrence_parent_id
-                        ],
-                        'visible' => $model->isRecurrentInstance(),
-                        'linkOptions' => [
-                            'data' => [
-                                'pjax' => '0',
-                                'turbo-frame' => 'task-modal-frame',
-                                'toggle' => 'modal',
-                                'target' => '#task-modal'
-                            ]
-                        ]
-                    ],
-                    '-',
-                    [
                         'label' => FAS::i('pen-square', [
                             'class' => ['mr-1']
                         ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Update series'),
@@ -351,25 +332,6 @@ Frame::begin([
                             'id' => ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id),
                             'group' => $group
                         ],
-                        'linkOptions' => [
-                            'data' => [
-                                'pjax' => '0',
-                                'turbo-frame' => 'task-modal-frame',
-                                'toggle' => 'modal',
-                                'target' => '#task-modal'
-                            ]
-                        ]
-                    ],
-                    [
-                        'label' => FAS::i('pen-square', [
-                            'class' => ['mr-1']
-                        ])->fixedWidth() . ' ' . Yii::t('simialbi/kanban', 'Update series'),
-                        'url' => [
-                            'task/update',
-                            'id' => $model->recurrence_parent_id,
-                            'updateSeries' => true
-                        ],
-                        'visible' => $model->isRecurrentInstance(),
                         'linkOptions' => [
                             'data' => [
                                 'pjax' => '0',

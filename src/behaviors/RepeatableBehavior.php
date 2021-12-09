@@ -236,7 +236,7 @@ class RepeatableBehavior extends Behavior
         if (!$this->owner->hasProperty($this->recurrencePatternProperty) || empty($this->owner->{$this->recurrencePatternProperty})) {
             return;
         }
-        if (!$this->owner->hasProperty($this->statusProperty) || $this->owner->{$this->statusProperty} === 0) {
+        if (!$this->owner->hasProperty($this->statusProperty) || $this->owner->{$this->statusProperty} === Task::STATUS_DONE) {
             return;
         }
 

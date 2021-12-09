@@ -176,10 +176,11 @@ JS;
         echo Html::beginTag('div', $this->listOptions);
 
         foreach ($results as $task) {
+            $id = $task->isRecurrentInstance() ? $task->recurrence_parent_id : $task->id;
             $options = $this->itemOptions;
             $options['href'] = Url::to([
                 "/{$this->kanbanModuleName}/task/update",
-                'id' => $task['id'],
+                'id' => $id,
                 'return' => 'todo'
             ]);
             $options['data'] = [
@@ -226,16 +227,16 @@ JS;
             echo Html::beginTag('div', [
                 'class' => ['form-check']
             ]);
-            echo Html::checkbox("check[{$task['id']}]", false, [
+            echo Html::checkbox("check[$id]", false, [
                 'value' => Task::STATUS_DONE,
                 'class' => ['form-check-input'],
-                'id' => 'sa-kanban-status-' . $task['id'],
+                'id' => 'sa-kanban-status-' . $id,
                 'data' => [
-                    'task-id' => $task['id']
+                    'task-id' => $id
                 ]
             ]);
 
-            echo Html::label($content, 'sa-kanban-status-' . $task['id'], [
+            echo Html::label($content, 'sa-kanban-status-' . $id, [
                 'class' => ['form-check-label']
             ]);
             echo Html::endTag('div');

@@ -24,17 +24,14 @@ $this->params['breadcrumbs'] = [$this->title];
     <h1><?= Html::encode($this->title); ?></h1>
 
     <?php $this->beginBlock('tab-hub'); ?>
-    <div class="mt-3 d-md-flex flex-row justify-content-start flex-wrap">
+    <div class="mt-3 kanban-boards">
         <?php $i = 0; ?>
         <?php foreach ($boards as $board): ?>
-            <?php $options = ['class' => ['kanban-board', 'card', 'mb-3', 'mr-md-2']]; ?>
-            <?php if (++$i % 3 === 0 && $i % 2 !== 0): ?>
-                <?php Html::addCssClass($options, 'mr-xl-0'); ?>
-            <?php endif; ?>
+            <?php $options = ['class' => ['kanban-board']]; ?>
             <?= Html::beginTag('div', $options); ?>
-            <div class="kanban-board-inner row no-gutters flex-nowrap flex-grow-1">
+            <div class="kanban-board-inner">
                 <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
-                   class="kanban-board-image col-3 col-md-4 d-flex justify-content-center align-items-center text-decoration-none">
+                   class="kanban-board-image d-flex justify-content-center align-items-center text-decoration-none">
                     <?php if ($board->image): ?>
                         <?= Html::img($board->image, ['class' => ['img-fluid']]); ?>
                     <?php else: ?>
@@ -43,8 +40,8 @@ $this->params['breadcrumbs'] = [$this->title];
                             </span>
                     <?php endif; ?>
                 </a>
-                <div class="col col-md-8">
-                    <div class="card-body d-flex align-items-stretch h-100">
+                <div class="kanban-board-meta">
+                    <div class="d-flex align-items-stretch h-100">
                         <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
                            class="flex-grow-1 text-body text-decoration-none">
                             <h5 class="pt-0"><?= Html::encode($board->name); ?></h5>
@@ -72,13 +69,11 @@ $this->params['breadcrumbs'] = [$this->title];
             </div>
             <?= Html::endTag('div'); ?>
         <?php endforeach; ?>
-        <div class="kanban-board card mr-md-2 mb-3 d-none d-md-block">
-            <div class="card-body">
-                <h5 class="mb-0 pt-0"><?= Html::encode(Yii::t('simialbi/kanban/plan', 'Create board')); ?></h5>
-                <?= Html::a('', ['plan/create'], [
-                    'class' => ['stretched-link']
-                ]); ?>
-            </div>
+        <div class="kanban-board bg-white p-3 d-none d-md-block position-relative">
+            <h5 class="mb-0 pt-0"><?= Html::encode(Yii::t('simialbi/kanban/plan', 'Create board')); ?></h5>
+            <?= Html::a('', ['plan/create'], [
+                'class' => ['stretched-link']
+            ]); ?>
         </div>
         <?= Html::a(FAS::i('plus'), ['plan/create'], [
             'class' => ['kanban-create-mobile', 'd-md-none', 'rounded-circle', 'bg-secondary', 'text-white', 'p-3'],
