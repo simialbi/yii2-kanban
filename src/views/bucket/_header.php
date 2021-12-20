@@ -38,6 +38,12 @@ Frame::begin([
                         'bucket/update',
                         'id' => $id,
                         'group' => Yii::$app->request->getQueryParam('group', 'bucket')
+                    ],
+                    'linkOptions' => [
+                        'data' => [
+                            'turbo' => 'true',
+                            'turbo-frame' => "update-bucket-$id-frame"
+                        ]
                     ]
                 ],
                 [
