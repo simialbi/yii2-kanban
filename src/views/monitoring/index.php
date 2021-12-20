@@ -40,7 +40,8 @@ Frame::begin([
                         'data' => [
                             'toggle' => 'modal',
                             'pjax' => '0',
-                            'target' => '#taskModal'
+                            'turbo-frame' => 'task-modal-frame',
+                            'target' => '#task-modal'
                         ]
                     ])
                 ]

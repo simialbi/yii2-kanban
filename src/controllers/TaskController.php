@@ -134,10 +134,8 @@ class TaskController extends Controller
      */
     protected function findModel($id)
     {
-//        if (preg_match('#^r-\d+$#', $id)) {
-//            $id = preg_replace('#[^\d]#', '', $id);
-//        }
-        if (($model = Task::findOne($id)) !== null) {
+        /** @var $model Task */
+        if (($model = Task::find()->with('assignments')->where(['id' => $id])->one()) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
@@ -437,7 +435,7 @@ class TaskController extends Controller
                 ]);
             }
 
-            $model = Task::findOne(['id' => $model->id]);
+            $model = $this->findModel($model->id);
 
             return $this->renderAjax('item', [
                 'boardId' => $model->board->id,
@@ -484,11 +482,16 @@ class TaskController extends Controller
     public function actionCopyPerUser($id, $group = 'bucket')
     {
         $model = $this->findModel($id);
+
+        if ($model->isRecurrentInstance()) {
+            $model = $model->getOriginalRecord();
+        }
+
         $assignees = Yii::$app->request->getBodyParam('assignees', []);
 
         if (Yii::$app->request->isPost && !empty($assignees)) {
             foreach ($assignees as $assignee) {
-                $newTask = new Task($model->toArray());
+                $newTask = new Task($model);
                 $newTask->id = null;
                 if (!$newTask->save()) {
                     continue;

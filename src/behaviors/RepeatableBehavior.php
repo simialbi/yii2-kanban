@@ -101,6 +101,10 @@ class RepeatableBehavior extends Behavior
         ];
     }
 
+    /**
+     * @param \yii\base\ModelEvent $event
+     * @throws \yii\base\InvalidConfigException
+     */
     public function deleteRecurrentInstance(\yii\base\ModelEvent $event)
     {
         if (!$this->isRecurrentInstance()) {
