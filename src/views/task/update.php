@@ -302,6 +302,9 @@ Frame::begin([
                             $byDayInt = preg_replace('#[^\-\d]#', '', $byDay);
                             $byDayString = preg_replace('#[\-\d]#', '', $byDay);
                         }
+                        if (is_array($byMonthDay)) {
+                            $byMonthDay = $byMonthDay[0];
+                        }
                     }
                     ?>
 
