@@ -155,6 +155,7 @@ class Task extends ActiveRecord
             ],
             'sortable' => [
                 'class' => ContinuousNumericalSortableBehavior::class,
+                'prependAdded' => true,
                 'sortAttribute' => 'sort',
                 'scope' => function () {
                     return Task::find()->where(['bucket_id' => $this->bucket_id]);
