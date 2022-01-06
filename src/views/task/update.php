@@ -51,7 +51,11 @@ Frame::begin([
                 'data' => [
                     'turbo-frame' => ($return === 'todo')
                         ? 'kanban-todo-frame'
+                        /*
                         : 'task-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '-frame'
+                        /*/
+                        : ($model->isRecurrentInstance() ? 'bucket-' . $model->bucket_id . '-frame' : 'task-' . $model->id . '-frame')
+                        //*/
                 ]
             ]
         ]); ?>

@@ -433,6 +433,14 @@ class TaskController extends Controller
                 return $this->renderAjax('todo', [
                     'kanbanModuleName' => $this->module->id
                 ]);
+            } elseif ($return === 'bucket') {
+                return $this->renderAjax('/bucket/view', [
+                    'model' => $model->bucket,
+                    'statuses' => $this->module->statuses,
+                    'users' => $this->module->users,
+                    'closeModal' => true,
+                    'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id')
+                ]);
             }
 
             $model = $this->findModel($model->id);

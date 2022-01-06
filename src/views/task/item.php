@@ -239,7 +239,8 @@ Frame::begin([
                 <?php endif; ?>
                 <?= Html::a(FAS::i('edit'), [
                     'task/update',
-                    'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id
+                    'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
+                    'return' => $model->isRecurrentInstance() ? 'bucket' : 'card'
                 ], [
                     'class' => ['btn', 'btn-sm', 'ml-auto', 'kanban-task-update-link'],
                     'data' => [
@@ -292,7 +293,8 @@ Frame::begin([
                         'label' => FAS::i('edit', ['class' => ['mr-1']])->fixedWidth() . ' ' . Yii::t('yii', 'Update'),
                         'url' => [
                             'task/update',
-                            'id' => ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id)
+                            'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
+                            'return' => $model->isRecurrentInstance() ? 'bucket' : 'card'
                         ],
                         'linkOptions' => [
                             'data' => [

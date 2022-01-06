@@ -206,6 +206,7 @@ class RepeatableBehavior extends Behavior
             }
             $record->save();
         }
+        $this->owner->setAttribute($this->idProperty, $instance->{$this->idProperty});
 
         $event->isValid = false;
     }
