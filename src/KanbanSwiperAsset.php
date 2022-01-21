@@ -14,7 +14,7 @@ class KanbanSwiperAsset extends AssetBundle
     /**
      * {@inheritDoc}
      */
-    public $sourcePath = '@bower/swiper/package';
+    public $sourcePath = '@npm/swiper';
 
     /**
      * {@inheritDoc}
