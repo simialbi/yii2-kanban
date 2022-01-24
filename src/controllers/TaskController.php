@@ -272,6 +272,7 @@ class TaskController extends Controller
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $hasStatusChanged = $model->isAttributeChanged('status', false);
             $model->save(false);
             $checklistElements = Yii::$app->request->getBodyParam('checklist', []);
             $newChecklistElements = ArrayHelper::remove($checklistElements, 'new', []);
@@ -396,7 +397,7 @@ class TaskController extends Controller
                 }
             }
 
-            if ($model->isAttributeChanged('status')) {
+            if ($hasStatusChanged) {
                 if ($model->ticket_id && ($ticket = $model->ticket)) {
                     switch ($model->status) {
                         case Task::STATUS_IN_PROGRESS:
@@ -820,6 +821,8 @@ class TaskController extends Controller
         $assignment->user_id = $userId;
         $assignment->save();
 
+        $model->refresh();
+
         $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
             'task' => $model,
             'user' => ArrayHelper::getValue($this->module->users, $userId)
@@ -854,6 +857,8 @@ class TaskController extends Controller
             'task_id' => $model->id,
             'user_id' => $userId
         ]);
+
+        $model->refresh();
 
         $this->module->trigger(Module::EVENT_TASK_UNASSIGNED, new TaskEvent([
             'task' => $model,

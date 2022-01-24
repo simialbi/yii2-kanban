@@ -26,7 +26,9 @@ Frame::begin([
 ?>
 <?= $this->render('_header', [
     'id' => $model->id,
-    'title' => $model->name
+    'title' => Html::tag('span', $model->name, [
+        'class' => ['d-block', 'text-truncate']
+    ])
 ]) ?>
 <?= Html::a(FAS::i('plus'), '#bucket-' . $model->id . '-create-task', [
     'class' => ['btn', 'btn-primary', 'btn-block'],
@@ -59,7 +61,8 @@ Frame::begin([
                 'model' => $task,
                 'statuses' => $statuses,
                 'users' => $users,
-                'closeModal' => false
+                'closeModal' => false,
+                'group' => null
             ]);
         }
         ?>

@@ -206,6 +206,10 @@ turbo-frame {
         }
     }
 
+    h5 {
+        min-width: 0;
+    }
+
     @media (max-width: map-get($grid-breakpoints, md) - 1) {
         > h1, > h2, > h3, > h4, > h5, > .h1, > .h2, > .h3, > .h4, > .h5 {
             max-width: 50vw;

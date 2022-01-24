@@ -316,12 +316,8 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         if ($topScrollBar.is(':visible')) {
             $topScrollBar.find('> div').css('width', $bottomScrollBar.find('> div').prop('scrollWidth'));
 
-            $topScrollBar.on('scroll', function () {
-                $bottomScrollBar.scrollLeft($topScrollBar.scrollLeft());
-            });
-            $bottomScrollBar.on('scroll', function () {
-                $topScrollBar.scrollLeft($bottomScrollBar.scrollLeft());
-            });
+            syncScroll($topScrollBar, $bottomScrollBar);
+            syncScroll($bottomScrollBar, $topScrollBar);
         } else {
             slider = new Swiper('.kanban-bottom-scrollbar', {
                 wrapperClass: 'kanban-plan-sortable',
@@ -332,6 +328,18 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                     disabledClass: 'text-muted'
                 }
             });
+        }
+
+        var ignoreScrollEvents = false;
+        function syncScroll(element1, element2) {
+            element1.scroll(function () {
+                var ignore = ignoreScrollEvents
+                ignoreScrollEvents = false
+                if (ignore) return
+
+                ignoreScrollEvents = true
+                element2.scrollLeft(element1.scrollLeft())
+            })
         }
     }
 
