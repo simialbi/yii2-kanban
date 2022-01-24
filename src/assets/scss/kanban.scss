@@ -302,9 +302,17 @@ turbo-frame {
     }
 }
 
-.kanban-task-assignees, .card-footer.kanban-task-assignees, .kanban-plan-assignees {
+.kanban-task-assignees, .card-footer.kanban-task-assignees, .kanban-plan-assignees, .kanban-task-responsible {
     background: none transparent;
     padding: 0;
+
+    .kanban-user.responsible {
+        padding: .5rem .75rem;
+
+        & + .dropdown .dropdown-menu {
+            margin-left: calc((#{$user-image-size} + 1.5rem) * -1);
+        }
+    }
 
     .dropdown {
         .dropdown-toggle {
@@ -496,5 +504,23 @@ turbo-frame {
     .nav-item.show .nav-link {
         color: $nav-link-active-color;
         border-color: $nav-link-active-border-color;
+    }
+}
+
+.kanban-plan-index {
+    #delegated-tasks-frame {
+        #search-widget-delegated {
+            width: 200px;
+        }
+
+        .list-group-item {
+            border-top: 0;
+        }
+    }
+
+    #responsible-tasks-frame {
+        turbo-frame + turbo-frame a {
+            border-top: 0;
+        }
     }
 }

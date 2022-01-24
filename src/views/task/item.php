@@ -437,105 +437,125 @@ Frame::begin([
                 ]); ?>
             </div>
         </div>
-        <?php if (count($model->assignees)): ?>
+        <?php if (count($model->assignees) || $model->responsible_id): ?>
             <div class="kanban-task-assignees kanban-assignees card-footer">
-                <div class="dropdown">
-                    <a href="javascript:;" data-toggle="dropdown"
-                       class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
-                        <?php foreach ($model->assignees as $assignee): ?>
-                            <span class="kanban-user">
-                            <?php if ($assignee->image): ?>
-                                <?= Html::img($assignee->image, [
-                                    'class' => ['rounded-circle', 'mr-1'],
-                                    'title' => Html::encode($assignee->name),
-                                    'data' => [
-                                        'toggle' => 'tooltip'
-                                    ]
-                                ]); ?>
-                            <?php else: ?>
-                                <span class="kanban-visualisation mr-1" title="<?= Html::encode($assignee->name); ?>"
-                                      data-toggle="tooltip">
-                                    <?= strtoupper(substr($assignee->name, 0, 1)); ?>
-                                </span>
-                            <?php endif; ?>
+                <div class="d-flex">
+                    <?php if ($model->responsible_id): ?>
+                        <span class="kanban-user responsible border-right">
+                        <?php if ($model->responsible->image): ?>
+                            <?= Html::img($model->responsible->image, [
+                                'class' => ['rounded-circle'],
+                                'title' => Html::encode($model->responsible->name),
+                                'data' => [
+                                    'toggle' => 'tooltip'
+                                ]
+                            ]); ?>
+                        <?php else: ?>
+                            <span class="kanban-visualisation mr-1" title="<?= Html::encode($model->responsible->name); ?>"
+                                  data-toggle="tooltip">
+                                <?= strtoupper(substr($model->responsible->name, 0, 1)); ?>
                             </span>
-                        <?php endforeach; ?>
-                    </a>
-                    <?php
-                    $assignees = [];
-                    $newUsers = [];
-                    foreach ($model->assignees as $assignee) {
-                        $assignees[] = [
-                            'label' => $this->render('_user', [
-                                'user' => $assignee,
-                                'assigned' => true
-                            ]),
-                            'linkOptions' => [
-                                'class' => ['align-items-center', 'remove-assignee', 'is-assigned'],
-                                'data' => [
-                                    'turbo-frame' => 'task-' . $model->id . '-frame',
-                                    'turbo' => 'true'
-                                ]
-                            ],
-                            'disabled' => $model->created_by != Yii::$app->user->id,
-                            'url' => ['task/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
-                        ];
-                    }
-
-                    foreach ($users as $user) {
+                        <?php endif; ?>
+                        </span>
+                    <?php endif; ?>
+                    <div class="dropdown flex-grow-1">
+                        <a href="javascript:;" data-toggle="dropdown"
+                           class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
+                            <?php foreach ($model->assignees as $assignee): ?>
+                                <span class="kanban-user">
+                                <?php if ($assignee->image): ?>
+                                    <?= Html::img($assignee->image, [
+                                        'class' => ['rounded-circle', 'mr-1'],
+                                        'title' => Html::encode($assignee->name),
+                                        'data' => [
+                                            'toggle' => 'tooltip'
+                                        ]
+                                    ]); ?>
+                                <?php else: ?>
+                                    <span class="kanban-visualisation mr-1" title="<?= Html::encode($assignee->name); ?>"
+                                          data-toggle="tooltip">
+                                        <?= strtoupper(substr($assignee->name, 0, 1)); ?>
+                                    </span>
+                                <?php endif; ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </a>
+                        <?php
+                        $assignees = [];
+                        $newUsers = [];
                         foreach ($model->assignees as $assignee) {
-                            if ($user->getId() === $assignee->getId()) {
-                                continue 2;
-                            }
+                            $assignees[] = [
+                                'label' => $this->render('_user', [
+                                    'user' => $assignee,
+                                    'assigned' => true
+                                ]),
+                                'linkOptions' => [
+                                    'class' => ['align-items-center', 'remove-assignee', 'is-assigned'],
+                                    'data' => [
+                                        'turbo-frame' => 'task-' . $model->id . '-frame',
+                                        'turbo' => 'true'
+                                    ]
+                                ],
+                                'disabled' => $model->created_by != Yii::$app->user->id,
+                                'url' => ['task/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
+                            ];
                         }
-                        $newUsers[] = [
-                            'label' => $this->render('_user', [
-                                'user' => $user,
-                                'assigned' => false
-                            ]),
-                            'linkOptions' => [
-                                'class' => ['align-items-center', 'add-assignee'],
-                                'data' => [
-                                    'turbo-frame' => 'task-' . $model->id . '-frame',
-                                    'turbo' => 'true'
-                                ]
-                            ],
-//                            'disabled' => $model->created_by != Yii::$app->user->id,
-                            'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
-                        ];
-                    }
 
-                    $items = [];
-                    if (!empty($assignees)) {
-                        $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
-                    }
-                    $items = array_merge($items, $assignees);
-                    if (!empty($assignees) && !empty($newUsers)) {
-                        $items[] = '-';
-                    }
-                    if (!empty($newUsers)) {
-                        $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
-                    }
-                    $items = array_merge($items, $newUsers);
-                    array_unshift($items, HideSeek::widget([
-                        'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
-                        'options' => [
-                            'id' => 'kanban-footer-task-assignees-' . $model->hash,
-                            'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
-                        ],
-                        'clientOptions' => [
-                            'list' => '.kanban-footer-task-assignees-' . $model->hash,
-                            'ignore' => '.search-field,.dropdown-header,.dropdown-divider'
-                        ]
-                    ]));
-                    ?>
-                    <?= Dropdown::widget([
-                        'items' => $items,
-                        'encodeLabels' => false,
-                        'options' => [
-                            'class' => ['kanban-footer-task-assignees-' . $model->hash, 'w-100']
-                        ]
-                    ]); ?>
+                        foreach ($users as $user) {
+                            foreach ($model->assignees as $assignee) {
+                                if ($user->getId() === $assignee->getId()) {
+                                    continue 2;
+                                }
+                            }
+                            $newUsers[] = [
+                                'label' => $this->render('_user', [
+                                    'user' => $user,
+                                    'assigned' => false
+                                ]),
+                                'linkOptions' => [
+                                    'class' => ['align-items-center', 'add-assignee'],
+                                    'data' => [
+                                        'turbo-frame' => 'task-' . $model->id . '-frame',
+                                        'turbo' => 'true'
+                                    ]
+                                ],
+    //                            'disabled' => $model->created_by != Yii::$app->user->id,
+                                'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
+                            ];
+                        }
+
+                        $items = [];
+                        if (!empty($assignees)) {
+                            $items[] = ['label' => Yii::t('simialbi/kanban', 'Assigned')];
+                        }
+                        $items = array_merge($items, $assignees);
+                        if (!empty($assignees) && !empty($newUsers)) {
+                            $items[] = '-';
+                        }
+                        if (!empty($newUsers)) {
+                            $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
+                        }
+                        $items = array_merge($items, $newUsers);
+                        array_unshift($items, HideSeek::widget([
+                            'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
+                            'options' => [
+                                'id' => 'kanban-footer-task-assignees-' . $model->hash,
+                                'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                            ],
+                            'clientOptions' => [
+                                'list' => '.kanban-footer-task-assignees-' . $model->hash,
+                                'ignore' => '.search-field,.dropdown-header,.dropdown-divider'
+                            ]
+                        ]));
+                        ?>
+                        <?= Dropdown::widget([
+                            'items' => $items,
+                            'encodeLabels' => false,
+                            'options' => [
+                                'class' => ['kanban-footer-task-assignees-' . $model->hash, 'w-100']
+                            ]
+                        ]); ?>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>

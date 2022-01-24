@@ -10,9 +10,11 @@ namespace simialbi\yii2\kanban\widgets;
 use kartik\select2\Select2;
 use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\hideseek\HideSeek;
 use simialbi\yii2\kanban\KanbanAsset;
 use simialbi\yii2\kanban\KanbanSwiperAsset;
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\Module;
 use simialbi\yii2\turbo\Frame;
 use simialbi\yii2\turbo\Modal;
 use simialbi\yii2\widgets\Widget;
@@ -94,20 +96,9 @@ class ToDo extends Widget
             ->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
 
         $results = $tasks->all();
-        usort($results, function ($a, $b) {
-            /** @var $a Task */
-            /** @var $b Task */
-            if ($a->endDate === $b->endDate) {
-                return 0;
-            }
-            if ($a->endDate === null && $b->endDate !== null) {
-                return 1;
-            }
-            if ($a->endDate !== null && $b->endDate === null) {
-                return -1;
-            }
-            return ($a->endDate < $b->endDate) ? -1 : 1;
-        });
+        /** @var Module $module */
+        $module = Yii::$app->getModule($this->kanbanModuleName);
+        $module::sortTasks($results);
 
         ob_start();
         if ($this->renderModal) {
@@ -141,37 +132,18 @@ JS;
         Frame::begin(['options' => ['id' => 'kanban-todo-frame']]);
         echo Html::beginTag('div', $this->options);
         if ($this->addBoardFilter) {
-            $filters = Yii::$app->request->getBodyParam('ToDo', []);
-            $boards = ArrayHelper::map(ArrayHelper::getColumn($results, 'board'), 'id', 'name');
-
-            if (isset($filters['boardId'])) {
-                $results = array_filter($results, function ($item) use ($filters) {
-                    return ArrayHelper::getValue($item, 'board.id') == $filters['boardId'];
-                });
-            }
-            echo Html::beginTag('div', [
-                'class' => ['sa-todo-filter', 'mb-3']
-            ]);
-            echo Html::beginForm(["/{$this->kanbanModuleName}/plan/index", 'activeTab' => 'todo'], 'POST', [
-                'id' => $this->options['id'] . '-filter-form'
-            ]);
-            echo Select2::widget([
-                'name' => 'ToDo[boardId]',
-                'value' => ArrayHelper::getValue($filters, 'boardId'),
-                'theme' => Select2::THEME_BOOTSTRAP,
-                'data' => $boards,
+            echo HideSeek::widget([
+                'fieldTemplate' => '<div class="search-field mb-3">{input}</div>',
                 'options' => [
-                    'placeholder' => Yii::t('simialbi/kanban', 'Filter by board'),
+                    'id' => 'search-widget-todo',
+                    'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword'),
+                    'autocomplete' => 'off'
                 ],
-                'pluginOptions' => [
-                    'allowClear' => true
+                'clientOptions' => [
+                    'list' => '#' . $this->id . ' .list-group',
+                    'attribute' => 'alt'
                 ],
-                'pluginEvents' => [
-                    'change' => new JsExpression('function () { jQuery(this).closest(\'form\').submit(); }')
-                ]
             ]);
-            echo Html::endForm();
-            echo Html::endTag('div');
         }
         echo Html::beginTag('div', $this->listOptions);
 
@@ -189,15 +161,20 @@ JS;
                 'turbo-frame' => 'task-modal-frame',
                 'target' => '#task-modal'
             ];
+            $options['alt'] = $task->subject . ' ' . str_replace(
+                    ["\r", "\n"],
+                    ' ',
+                    strip_tags($task->description)
+                ) . ' ' . $task->board->name . ' ' . $task->bucket->name;
 
             $subject = $task['subject'];
             if ($task->isRecurrentInstance()) {
                 $subject = FAS::i('infinity', [
-                    'data' => [
-                        'fa-transform' => 'shrink-4.5',
-                        'fa-mask' => 'fas fa-circle'
-                    ]
-                ]) . $subject;
+                        'data' => [
+                            'fa-transform' => 'shrink-4.5',
+                            'fa-mask' => 'fas fa-circle'
+                        ]
+                    ]) . $subject;
             }
             $content = Html::tag('h6', $subject, ['class' => ['m-0']]);
             $small = $task['board']['name'];

@@ -84,7 +84,14 @@ $this->params['breadcrumbs'] = [$this->title];
     <?php $this->beginBlock('tab-tasks'); ?>
     <div class="mt-3">
         <?= ToDo::widget([
-            'addBoardFilter' => true
+            'addBoardFilter' => true,
+            'kanbanModuleName' => 'schedule',
+            'listOptions' => [
+                'class' => ['list-group']
+            ],
+            'itemOptions' => [
+                'class' => ['list-group-item', 'list-group-item-action', 'rounded-0', 'p-2']
+            ]
         ]); ?>
     </div>
     <?php $this->endBlock(); ?>
@@ -93,6 +100,15 @@ $this->params['breadcrumbs'] = [$this->title];
         'options' => [
             'id' => 'delegated-tasks-frame',
             'src' => Url::to(['task/view-delegated']),
+            'loading' => 'lazy'
+        ]
+    ]); ?>
+    <?php $this->endBlock(); ?>
+    <?php $this->beginBlock('tab-responsible-tasks'); ?>
+    <?= Frame::widget([
+        'options' => [
+            'id' => 'responsible-tasks-frame',
+            'src' => Url::to(['task/view-responsible', 'Filters' => Yii::$app->request->getBodyParam('Filter', [])]),
             'loading' => 'lazy'
         ]
     ]); ?>
@@ -159,6 +175,11 @@ JS;
                 'label' => Yii::t('simialbi/kanban/plan', 'Delegated tasks'),
                 'content' => $this->blocks['tab-delegated-tasks'],
                 'active' => ($activeTab === 'delegated')
+            ],
+            [
+                'label' => Yii::t('simialbi/kanban/plan', 'Responsible'),
+                'content' => $this->blocks['tab-responsible-tasks'],
+                'active' => ($activeTab === 'responsible')
             ],
             [
                 'label' => Yii::t('simialbi/kanban/plan', 'Monitoring'),

@@ -22,6 +22,7 @@ use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\ticket\models\Ticket;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 use yii\db\Exception;
 use yii\db\Query;
 use yii\filters\AccessControl;
@@ -70,7 +71,7 @@ class TaskController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['view', 'view-completed', 'view-delegated', 'history']
+                        'actions' => ['view', 'view-completed', 'view-delegated', 'view-responsible', 'history']
                     ]
                 ]
             ]
@@ -167,11 +168,57 @@ class TaskController extends Controller
             }
         }
 
+        if ($view === 'list') {
+            $module = $this->module;
+            foreach ($indexed as &$user) {
+                $module::sortTasks($user);
+            }
+            unset($user);
+        }
+
         return $this->renderAjax('delegated', [
             'tasks' => $indexed,
             'view' => $view,
             'users' => $this->module->users,
             'statuses' => $this->module->statuses
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function actionViewResponsible()
+    {
+        $filters = Yii::$app->request->getQueryParam('Filters', []);
+
+        $query = Board::find()
+            ->alias('bo')
+            ->distinct()
+            ->joinWith([
+                'buckets b' => function (ActiveQuery $query) {
+                    $query->joinWith([
+                        'tasks t' => function (ActiveQuery $query) {
+                            $query
+                                ->where(['{{t}}.[[responsible_id]]' => Yii::$app->user->id])
+                                ->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
+                                ->orderBy([]);
+                        }
+                    ], true, 'INNER JOIN')
+                        ->orderBy([]);
+                }
+            ], true, 'INNER JOIN')
+            ->filterWhere([
+                Board::tableName() . '.id' => ArrayHelper::getValue($filters, 'boardId')
+            ])
+            ->orderBy([
+                '{{bo}}.[[name]]' => SORT_ASC,
+                '{{b}}.[[name]]' => SORT_ASC
+            ]);
+
+        return $this->renderAjax('responsible', [
+            'boards' => $query->all(),
+            'module' => $this->module
         ]);
     }
 
@@ -441,6 +488,10 @@ class TaskController extends Controller
                     'users' => $this->module->users,
                     'closeModal' => true,
                     'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id')
+                ]);
+            } elseif ($return === 'list-item') {
+                return $this->renderAjax('/task/list-item', [
+                    'task' => $model
                 ]);
             }
 

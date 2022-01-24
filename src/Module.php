@@ -123,7 +123,8 @@ class Module extends \simialbi\yii2\base\Module
         // TODO: Cache somehow
         $this->users = ArrayHelper::index(call_user_func([Yii::$app->user->identityClass, 'findIdentities']), 'id');
         if (Yii::$app->has('authManager')) {
-            $this->roles = ArrayHelper::getColumn(ArrayHelper::index(Yii::$app->authManager->getRoles(), 'name'), 'description');
+            $this->roles = ArrayHelper::getColumn(ArrayHelper::index(Yii::$app->authManager->getRoles(), 'name'),
+                'description');
         }
 
         Yii::$app->view->registerJs(
@@ -151,5 +152,33 @@ class Module extends \simialbi\yii2\base\Module
             ->orWhere(['{{a}}.[[user_id]]' => $userId])
             ->indexBy('id')
             ->all();
+    }
+
+    /**
+     * Sorts an array of tasks like this:
+     * - End-date ASC,
+     * - Subject ASC
+     *
+     * @param Task[] $tasks
+     * @return void
+     */
+    public static function sortTasks(&$tasks)
+    {
+        usort($tasks, function ($a, $b) {
+            if ($a->endDate === $b->endDate) {
+                if ($a->end_date !== null) {
+                    return 0;
+                } else {
+                    return strcasecmp($a->subject, $b->subject);
+                }
+            }
+            if ($a->endDate === null && $b->endDate !== null) {
+                return 1;
+            }
+            if ($a->endDate !== null && $b->endDate === null) {
+                return -1;
+            }
+            return ($a->endDate < $b->endDate) ? -1 : 1;
+        });
     }
 }

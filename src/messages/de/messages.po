@@ -347,6 +347,10 @@ msgid "Assignee"
 msgstr "Mitglieder"
 
 msgctxt "simialbi/kanban/model/task"
+msgid "Responsible"
+msgstr "Verantwortlicher"
+
+msgctxt "simialbi/kanban/model/task"
 msgid "Board"
 msgstr "Plan"
 
@@ -501,6 +505,10 @@ msgstr "Neuer Plan"
 msgctxt "simialbi/kanban/plan"
 msgid "Delegated tasks"
 msgstr "Delegierte Aufgaben"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Responsible"
+msgstr "Verantwortlich"
 
 msgctxt "simialbi/kanban/plan"
 msgid "Delete plan"

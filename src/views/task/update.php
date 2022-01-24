@@ -4,6 +4,7 @@ use kartik\file\FileInput;
 use marqu3s\summernote\Summernote;
 use Recurr\Transformer\TextTransformer;
 use Recurr\Transformer\Translator;
+use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\datedropper\Datedropper;
 use simialbi\yii2\hideseek\HideSeek;
@@ -93,7 +94,9 @@ Frame::begin([
                 'inputOptions' => [
                     'class' => new ReplaceArrayValue(['form-control'])
                 ]
-            ])->textInput()->hint($hint); ?>
+            ])->textInput([
+                'autocomplete' => 'off'
+            ])->hint($hint); ?>
             <?= Html::button('<span aria-hidden="true">' . FAS::i('times') . '</span>', [
                 'type' => 'button',
                 'class' => ['close'],
@@ -218,7 +221,8 @@ Frame::begin([
                                 'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
                                 'options' => [
                                     'id' => 'kanban-update-task-assignees',
-                                    'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                                    'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword'),
+                                    'autocomplete' => 'off'
                                 ],
                                 'clientOptions' => [
                                     'list' => '.kanban-assignees',
@@ -548,6 +552,84 @@ Frame::begin([
                                         ]
                                     ]); ?>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row kanban-task-responsible">
+                <div class="dropdown form-group col-12">
+                    <div class="position-relative">
+                        <?= Html::label(Yii::t('simialbi/kanban/model/task', 'Responsible'), null, [
+                            'class' => [
+                                'col-form-label-sm',
+                                'py-0'
+                            ]
+                        ]) ?>
+
+                        <div class="input-group input-group-sm">
+                            <?= Html::activeHiddenInput($model, 'responsible_id') ?>
+                            <?= Html::textInput('', $model->responsible_id ? $model->responsible->fullname : null, [
+                                'id' => 'task-responsible_id-dummy',
+                                'class' => [
+                                    'form-control', 'form-control-sm'
+                                ],
+                                'data' => [
+                                    'toggle' => 'dropdown'
+                                ],
+                                'autocomplete' => 'off'
+                            ]) ?>
+                            <?php
+                            $items = [];
+                            foreach ($users as $user) {
+                                $item = [
+                                    'label' => $this->render('_user', [
+                                        'user' => $user,
+                                        'assigned' => false
+                                    ]),
+                                    'linkOptions' => [
+                                        'class' => ['align-items-center', 'remove-assignee'],
+                                        'onclick' => sprintf(
+                                            'window.sa.kanban.chooseResponsible.call(this, %u);',
+                                            $user->getId()
+                                        ),
+                                        'data' => [
+                                            'id' => $user->getId(),
+                                            'name' => $user->name,
+                                            'image' => $user->image
+                                        ]
+                                    ],
+                                    'disabled' => $model->created_by != Yii::$app->user->id,
+                                    'url' => 'javascript:;'
+                                ];
+
+                                $items[] = $item;
+                            }
+
+                            array_unshift($items, HideSeek::widget([
+                                'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
+                                'options' => [
+                                    'id' => 'kanban-update-task-responsible',
+                                    'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword'),
+                                    'autocomplete' => 'off'
+                                ],
+                                'clientOptions' => [
+                                    'list' => '.kanban-responsible',
+                                    'ignore' => '.search-field,.dropdown-header,.dropdown-divider'
+                                ]
+                            ]));
+                            ?>
+                            <?= Dropdown::widget([
+                                'items' => $items,
+                                'encodeLabels' => false,
+                                'options' => [
+                                    'class' => ['kanban-responsible', 'w-100']
+                                ]
+                            ]); ?>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" onclick="window.sa.kanban.removeResponsible();">
+                                    <?= FAR::i('times') ?>
+                                </button>
                             </div>
                         </div>
                     </div>

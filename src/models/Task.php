@@ -28,6 +28,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $id
  * @property integer $bucket_id
  * @property integer $ticket_id
+ * @property string $responsible_id
  * @property string $subject
  * @property integer $status
  * @property integer|string|\DateTime $start_date
@@ -66,6 +67,7 @@ use yii\helpers\ArrayHelper;
  * @property-read Comment[] $comments
  * @property-read Ticket $ticket
  * @property-read Task $recurrenceParent
+ * @property-read UserInterface $responsible
  */
 class Task extends ActiveRecord
 {
@@ -96,6 +98,8 @@ class Task extends ActiveRecord
         return [
             [['id', 'bucket_id', 'ticket_id', 'status', 'recurrence_parent_id'], 'integer'],
             ['subject', 'string', 'max' => 255],
+            ['responsible_id', 'string', 'max' => 64],
+            ['responsible_id', 'default', 'value' => null],
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'start_date'],
             ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
@@ -110,12 +114,17 @@ class Task extends ActiveRecord
                     return $model->is_recurring;
                 }
             ],
-            ['recurrence_pattern', 'filter', 'filter' => function () {
-                return null;
-            }, 'when' => function ($model) {
-                /** @var static $model */
-                return !$model->is_recurring;
-            }],
+            [
+                'recurrence_pattern',
+                'filter',
+                'filter' => function () {
+                    return null;
+                },
+                'when' => function ($model) {
+                    /** @var static $model */
+                    return !$model->is_recurring;
+                }
+            ],
 
             [['bucket_id', 'ticket_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
@@ -173,7 +182,8 @@ class Task extends ActiveRecord
                             return Rule::createFromString(
                                 $value,
                                 Yii::$app->formatter->asDatetime($start, 'yyyy-MM-dd HH:mm:ss'),
-                                $this->end_date ? Yii::$app->formatter->asDate($this->end_date, 'yyyy-MM-dd HH:mm:ss') : null,
+                                $this->end_date ? Yii::$app->formatter->asDate($this->end_date,
+                                    'yyyy-MM-dd HH:mm:ss') : null,
                                 YIi::$app->timeZone
                             );
                         }
@@ -212,6 +222,7 @@ class Task extends ActiveRecord
             'bucket_id' => Yii::t('simialbi/kanban/model/task', 'Bucket'),
             'board_id' => Yii::t('simialbi/kanban/model/task', 'Board'),
             'assignee_id' => Yii::t('simialbi/kanban/model/task', 'Assignee'),
+            'responsible_id' => Yii::t('simialbi/kanban/model/task', 'Responsible'),
             'subject' => Yii::t('simialbi/kanban/model/task', 'Subject'),
             'status' => Yii::t('simialbi/kanban/model/task', 'Status'),
             'start_date' => Yii::t('simialbi/kanban/model/task', 'Start date'),
@@ -546,5 +557,15 @@ class Task extends ActiveRecord
     public function getRecurrenceParent()
     {
         return $this->hasOne(static::class, ['id' => 'recurrence_parent_id']);
+    }
+
+    /**
+     * Get responsible User
+     * @return UserInterface
+     * @throws \Exception
+     */
+    public function getResponsible()
+    {
+        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->responsible_id);
     }
 }

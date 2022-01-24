@@ -85,7 +85,7 @@ class PlanController extends Controller
 
     /**
      * Plan overview
-     * @param string $activeTab One of 'plan', 'tasks', 'delegated'
+     * @param string $activeTab One of 'plan', 'tasks', 'delegated', 'responsible'
      * @return string
      */
     public function actionIndex($activeTab = 'plan')
@@ -189,7 +189,7 @@ class PlanController extends Controller
                 ->andWhere(['not', ['status' => Task::STATUS_DONE]])->all(),
             'calendarTasks' => $calendarTasks,
             'users' => $this->module->users,
-            'statuses' =>  $this->module->statuses,
+            'statuses' => $this->module->statuses,
             'readonly' => $readonly
         ]);
     }

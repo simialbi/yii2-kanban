@@ -198,6 +198,26 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 .removeClass('is-assigned').css('display', '');
         },
         /**
+         * Set responsible person
+         * @param {int} id
+         */
+        chooseResponsible: function (id) {
+            var $this = $(this);
+            var $name = $this.data('name');
+            $('#task-responsible_id-dummy').val($name);
+            $('#task-responsible_id').val(id);
+        },
+        /**
+         * remove responsible person
+         */
+        removeResponsible: function() {
+            var id = $('#task-responsible_id').val();
+            if (id) {
+                $('#task-responsible_id-dummy').val('');
+            }
+            $('#task-responsible_id').val(null);
+        },
+        /**
          * Copy passed text to browser clipboard
          *
          * @param {string} text the text to copy to clipboard

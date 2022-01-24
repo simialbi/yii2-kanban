@@ -1,11 +1,9 @@
 <?php
 
-use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\hideseek\HideSeek;
 use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ButtonDropdown;
-use yii\helpers\Html;
-use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $tasks array */
@@ -20,43 +18,73 @@ Frame::begin([
 ]);
 ?>
 <div class="mt-3">
-    <?= ButtonDropdown::widget([
-        'label' => ($view === 'list')
-            ? Yii::t('simialbi/kanban/plan', 'List view')
-            : Yii::t('simialbi/kanban/plan', 'Task view'),
-        'id' => 'delegatedTasksView',
-        'buttonOptions' => [
-            'class' => ['btn-outline-secondary']
-        ],
-        'dropdown' => [
-            'items' => [
-                [
-                    'label' => Yii::t('simialbi/kanban/plan', 'Task view'),
-                    'url' => ['task/view-delegated', 'view' => 'task'],
-                    'linkOptions' => [
-                        'data' => [
-                            'turbo' => 'true',
-                            'turbo-frame' => 'delegated-tasks-frame'
+    <div class="d-flex justify-content-between">
+        <?= ButtonDropdown::widget([
+            'label' => ($view === 'list')
+                ? Yii::t('simialbi/kanban/plan', 'List view')
+                : Yii::t('simialbi/kanban/plan', 'Task view'),
+            'id' => 'delegatedTasksView',
+            'options' => [
+                'class' => ['mb-3']
+            ],
+            'buttonOptions' => [
+                'class' => ['btn-outline-secondary']
+            ],
+            'dropdown' => [
+                'items' => [
+                    [
+                        'label' => Yii::t('simialbi/kanban/plan', 'Task view'),
+                        'url' => ['task/view-delegated', 'view' => 'task'],
+                        'linkOptions' => [
+                            'data' => [
+                                'turbo' => 'true',
+                                'turbo-frame' => 'delegated-tasks-frame'
+                            ]
                         ]
-                    ]
-                ],
-                [
-                    'label' => Yii::t('simialbi/kanban/plan', 'List view'),
-                    'url' => ['task/view-delegated', 'view' => 'list'],
-                    'linkOptions' => [
-                        'data' => [
-                            'turbo' => 'true',
-                            'turbo-frame' => 'delegated-tasks-frame'
+                    ],
+                    [
+                        'label' => Yii::t('simialbi/kanban/plan', 'List view'),
+                        'url' => ['task/view-delegated', 'view' => 'list'],
+                        'linkOptions' => [
+                            'data' => [
+                                'turbo' => 'true',
+                                'turbo-frame' => 'delegated-tasks-frame'
+                            ]
                         ]
                     ]
                 ]
             ]
-        ]
-    ]); ?>
+        ]); ?>
+
+        <?php
+        if ($view === 'list') {
+            $clientOptions = [
+                'list' => '#delegated-tasks-frame .list-group',
+                'attribute' => 'alt'
+            ];
+        }
+        else {
+            $clientOptions = [
+                'list' => '.kanban-tasks',
+                'attribute' => 'alt'
+            ];
+        }
+        echo HideSeek::widget([
+            'fieldTemplate' => '<div class="search-field mb-3">{input}</div>',
+            'options' => [
+                'id' => 'search-widget-delegated',
+                'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword'),
+                'autocomplete' => 'off'
+            ],
+            'clientOptions' => $clientOptions
+        ]);
+        ?>
+    </div>
+
     <?php if ($view === 'list'): ?>
-        <div class="card mt-2">
-            <?php foreach ($tasks as $userId => $userTasks): ?>
-                <?php if (isset($users[$userId])): ?>
+        <?php foreach ($tasks as $userId => $userTasks): ?>
+            <?php if (isset($users[$userId])): ?>
+                <div class="card mb-3">
                     <div class="card-header">
                         <h4 class="card-title m-0">
                             <?= $this->render('_user', [
@@ -68,28 +96,14 @@ Frame::begin([
                     <div class="list-group list-group-flush">
                         <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>
                         <?php foreach ($userTasks as $task): ?>
-                            <a href="<?= Url::to(['task/update', 'id' => $task->id]); ?>" data-toggle="modal"
-                               data-target="#task-modal" data-turbo-frame="task-modal-frame"
-                               class="list-group-item list-group-item-action<?php if ($task->end_date && $task->end_date < time()) { echo " list-group-item-danger"; } ?>">
-                                <h6 class="m-0"><?= Html::encode($task->subject); ?></h6>
-                                <small>
-                                    <?= $task->board->name; ?>
-                                    <?php if ($count = count($task->checklistElements)): ?>
-                                        &nbsp;&bull;&nbsp;<?= $task->getChecklistStats(); ?>
-                                    <?php endif; ?>
-                                    <?php if ($task->end_date): ?>
-                                        &nbsp;&bull;&nbsp; <?= FAR::i('calendar'); ?> <?= Yii::$app->formatter->asDate($task->end_date, 'short'); ?>
-                                    <?php endif; ?>
-                                    <?php if (count($task->comments)): ?>
-                                        &nbsp;&bull;&nbsp; <?= FAR::i('sticky-note'); ?>
-                                    <?php endif; ?>
-                                </small>
-                            </a>
+                            <?= $this->render('list-item', [
+                                'task' => $task
+                            ]); ?>
                         <?php endforeach; ?>
                     </div>
-                <?php endif; ?>
-            <?php endforeach; ?>
-        </div>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
     <?php else: ?>
         <div class="kanban-plan-view">
             <div class="d-flex flex-column">

@@ -347,6 +347,10 @@ msgid "Assignee"
 msgstr "Assignee"
 
 msgctxt "simialbi/kanban/model/task"
+msgid "Responsible"
+msgstr "Responsible"
+
+msgctxt "simialbi/kanban/model/task"
 msgid "Board"
 msgstr "Доска"
 
@@ -501,6 +505,10 @@ msgstr "Создать план"
 msgctxt "simialbi/kanban/plan"
 msgid "Delegated tasks"
 msgstr "Делегировать задачу"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Responsible"
+msgstr "Responsible"
 
 msgctxt "simialbi/kanban/plan"
 msgid "Delete plan"
