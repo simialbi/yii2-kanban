@@ -356,15 +356,26 @@ class TaskController extends Controller
                 $element->save();
             }
 
+            $oldAssignees = ArrayHelper::getColumn($model->assignees, 'id');
             TaskUserAssignment::deleteAll(['task_id' => $model->id]);
             foreach ($assignees as $assignee) {
                 $assignment = new TaskUserAssignment();
                 $assignment->task_id = $model->id;
                 $assignment->user_id = $assignee;
                 $assignment->save();
+            }
+            // Send notification to all new assignees
+            foreach (array_diff($assignees, $oldAssignees) as $assigneeId) {
                 $this->module->trigger(Module::EVENT_TASK_ASSIGNED, new TaskEvent([
                     'task' => $model,
-                    'user' => ArrayHelper::getValue($this->module->users, $assignee)
+                    'user' => ArrayHelper::getValue($this->module->users, $assigneeId)
+                ]));
+            }
+            // Send notification to all expelled assignees
+            foreach (array_diff($oldAssignees, $assignees) as $assigneeId) {
+                $this->module->trigger(Module::EVENT_TASK_UNASSIGNED, new TaskEvent([
+                    'task' => $model,
+                    'user' => ArrayHelper::getValue($this->module->users, $assigneeId)
                 ]));
             }
 
