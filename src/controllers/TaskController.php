@@ -193,6 +193,10 @@ class TaskController extends Controller
         $filters = Yii::$app->request->getQueryParam('Filters', []);
 
         $query = Board::find()
+            ->select([
+                'bo.*',
+                'b.name'
+            ])
             ->alias('bo')
             ->distinct()
             ->joinWith([
