@@ -14,6 +14,9 @@ Frame::begin([
 ]);
 ?>
     <div class="mt-3">
+        <div class="kanban-top-scrollbar mb-2 d-none d-md-block">
+            <div></div>
+        </div>
 
         <?= HideSeek::widget([
             'fieldTemplate' => '<div class="search-field mb-3">{input}</div>',
@@ -65,4 +68,13 @@ Frame::begin([
         </div>
     </div>
 <?php
+
+$js = <<<JS
+var bottomScrollBar = $('.kanban-bottom-scrollbar');
+if (bottomScrollBar.is(':visible')) {
+    window.sa.kanban.initScrollBars();
+}
+JS;
+$this->registerJs('window.sa.kanban.initScrollBars();');
+
 Frame::end();

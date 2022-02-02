@@ -25,12 +25,12 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 $tabs.find('a[data-toggle="tab"]').on('shown.bs.tab', function () {
                     var $bottomScrollBar = $('.kanban-bottom-scrollbar');
                     if ($bottomScrollBar.is(':visible')) {
-                        initScrollBars();
+                        pub.initScrollBars();
                         $tabs.find('a[data-toggle="tab"]').off('shown.bs.tab');
                     }
                 });
             } else {
-                initScrollBars();
+                pub.initScrollBars();
             }
             initSortable();
             initChecklist();
@@ -248,6 +248,43 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             document.addEventListener('copy', listener);
             document.execCommand('copy');
             document.removeEventListener('copy', listener);
+        },
+        /**
+         * Initialises the synced scrollbars 'kanban-top-scrollbar' and 'kanban-bottom-scrollbar'
+         *
+         */
+        initScrollBars: function () {
+            var $topScrollBar = $('.kanban-top-scrollbar'),
+                $bottomScrollBar = $('.kanban-bottom-scrollbar');
+
+            if ($topScrollBar.is(':visible')) {
+                $topScrollBar.find('> div').css('width', $bottomScrollBar.find('> div').prop('scrollWidth'));
+
+                syncScroll($topScrollBar, $bottomScrollBar);
+                syncScroll($bottomScrollBar, $topScrollBar);
+            } else {
+                slider = new Swiper('.kanban-bottom-scrollbar', {
+                    wrapperClass: 'kanban-plan-sortable',
+                    slideClass: 'kanban-bucket',
+                    navigation: {
+                        nextEl: '.kanban-button-next',
+                        prevEl: '.kanban-button-prev',
+                        disabledClass: 'text-muted'
+                    }
+                });
+            }
+
+            var ignoreScrollEvents = false;
+            function syncScroll(element1, element2) {
+                element1.scroll(function () {
+                    var ignore = ignoreScrollEvents
+                    ignoreScrollEvents = false
+                    if (ignore) return
+
+                    ignoreScrollEvents = true
+                    element2.scrollLeft(element1.scrollLeft())
+                })
+            }
         }
     };
 
@@ -325,41 +362,6 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             } else {
                 $this.attr('placeholder', $this.val());
             }
-        }
-    }
-
-    function initScrollBars()
-    {
-        var $topScrollBar = $('.kanban-top-scrollbar'),
-            $bottomScrollBar = $('.kanban-bottom-scrollbar');
-
-        if ($topScrollBar.is(':visible')) {
-            $topScrollBar.find('> div').css('width', $bottomScrollBar.find('> div').prop('scrollWidth'));
-
-            syncScroll($topScrollBar, $bottomScrollBar);
-            syncScroll($bottomScrollBar, $topScrollBar);
-        } else {
-            slider = new Swiper('.kanban-bottom-scrollbar', {
-                wrapperClass: 'kanban-plan-sortable',
-                slideClass: 'kanban-bucket',
-                navigation: {
-                    nextEl: '.kanban-button-next',
-                    prevEl: '.kanban-button-prev',
-                    disabledClass: 'text-muted'
-                }
-            });
-        }
-
-        var ignoreScrollEvents = false;
-        function syncScroll(element1, element2) {
-            element1.scroll(function () {
-                var ignore = ignoreScrollEvents
-                ignoreScrollEvents = false
-                if (ignore) return
-
-                ignoreScrollEvents = true
-                element2.scrollLeft(element1.scrollLeft())
-            })
         }
     }
 

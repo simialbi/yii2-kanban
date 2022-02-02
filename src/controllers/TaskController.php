@@ -194,8 +194,8 @@ class TaskController extends Controller
 
         $query = Board::find()
             ->select([
-                'bo.*',
-                'b.name'
+                'b.name',
+                'bo.*'
             ])
             ->alias('bo')
             ->distinct()
