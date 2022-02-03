@@ -169,9 +169,8 @@ class TaskController extends Controller
         }
 
         if ($view === 'list') {
-            $module = $this->module;
             foreach ($indexed as &$user) {
-                $module::sortTasks($user);
+                Module::sortTasks($user);
             }
             unset($user);
         }
@@ -270,7 +269,8 @@ class TaskController extends Controller
                 'model' => $task->getBucket()->with(['openTasks'])->one(),
                 'statuses' => $this->module->statuses,
                 'users' => $this->module->users,
-                'finishedTasks' => $task->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id')
+                'finishedTasks' => $task->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
+                'readonly' => false
             ]);
         }
 
@@ -309,12 +309,14 @@ class TaskController extends Controller
      * Update a task
      * @param integer $id Tasks id
      * @param boolean $updateSeries Update the series?
+     * @param string $return What to render back
+     * @param boolean $readonly If readonly mode?
      * @return string
      * @throws NotFoundHttpException
      * @throws InvalidConfigException
      * @throws \yii\base\Exception
      */
-    public function actionUpdate($id, $updateSeries = false, $return = 'card')
+    public function actionUpdate($id, $updateSeries = false, $return = 'card', $readonly = false)
     {
         $model = $this->findModel($id);
 
@@ -517,7 +519,9 @@ class TaskController extends Controller
                 'model' => $model,
                 'statuses' => $this->module->statuses,
                 'users' => $this->module->users,
-                'closeModal' => true
+                'closeModal' => true,
+                'group' => 'bucket',
+                'readonly' => $readonly
             ]);
         }
 
@@ -544,17 +548,20 @@ class TaskController extends Controller
             'users' => $this->module->users,
             'updateSeries' => $updateSeries,
             'statuses' => $statuses,
-            'return' => $return
+            'return' => $return,
+            'readonly' => $readonly
         ]);
     }
 
     /**
      * Copy a task for each user
      * @param string $id The id of the task
+     * @param string $group In which view are we?
+     * @param boolean $readonly In readonly mode?
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionCopyPerUser($id, $group = 'bucket')
+    public function actionCopyPerUser($id, $group = 'bucket', $readonly = false)
     {
         $model = $this->findModel($id);
 
@@ -611,7 +618,8 @@ class TaskController extends Controller
                         'statuses' => $this->module->statuses,
                         'users' => $this->module->users,
                         'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
-                        'closeModal' => true
+                        'closeModal' => true,
+                        'readonly' => $readonly
                     ]);
                 case 'assignee':
                     return $this->redirect(['plan/view', 'id' => $model->board->id, 'group' => 'assignee']);
@@ -775,11 +783,12 @@ class TaskController extends Controller
      *
      * @param integer $id Tasks id
      * @param integer $status New status
+     * @param boolean $readonly In read only mode?
      *
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionSetStatus($id, $status)
+    public function actionSetStatus($id, $status, $readonly = false)
     {
         $model = $this->findModel($id);
 
@@ -815,12 +824,25 @@ class TaskController extends Controller
                 'task' => $model
             ]));
         }
+
+        if ($readonly) {
+            $finishedTasks = $model->bucket->getTasks()
+                ->alias('t')
+                ->innerJoinWith('assignments a')
+                ->where(['{{t}}.[[status]]' => Task::STATUS_DONE])
+                ->andWhere(['{{a}}.[[user_id]]' => Yii::$app->user->id])
+                ->count('{{t}}.[[id]]');
+        } else {
+            $finishedTasks = $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id');
+        }
+
         return $this->renderAjax('/bucket/view', [
             'model' => $model->getBucket()->with(['openTasks'])->one(),
             'statuses' => $this->module->statuses,
             'users' => $this->module->users,
-            'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
-            'closeModal' => true
+            'finishedTasks' => $finishedTasks,
+            'closeModal' => true,
+            'readonly' => $readonly
         ]);
     }
 

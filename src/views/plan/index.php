@@ -85,7 +85,6 @@ $this->params['breadcrumbs'] = [$this->title];
     <div class="mt-3">
         <?= ToDo::widget([
             'addBoardFilter' => true,
-            'kanbanModuleName' => 'schedule',
             'listOptions' => [
                 'class' => ['list-group']
             ],

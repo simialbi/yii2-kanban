@@ -22,6 +22,7 @@ use yii\helpers\Url;
 /* @var $updateSeries boolean */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $return string */
+/* @var $readonly boolean */
 
 Frame::begin([
     'options' => [
@@ -36,7 +37,8 @@ Frame::begin([
                 'task/update',
                 'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
                 'updateSeries' => $updateSeries,
-                'return' => $return
+                'return' => $return,
+                'readonly' => $readonly
             ],
             'validateOnSubmit' => false,
             'fieldConfig' => [

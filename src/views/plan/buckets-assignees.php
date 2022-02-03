@@ -30,7 +30,7 @@ foreach ($query->column() as $id) {
     echo Frame::widget([
         'options' => [
             'id' => 'bucket-assignee-' . $id . '-frame',
-            'src' => Url::to(['bucket/view-assignee', 'id' => $id, 'boardId' => $model->id]),
+            'src' => Url::to(['bucket/view-assignee', 'id' => $id, 'boardId' => $model->id, 'readonly' => $readonly]),
             'class' => ['kanban-bucket', 'mr-md-4', 'pb-6', 'pb-md-0', 'd-flex', 'flex-column', 'flex-shrink-0'],
             'data' => ['id' => $id, 'action' => 'change-assignee', 'key-name' => 'user_id', 'sort' => 'false']
         ]

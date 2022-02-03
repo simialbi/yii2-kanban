@@ -9,6 +9,7 @@ use yii\helpers\ArrayHelper;
 /* @var $users array */
 /* @var $statuses array */
 /* @var $closeModal boolean */
+/* @var $readonly boolean */
 
 if (!isset($closeModal)) {
     $closeModal = false;
@@ -38,7 +39,8 @@ echo $this->render('_header', [
             'statuses' => $statuses,
             'users' => $users,
             'closeModal' => false,
-            'group' => 'status'
+            'group' => 'status',
+            'readonly' => $readonly
         ]);
     }
     ?>

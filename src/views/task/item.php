@@ -19,6 +19,7 @@ use yii\web\JsExpression;
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $closeModal boolean */
 /* @var $group string|null */
+/* @var $readonly boolean */
 
 if (!isset($group)) {
     $group = 'bucket';
@@ -69,12 +70,13 @@ Frame::begin([
                     [
                         'task/set-status',
                         'id' => ($model->isRecurrentInstance()) ? $model->recurrence_parent_id : $model->id,
-                        'status' => Task::STATUS_DONE
+                        'status' => Task::STATUS_DONE,
+                        'readonly' => $readonly
                     ],
                     [
                         'class' => ['h5', 'kanban-task-done-link', 'd-block', 'text-decoration-none'],
                         'data' => [
-                            'turbo-frame' => 'task-' . $model->id . '-frame',
+                            'turbo-frame' => 'bucket-' . $model->bucket_id . '-frame',
                             'turbo' => 'true'
                         ]
                     ]
@@ -90,7 +92,8 @@ Frame::begin([
                     <?php endif; ?>
                     <a class="kanban-task-checkbox custom-control custom-checkbox text-reset" href="<?= Url::to([
                         'checklist-element/set-done',
-                        'id' => $checklistElement->id
+                        'id' => $checklistElement->id,
+                        'readonly' => $readonly
                     ]); ?>">
                         <?= Html::checkbox('checklist[' . $checklistElement->id . ']', false, [
                             'class' => ['custom-control-input'],
@@ -240,7 +243,8 @@ Frame::begin([
                 <?= Html::a(FAS::i('edit'), [
                     'task/update',
                     'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
-                    'return' => $model->isRecurrentInstance() ? 'bucket' : 'card'
+                    'return' => $model->isRecurrentInstance() ? 'bucket' : 'card',
+                    'readonly' => $readonly
                 ], [
                     'class' => ['btn', 'btn-sm', 'ml-auto', 'kanban-task-update-link'],
                     'data' => [
@@ -259,7 +263,8 @@ Frame::begin([
                         'url' => [
                             'comment/create',
                             'taskId' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
-                            'group' => $group
+                            'group' => $group,
+                            'readonly' => $readonly
                         ],
                         'linkOptions' => [
                             'data' => [
@@ -294,7 +299,8 @@ Frame::begin([
                         'url' => [
                             'task/update',
                             'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,
-                            'return' => $model->isRecurrentInstance() ? 'bucket' : 'card'
+                            'return' => $model->isRecurrentInstance() ? 'bucket' : 'card',
+                            'readonly' => $readonly
                         ],
                         'linkOptions' => [
                             'data' => [
@@ -350,7 +356,8 @@ Frame::begin([
                         'url' => [
                             'task/copy-per-user',
                             'id' => ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id),
-                            'group' => $group
+                            'group' => $group,
+                            'readonly' => $readonly
                         ],
                         'disabled' => $model->created_by != Yii::$app->user->id,
                         'linkOptions' => [

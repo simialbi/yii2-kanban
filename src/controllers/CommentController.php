@@ -49,10 +49,11 @@ class CommentController extends Controller
      *
      * @param integer $taskId
      * @param string $group
+     * @param boolean $readonly
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException
      */
-    public function actionCreate($taskId, $group = 'bucket')
+    public function actionCreate($taskId, $group = 'bucket', $readonly = false)
     {
         $task = $this->findTaskModel($taskId);
         $model = new Comment(['task_id' => $taskId]);
@@ -73,7 +74,9 @@ class CommentController extends Controller
                 'model' => $task,
                 'statuses' => $this->module->statuses,
                 'users' => $this->module->users,
-                'closeModal' => true
+                'group' => $group,
+                'closeModal' => true,
+                'readonly' => $readonly
             ]);
         }
 
