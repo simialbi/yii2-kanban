@@ -12,6 +12,7 @@ use yii\helpers\Url;
 /* @var $users array */
 /* @var $statuses array */
 /* @var $finishedTasks int */
+/* @var $readonly boolean */
 
 Frame::begin([
     'options' => [
@@ -42,7 +43,8 @@ echo $this->render('_header', [
                 'statuses' => $statuses,
                 'users' => $users,
                 'closeModal' => false,
-                'group' => 'assignee'
+                'group' => 'assignee',
+                'readonly' => $readonly
             ]);
         }
         ?>

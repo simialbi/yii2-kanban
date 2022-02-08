@@ -27,21 +27,21 @@ Frame::begin([
             ],
             'clientOptions' => [
                 'list' => '#responsible-tasks-frame .list-group',
-                'attribute' => 'alt'
+                'attribute' => 'data-alt'
             ],
         ]); ?>
 
         <div id="boardAccordion" class="boardAccordion">
             <?php foreach ($boards as $index => $board): ?>
-                <div class="card mb-3" alt="<?= $board->name ?>">
+                <div class="card mb-3" data-alt="<?= $board->name; ?>">
                     <div class="card-header">
                         <h4 class="m-0"
                             style="cursor: pointer; font-weight: bold;"
                             data-toggle="collapse"
-                            data-target="#board_<?= $board->id ?>"
+                            data-target="#board_<?= $board->id; ?>"
                             aria-expanded="true"
                             aria-controls="collapseOne">
-                            <?= $board->name ?>
+                            <?= $board->name; ?>
                         </h4>
                     </div>
 
@@ -52,7 +52,7 @@ Frame::begin([
                                 <div class="list-group">
                                     <?php
                                     $tasks = $bucket->tasks;
-                                    $module::sortTasks($tasks);
+                                    \simialbi\yii2\kanban\Module::sortTasks($tasks);
                                     ?>
                                     <?php foreach ($tasks as $task): ?>
                                         <?= $this->render('list-item', [

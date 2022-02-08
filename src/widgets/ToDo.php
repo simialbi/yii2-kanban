@@ -153,7 +153,8 @@ JS;
             $options['href'] = Url::to([
                 "/{$this->kanbanModuleName}/task/update",
                 'id' => $id,
-                'return' => 'todo'
+                'return' => 'todo',
+                'readonly' => false
             ]);
             $options['data'] = [
                 'toggle' => 'modal',

@@ -6,6 +6,7 @@ use simialbi\yii2\turbo\Frame;
 /* @var $model \simialbi\yii2\kanban\models\Bucket */
 /* @var $statuses array */
 /* @var $users array */
+/* @var $readonly boolean */
 
 Frame::begin([
     'options' => [
@@ -20,7 +21,9 @@ foreach ($model->finishedTasks as $task) {
         'model' => $task,
         'statuses' => $statuses,
         'users' => $users,
-        'closeModal' => false
+        'closeModal' => false,
+        'readonly' => $readonly,
+        'group' => 'bucket'
     ]);
 }
 

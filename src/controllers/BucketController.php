@@ -84,41 +84,64 @@ class BucketController extends Controller
             ->where(['id' => $id])
             ->one();
 
+        if ($readonly) {
+            $finishedTasks = $model->getTasks()
+                ->alias('t')
+                ->innerJoinWith('assignments a')
+                ->where(['{{t}}.[[status]]' => Task::STATUS_DONE])
+                ->andWhere(['{{a}}.[[user_id]]' => Yii::$app->user->id])
+                ->count('{{t}}.[[id]]');
+        } else {
+            $finishedTasks = $model->getTasks()->where(['status' => Task::STATUS_DONE])->count('id');
+        }
+
         return $this->renderPartial('view', [
             'model' => $model,
             'statuses' => $this->module->statuses,
             'users' => $this->module->users,
-            'finishedTasks' => $model->getTasks()->where(['status' => Task::STATUS_DONE])->count('id')
+            'finishedTasks' => $finishedTasks,
+            'closeModal' => false,
+            'readonly' => $readonly
         ]);
     }
 
     /**
      * Render bucket
      * @param integer $id
+     * @param boolean $readonly
      * @return string
      */
-    public function actionViewFinished($id)
+    public function actionViewFinished($id, $readonly = false)
     {
         $model = Bucket::find()
-            ->with(['finishedTasks'])
+            ->with([
+                'finishedTasks' => function ($query) use ($readonly) {
+                    /** @var $query \yii\db\ActiveQuery */
+                    if ($readonly) {
+                        $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+                    }
+                }
+            ])
             ->where(['id' => $id])
             ->one();
 
         return $this->renderPartial('view-finished', [
             'model' => $model,
             'statuses' => $this->module->statuses,
-            'users' => $this->module->users
+            'users' => $this->module->users,
+            'readonly' => $readonly
         ]);
     }
 
     /**
      * @param integer $boardId
      * @param integer|null $id
+     * @param boolean $readonly
      *
      * @return string
      * @throws \Exception
      */
-    public function actionViewAssignee($boardId, $id = null)
+    public function actionViewAssignee($boardId, $id = null, $readonly = false)
     {
         $query = Task::find()
             ->alias('t')
@@ -142,7 +165,8 @@ class BucketController extends Controller
             'finishedTasks' => $query->where(['{{t}}.[[status]]' => Task::STATUS_DONE])->andWhere([
                 '{{b}}.[[board_id]]' => $boardId,
                 '{{u}}.[[user_id]]' => $id
-            ])->count()
+            ])->count(),
+            'readonly' => $readonly
         ]);
     }
 
@@ -206,7 +230,8 @@ class BucketController extends Controller
             'tasks' => $query->all(),
             'status' => $status,
             'statuses' => $this->module->statuses,
-            'users' => $this->module->users
+            'users' => $this->module->users,
+            'readonly' => $readonly
         ]);
     }
 

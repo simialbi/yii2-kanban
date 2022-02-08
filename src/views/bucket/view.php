@@ -11,6 +11,7 @@ use yii\helpers\Url;
 /* @var $users array */
 /* @var $closeModal boolean */
 /* @var $finishedTasks int */
+/* @var $readonly boolean */
 
 if (!isset($closeModal)) {
     $closeModal = false;
@@ -29,18 +30,20 @@ Frame::begin([
     'title' => Html::tag('span', $model->name, [
         'class' => ['d-block', 'text-truncate']
     ])
-]) ?>
-<?= Html::a(FAS::i('plus'), '#bucket-' . $model->id . '-create-task', [
-    'class' => ['btn', 'btn-primary', 'btn-block'],
-    'role' => 'button',
-    'aria' => [
-        'expanded' => 'false',
-        'controls' => 'bucket-' . $model->id . '-create-task'
-    ],
-    'data' => [
-        'toggle' => 'collapse'
-    ]
-]); ?>
+]);
+if (!$readonly):
+    ?>
+    <?= Html::a(FAS::i('plus'), '#bucket-' . $model->id . '-create-task', [
+        'class' => ['btn', 'btn-primary', 'btn-block'],
+        'role' => 'button',
+        'aria' => [
+            'expanded' => 'false',
+            'controls' => 'bucket-' . $model->id . '-create-task'
+        ],
+        'data' => [
+            'toggle' => 'collapse'
+        ]
+    ]); ?>
     <div class="collapse" id="bucket-<?= $model->id; ?>-create-task">
         <?= $this->render('/task/create', [
             'board' => $model->board,
@@ -51,6 +54,9 @@ Frame::begin([
             'users' => $users
         ]); ?>
     </div>
+    <?php
+endif;
+?>
 
     <div class="kanban-tasks flex-grow-1 mt-4">
         <?php
@@ -62,14 +68,15 @@ Frame::begin([
                 'statuses' => $statuses,
                 'users' => $users,
                 'closeModal' => false,
-                'group' => null
+                'group' => null,
+                'readonly' => $readonly
             ]);
         }
         ?>
     </div>
     <script>
         <?php if ($closeModal) : ?>
-            jQuery('#task-modal').modal('hide');
+        jQuery('#task-modal').modal('hide');
         <?php endif; ?>
         window.sa.kanban.updateSortable();
     </script>
@@ -88,7 +95,7 @@ Frame::begin([
             'options' => [
                 'id' => 'bucket-' . $model->id . '-finished-frame',
                 'class' => [],
-                'src' => Url::to(['bucket/view-finished', 'id' => $model->id])
+                'src' => Url::to(['bucket/view-finished', 'id' => $model->id, 'readonly' => $readonly])
             ],
             'lazyLoading' => true,
             'autoscroll' => true
