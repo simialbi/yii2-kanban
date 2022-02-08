@@ -131,7 +131,8 @@ Frame::begin([
                                                 'statuses' => $statuses,
                                                 'users' => $users,
                                                 'closeModal' => false,
-                                                'group' => 'bucket'
+                                                'group' => 'bucket',
+                                                'readonly' => false
                                             ]); ?>
                                         <?php endforeach; ?>
                                     </div>
