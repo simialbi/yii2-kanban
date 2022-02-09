@@ -504,7 +504,7 @@ Frame::begin([
                                     ]
                                 ],
                                 'disabled' => $model->created_by != Yii::$app->user->id,
-                                'url' => ['task/expel-user', 'id' => $model->id, 'userId' => $assignee->getId()]
+                                'url' => ['task/expel-user', 'id' => $model->id, 'userId' => $assignee->getId(), 'readonly' => $readonly]
                             ];
                         }
 
@@ -527,7 +527,7 @@ Frame::begin([
                                     ]
                                 ],
     //                            'disabled' => $model->created_by != Yii::$app->user->id,
-                                'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId()]
+                                'url' => ['task/assign-user', 'id' => $model->id, 'userId' => $user->getId(), 'readonly' => $readonly]
                             ];
                         }
 

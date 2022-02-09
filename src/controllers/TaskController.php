@@ -896,11 +896,12 @@ class TaskController extends Controller
      *
      * @param integer $id Tasks id
      * @param integer|string $userId Users id
+     * @param boolean $readonly In read only mode?
      *
      * @return string
      * @throws NotFoundHttpException|Exception|ForbiddenHttpException
      */
-    public function actionAssignUser($id, $userId)
+    public function actionAssignUser($id, $userId, $readonly)
     {
         $model = $this->findModel($id);
 
@@ -920,7 +921,8 @@ class TaskController extends Controller
             'model' => $model,
             'statuses' => $this->module->statuses,
             'users' => $this->module->users,
-            'closeModal' => false
+            'closeModal' => false,
+            'readonly' => $readonly
         ]);
     }
 
@@ -929,11 +931,12 @@ class TaskController extends Controller
      *
      * @param integer $id Tasks id
      * @param integer|string $userId Users id
+     * @param boolean $readonly In read only mode?
      *
      * @return string
      * @throws NotFoundHttpException|Exception|ForbiddenHttpException
      */
-    public function actionExpelUser($id, $userId)
+    public function actionExpelUser($id, $userId, $readonly)
     {
         $model = $this->findModel($id);
 
@@ -957,7 +960,8 @@ class TaskController extends Controller
             'model' => $model,
             'statuses' => $this->module->statuses,
             'users' => $this->module->users,
-            'closeModal' => false
+            'closeModal' => false,
+            'readonly' => $readonly
         ]);
     }
 
