@@ -112,6 +112,7 @@ $this->params['breadcrumbs'] = [
                     'closeModal' => false,
                     'model' => $task,
                     'users' => $users,
+                    'readonly' => $readonly
                 ]); ?>
                 <?php $lastBucket = $task->bucket_id; ?>
             <?php endforeach; ?>
