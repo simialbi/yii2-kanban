@@ -390,12 +390,12 @@ turbo-frame {
         cursor: grab;
     }
 
-    .picker-trigger {
+    .flatpickr-input {
         max-width: 25%;
     }
 
     @media (max-width: map-get($grid-breakpoints, sm) - 1) {
-        .picker-trigger {
+        .flatpickr-input {
             max-width: 33.33333333%;
         }
     }

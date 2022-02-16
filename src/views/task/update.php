@@ -4,9 +4,8 @@ use kartik\file\FileInput;
 use marqu3s\summernote\Summernote;
 use Recurr\Transformer\TextTransformer;
 use Recurr\Transformer\Translator;
-use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
-use simialbi\yii2\datedropper\Datedropper;
+use sandritsch91\yii2\flatpickr\Flatpickr;
 use simialbi\yii2\hideseek\HideSeek;
 use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ActiveForm;
@@ -266,23 +265,17 @@ Frame::begin([
                     'options' => [
                         'class' => ['form-group', 'col-6', 'col-md-3']
                     ]
-                ])->widget(Datedropper::class, [
-                    'clientOptions' => [
-                        'format' => 'd.m.Y',
-                        'large' => true
-                    ]
+                ])->widget(Flatpickr::class, [
+                    'customAssetBundle' => false
                 ]); ?>
                 <?= $form->field($model, 'end_date', [
                     'options' => [
                         'class' => ['form-group', 'col-6', 'col-md-3']
                     ]
-                ])->widget(Datedropper::class, [
+                ])->widget(Flatpickr::class, [
+                    'customAssetBundle' => false,
                     'options' => [
                         'placeholder' => (null === $model->endDate) ? '' : Yii::$app->formatter->asDate($model->endDate, 'dd.MM.yyyy')
-                    ],
-                    'clientOptions' => [
-                        'format' => 'd.m.Y',
-                        'large' => true
                     ]
                 ]); ?>
             </div>
@@ -630,7 +623,7 @@ Frame::begin([
                             ]); ?>
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button" onclick="window.sa.kanban.removeResponsible();">
-                                    <?= FAR::i('times') ?>
+                                    <?= FAS::i('times') ?>
                                 </button>
                             </div>
                         </div>
@@ -716,10 +709,11 @@ Frame::begin([
                                     'placeholder' => Html::encode($checklistElement->name)
                                 ]
                             ); ?>
-                            <?= Datedropper::widget([
+                            <?= Flatpickr::widget([
                                 'name' => 'checklist[' . $checklistElement->id . '][end_date]',
                                 'value' => $checklistElement->end_date ? Yii::$app->formatter->asDate($checklistElement->end_date, 'dd.MM.yyyy') : null,
                                 'id' => 'task-' . $model->id . '-ce-' . $checklistElement->id . '-end-date',
+                                'customAssetBundle' => false,
                                 'options' => [
                                     'autocomplete' => 'off',
                                     'class' => ['form-control'],
@@ -727,12 +721,9 @@ Frame::begin([
                                     'placeholder' => Yii::t('simialbi/kanban/model/checklist-element', 'End date')
                                 ],
                                 'clientOptions' => [
-                                    'format' => 'd.m.Y',
-                                    'large' => true,
-                                    'autofill' => false,
-                                    'minDate' => Yii::$app->formatter->asDate('now', 'MM/dd/yyyy'),
+                                    'minDate' => 'today',
                                     'maxDate' => ($model->end_date)
-                                        ? Yii::$app->formatter->asDate($model->end_date, 'MM/dd/yyyy')
+                                        ? Yii::$app->formatter->asTimestamp($model->end_date) * 1000
                                         : null
                                 ]
                             ]); ?>
@@ -753,10 +744,11 @@ Frame::begin([
                             'class' => ['form-control'],
                             'placeholder' => Yii::t('simialbi/kanban/model/checklist-element', 'Name')
                         ]); ?>
-                        <?= Datedropper::widget([
+                        <?= Flatpickr::widget([
                             'name' => 'checklist[new][0][end_date]',
                             'value' => null,
                             'id' => 'task-' . $model->id . '-ce-new-end-date-1',
+                            'customAssetBundle' => false,
                             'options' => [
                                 'autocomplete' => 'off',
                                 'class' => ['form-control'],
@@ -767,12 +759,10 @@ Frame::begin([
                                 ],
                             ],
                             'clientOptions' => [
-                                'format' => 'd.m.Y',
-                                'large' => true,
-                                'autofill' => false,
-                                'minDate' => Yii::$app->formatter->asDate('now', 'MM/dd/yyyy'),
-                                'maxDate' => ($model->end_date) ? Yii::$app->formatter->asDate($model->end_date,
-                                    'MM/dd/yyyy') : null
+                                'minDate' => 'today',
+                                'maxDate' => ($model->end_date)
+                                        ? Yii::$app->formatter->asTimestamp($model->end_date) * 1000
+                                        : null
                             ]
                         ]); ?>
                         <div class="input-group-append">

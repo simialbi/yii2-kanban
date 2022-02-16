@@ -327,8 +327,9 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         if ($this.closest('.add-checklist-element').length) {
             var $addElement = $this.closest('.add-checklist-element').clone(),
                 $inputGroup = $this.closest('.input-group'),
-                $datePicker = $addElement.find('.picker-trigger'),
-                idParts = $datePicker.prop('id').split('-');
+                $datePicker = $addElement.find('.flatpickr-input'),
+                idParts = $datePicker.prop('id').split('-'),
+                $config = $('.checklist .flatpickr-input')[0]._flatpickr.config;
             $this.closest('.add-checklist-element').removeClass('add-checklist-element');
             $this.attr('placeholder', $this.val());
 
@@ -348,15 +349,11 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             $datePicker.prop('id', idParts.join('-'));
 
             $checklist.append($addElement);
-            $datePicker.removeClass('picker-trigger').data('datedropperId', null).dateDropper({
-                format: 'd.m.Y',
-                large: true,
-                autofill: false,
-                lang: $datePicker.data('lang')
-            });
+            $datePicker.removeClass('flatpickr-input');
+            flatpickr($datePicker[0], $config);
         } else {
             if ($this.val() === '') {
-                if (!$this.hasClass('picker-trigger')) {
+                if (!$this.hasClass('flatpickr-input')) {
                     $this.val($this.attr('placeholder'));
                 }
             } else {

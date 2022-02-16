@@ -1,7 +1,7 @@
 <?php
 
 use rmrevin\yii\fontawesome\FAS;
-use simialbi\yii2\datedropper\Datedropper;
+use sandritsch91\yii2\flatpickr\Flatpickr;
 use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
@@ -64,14 +64,11 @@ $form = ActiveForm::begin([
             'options' => [
                 'class' => ['form-group', 'mb-0']
             ]
-        ])->widget(Datedropper::class, [
+        ])->widget(Flatpickr::class, [
             'options' => [
-                'id' => 'datedropper-create-task-' . $id,
+                'id' => 'flatpickr-create-task-' . $id,
             ],
-            'clientOptions' => [
-                'format' => 'd.m.Y',
-                'large' => true
-            ]
+            'customAssetBundle' => false
         ]); ?>
         <?php if ($keyName !== 'userId'): ?>
             <div class="kanban-task-assignees kanban-assignees mt-3">

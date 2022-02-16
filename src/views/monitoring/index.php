@@ -84,13 +84,9 @@ Frame::begin([
                     'class' => '\kartik\grid\DataColumn',
                     'format' => 'datetime',
                     'attribute' => 'created_at',
-                    'filterType' => '\simialbi\yii2\datedropper\Datedropper',
+                    'filterType' => '\sandritsch91\yii2\flatpickr\Flatpickr',
                     'filterWidgetOptions' => [
-                        'clientOptions' => [
-                            'format' => 'd.m.Y',
-                            'large' => true,
-                            'autofill' => false
-                        ]
+                        'customAssetBundle' => false,
                     ],
                     'vAlign' => GridView::ALIGN_MIDDLE
                 ],
@@ -98,13 +94,9 @@ Frame::begin([
                     'class' => '\kartik\grid\DataColumn',
                     'format' => 'datetime',
                     'attribute' => 'updated_at',
-                    'filterType' => '\simialbi\yii2\datedropper\Datedropper',
+                    'filterType' => '\sandritsch91\yii2\flatpickr\Flatpickr',
                     'filterWidgetOptions' => [
-                        'clientOptions' => [
-                            'format' => 'd.m.Y',
-                            'large' => true,
-                            'autofill' => false
-                        ]
+                        'customAssetBundle' => false,
                     ],
                     'vAlign' => GridView::ALIGN_MIDDLE
                 ],

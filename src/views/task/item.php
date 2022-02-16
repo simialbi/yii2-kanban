@@ -2,7 +2,7 @@
 
 use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
-use simialbi\yii2\datedropper\Datedropper;
+use sandritsch91\yii2\flatpickr\Flatpickr;
 use simialbi\yii2\hideseek\HideSeek;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\turbo\Frame;
@@ -171,7 +171,7 @@ Frame::begin([
                     <?php $options = [
                         'class' => ['btn', 'btn-sm', 'mr-3', 'px-0', 'position-relative'],
                         'style' => ['z-index' => '1'],
-                        'onClick' => new JsExpression('jQuery(\'#task-end_date-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '\').dateDropper(\'show\');')
+                        'onClick' => new JsExpression('document.querySelector(\'#task-end_date-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '\')._flatpickr.open()')
                     ]; ?>
                     <?php if ($model->endDate < time() && $model->status !== $model::STATUS_DONE): ?>
                         <?php Html::addCssClass($options, ['btn-danger', 'px-1']); ?>
@@ -180,8 +180,9 @@ Frame::begin([
                         <?php Html::addCssClass($options, ['btn-info', 'px-1']); ?>
                         <?php Html::removeCssClass($options, 'px-0'); ?>
                     <?php endif; ?>
-                    <?= Datedropper::widget([
+                    <?= Flatpickr::widget([
                         'model' => $model,
+                        'customAssetBundle' => false,
                         'options' => [
                             'id' => 'task-end_date-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id),
                             'class' => ['position-absolute', 'border-0'],
@@ -195,12 +196,11 @@ Frame::begin([
                         ],
                         'attribute' => 'end_date',
                         'clientOptions' => [
-                            'format' => 'd.m.Y',
-                            'large' => true,
-                            'autofill' => false,
-                            'onChange' => new JsExpression('function (e) {
-                                var container = e.selector.closest(\'#bucket-' . $model->bucket_id . '-frame\').get(0);
-                                var date = new Date(e.date.Y, e.date.n - 1, e.date.d);
+                            'onChange' => new JsExpression('function (selectedDates, dateStr, instance) {
+                                var container = jQuery(instance.element).closest(\'#bucket-' . $model->bucket_id . '-frame\').get(0);
+                                var date = selectedDates[0];
+
+                                instance.destroy();
 
                                 jQuery.ajax({
                                     url: \'' . Url::to([
