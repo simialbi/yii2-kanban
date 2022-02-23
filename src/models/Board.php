@@ -163,7 +163,7 @@ class Board extends ActiveRecord
         if ($insert && !Yii::$app->user->isGuest) {
             $assignment = new BoardUserAssignment();
             $assignment->board_id = $this->id;
-            $assignment->user_id = Yii::$app->user->id;
+            $assignment->user_id = (string) Yii::$app->user->id;
             $assignment->save();
         }
         parent::afterSave($insert, $changedAttributes);

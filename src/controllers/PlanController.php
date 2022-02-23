@@ -347,15 +347,7 @@ class PlanController extends Controller
         ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if (!Yii::$app->user->isGuest) {
-                $assignment = new BoardUserAssignment();
-                $assignment->board_id = $model->id;
-                $assignment->user_id = (string)Yii::$app->user->id;
-                $assignment->save();
-            }
-
             $image = UploadedFile::getInstance($model, 'uploadedFile');
-
             if ($image) {
                 $path = Yii::getAlias('@webroot/uploads');
                 if (FileHelper::createDirectory($path)) {
