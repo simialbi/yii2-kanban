@@ -326,6 +326,7 @@ class TaskController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $hasStatusChanged = $model->isAttributeChanged('status', false);
+            $oldAttributes = $model->oldAttributes;
             $model->save(false);
             $checklistElements = Yii::$app->request->getBodyParam('checklist', []);
             $newChecklistElements = ArrayHelper::remove($checklistElements, 'new', []);
@@ -491,7 +492,8 @@ class TaskController extends Controller
 
             $this->module->trigger(Module::EVENT_TASK_UPDATED, new TaskEvent([
                 'task' => $model,
-                'data' => $model
+                'data' => $model,
+                'oldAttributes' => $oldAttributes
             ]));
 
             if ($return === 'todo') {
