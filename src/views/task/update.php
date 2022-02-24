@@ -23,6 +23,8 @@ use yii\helpers\Url;
 /* @var $return string */
 /* @var $readonly boolean */
 
+$isAutor = $model->created_by == \Yii::$app->user->id;
+
 Frame::begin([
     'options' => [
         'id' => 'task-modal-frame'
@@ -171,7 +173,7 @@ Frame::begin([
                                             'image' => $user->image
                                         ]
                                     ],
-                                    'disabled' => $model->created_by != Yii::$app->user->id,
+                                    'disabled' => !$isAutor,
                                     'url' => 'javascript:;'
                                 ];
                                 foreach ($model->assignees as $assignee) {
@@ -594,7 +596,7 @@ Frame::begin([
                                             'image' => $user->image
                                         ]
                                     ],
-                                    'disabled' => $model->created_by != Yii::$app->user->id,
+                                    'disabled' => !$isAutor,
                                     'url' => 'javascript:;'
                                 ];
 
@@ -622,7 +624,7 @@ Frame::begin([
                                 ]
                             ]); ?>
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" onclick="window.sa.kanban.removeResponsible();">
+                                <button class="btn btn-outline-secondary" type="button" <?=($isAutor ? 'onclick="window.sa.kanban.removeResponsible();"' : 'disabled')?>>
                                     <?= FAS::i('times') ?>
                                 </button>
                             </div>
