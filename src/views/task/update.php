@@ -810,7 +810,7 @@ Frame::begin([
                         'inline' => true,
                         'class' => 'custom-control-input'
                     ]); ?>
-                    <?= Html::a(FAS::i('trash-alt'), ['attachment/delete', 'id' => $attachment->id], [
+                    <?= Html::a(FAS::i('trash-alt'), ['attachment/delete', 'id' => $attachment->id, 'readonly' => $readonly], [
                         'class' => ['remove-attachment'],
                         'data' => [
                             'turbo' => 'true',
