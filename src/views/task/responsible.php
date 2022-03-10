@@ -1,11 +1,12 @@
 <?php
 
 use simialbi\yii2\hideseek\HideSeek;
+use simialbi\yii2\kanban\Module;
 use simialbi\yii2\turbo\Frame;
 
 /* @var \yii\web\View $this */
 /* @var \simialbi\yii2\kanban\models\Board[] $boards */
-/* @var \simialbi\yii2\kanban\Module $module */
+/* @var Module $module */
 
 Frame::begin([
     'options' => [
@@ -46,22 +47,19 @@ Frame::begin([
                     </div>
 
                     <div id="board_<?= $board->id ?>" class="collapse show">
-                        <div class="card-body border-bottom border-bottom-1">
-                            <?php foreach ($board->buckets as $bucket): ?>
-                                <h5><?= $bucket->name ?></h5>
-                                <div class="list-group">
-                                    <?php
-                                    $tasks = $bucket->tasks;
-                                    \simialbi\yii2\kanban\Module::sortTasks($tasks);
-                                    ?>
-                                    <?php foreach ($tasks as $task): ?>
-                                        <?= $this->render('list-item', [
-                                            'task' => $task
-                                        ]); ?>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
+                        <?php foreach ($board->buckets as $bucket): ?>
+                            <div class="list-group list-group-flush">
+                                <?php
+                                $tasks = $bucket->tasks;
+                                Module::sortTasks($tasks);
+                                ?>
+                                <?php foreach ($tasks as $task): ?>
+                                    <?= $this->render('list-item', [
+                                        'task' => $task
+                                    ]); ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             <?php endforeach; ?>

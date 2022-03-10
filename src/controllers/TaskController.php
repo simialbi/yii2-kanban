@@ -125,25 +125,6 @@ class TaskController extends Controller
     }
 
     /**
-     * Finds the model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     *
-     * @param integer $id
-     *
-     * @return Task the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        /** @var $model Task */
-        if (($model = Task::find()->with('assignments')->where(['id' => $id])->one()) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
-        }
-    }
-
-    /**
      * @param string $view
      */
     public function actionViewDelegated($view = 'task')
@@ -156,7 +137,7 @@ class TaskController extends Controller
             ->where(['{{t}}.[[created_by]]' => Yii::$app->user->id])
             ->andWhere(['not', ['{{u}}.[[user_id]]' => Yii::$app->user->id]])
             ->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]])
-            ->orderBy(['{{u}}.[[user_id]]' => SORT_ASC]);
+            ->addOrderBy(['{{u}}.[[user_id]]' => SORT_ASC]);
 //            ->groupBy(['{{u}}.[[user_id]]']);
 
         $indexed = [];
@@ -285,24 +266,6 @@ class TaskController extends Controller
             'statuses' => $this->module->statuses,
             'users' => $this->module->users
         ]);
-    }
-
-    /**
-     * Finds the model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     *
-     * @param integer $id
-     *
-     * @return Board the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findBoardModel($id)
-    {
-        if (($model = Board::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
-        }
     }
 
     /**
@@ -965,6 +928,43 @@ class TaskController extends Controller
             'closeModal' => false,
             'readonly' => $readonly
         ]);
+    }
+
+    /**
+     * Finds the model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Task the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        /** @var $model Task */
+        if (($model = Task::find()->with('assignments')->where(['id' => $id])->one()) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+    }
+
+    /**
+     * Finds the model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     *
+     * @return Board the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findBoardModel($id)
+    {
+        if (($model = Board::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
     }
 
     /**

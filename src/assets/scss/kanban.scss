@@ -508,19 +508,9 @@ turbo-frame {
 }
 
 .kanban-plan-index {
-    #delegated-tasks-frame {
-        #search-widget-delegated {
-            width: 200px;
-        }
-
+    #delegated-tasks-frame, #responsible-tasks-frame {
         .list-group-item {
-            border-top: 0;
-        }
-    }
-
-    #responsible-tasks-frame {
-        turbo-frame + turbo-frame a {
-            border-top: 0;
+            cursor: pointer;
         }
     }
 }

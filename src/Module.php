@@ -165,6 +165,8 @@ class Module extends \simialbi\yii2\base\Module
     public static function sortTasks(&$tasks)
     {
         usort($tasks, function ($a, $b) {
+            /** @var \simialbi\yii2\kanban\models\Task $a */
+            /** @var \simialbi\yii2\kanban\models\Task $b */
             if ($a->endDate === $b->endDate) {
                 if ($a->end_date !== null) {
                     return 0;
