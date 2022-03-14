@@ -13,3 +13,4 @@ modules:
     config:
         Yii2:
             configFile: 'tests/_data/config.php'
+            transaction: false
