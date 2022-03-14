@@ -45,6 +45,7 @@
         "ext-gd": "*",
         "ext-mbstring": "*",
         "codeception/module-asserts": "^2.0.1",
+        "codeception/module-filesystem": "^2.0.1",
         "codeception/module-yii2": "^1.0",
         "simialbi/yii2-ticket": "~1.0@dev",
 		"yiisoft/yii2-coding-standards": "~2.0",

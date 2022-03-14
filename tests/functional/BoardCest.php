@@ -18,5 +18,15 @@ class BoardCest
     public function checkCreateForm(FunctionalTester $I)
     {
         $I->amOnRoute('kanban/plan/create');
+        $I->seeInTitle('Neuer Plan');
+        $I->see('<h1>Neuer Plan</h1>');
+        $I->seeCheckboxIsChecked('#board-is_public');
+    }
+
+    public function submitCreateFormEmpty(FunctionalTester $I)
+    {
+        $I->amOnRoute('kanban/plan/create');
+        $I->submitForm('#w0', []);
+        $I->see('Name darf nicht leer sein.', '.invalid-feedback');
     }
 }

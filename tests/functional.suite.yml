@@ -2,5 +2,6 @@ suite_namespace: simialbi\extension\kanban\functional
 actor: FunctionalTester
 modules:
     enabled:
+        - Filesystem
         - Yii2
         - Asserts
