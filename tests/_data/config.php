@@ -40,6 +40,9 @@ return [
             'htmlLayout' => '',
             'textLayout' => '',
             'useFileTransport' => true
+        ],
+        'authManager' => [
+            'class' => '\yii\rbac\DbManager',
         ]
     ]
 ];

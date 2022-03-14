@@ -8,7 +8,8 @@ return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm' => '@vendor/npm-asset',
-        '@simialbi/yii2/kanban' => dirname(dirname(__DIR__)) . '/src'
+        '@simialbi/yii2/kanban' => dirname(dirname(__DIR__)) . '/src',
+        '@simialbi/extensions/kanban' => dirname(__DIR__)
     ],
     'modules' => [
         'kanban' => [
@@ -19,7 +20,11 @@ return [
         'migrate' => [
             'class' => 'yii\console\controllers\MigrateController',
             'migrationNamespaces' => [
-                'simialbi\yii2\kanban\migrations'
+                'simialbi\yii2\kanban\migrations',
+                'simialbi\extensions\kanban\migrations'
+            ],
+            'migrationPath' => [
+                '@yii/rbac/migrations'
             ]
         ]
     ],
@@ -33,6 +38,9 @@ return [
             'tablePrefix' => 'test_',
             'enableSchemaCache' => false,
             'enableQueryCache' => false
+        ],
+        'authManager' => [
+            'class' => '\yii\rbac\DbManager'
         ]
     ]
 ];

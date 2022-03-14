@@ -7,50 +7,35 @@
 namespace simialbi\extensions\kanban\models;
 
 use simialbi\yii2\models\UserInterface;
-use yii\base\Model;
+use yii\db\ActiveRecord;
 
-class User extends Model implements UserInterface
+/**
+ * @property integer $id
+ * @property string $username
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $email
+ * @property string $mobile
+ * @property string $password
+ * @property string $token
+ * @property string $image
+ */
+class User extends ActiveRecord implements UserInterface
 {
     /**
-     * @var integer
+     * {@inheritDoc}
      */
-    public $id;
-    /**
-     * @var string
-     */
-    public $username;
-    /**
-     * @var string
-     */
-    public $token;
-    /**
-     * @var string
-     */
-    public $image;
-    /**
-     * @var string
-     */
-    public $name;
-    /**
-     * @var string
-     */
-    public $email;
-    /**
-     * @var string
-     */
-    public $mobile;
-
-    /**
-     * @var array[]
-     */
-    private static $_users = [];
+    public static function tableName()
+    {
+        return '{{%user}}';
+    }
 
     /**
      * {@inheritDoc}
      */
     public static function findIdentity($id)
     {
-        return self::$_users[$id] ?: null;
+        return static::findOne($id);
     }
 
     /**
@@ -58,7 +43,7 @@ class User extends Model implements UserInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        return null;
+        return static::findOne(['token' => $token]);
     }
 
     /**
@@ -66,23 +51,7 @@ class User extends Model implements UserInterface
      */
     public static function findIdentities()
     {
-        return self::$_users;
-    }
-
-    /**
-     * @return array[]
-     */
-    public static function getUsers()
-    {
-        return self::$_users;
-    }
-
-    /**
-     * @param array[] $users
-     */
-    public static function setUsers($users)
-    {
-        self::$_users = $users;
+        return static::find()->all();
     }
 
     /**
