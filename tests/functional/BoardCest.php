@@ -59,8 +59,7 @@ class BoardCest
         $I->amOnPage(['kanban/plan/update', 'id' => 1]);
 
         $I->seeInFormFields('#sa-kanban-update-plan-form', [
-            'Board[name]' => 'Test',
-            'Board[is_public]' => false
+            'Board[name]' => 'Test'
         ]);
 
         $I->submitForm('#sa-kanban-update-plan-form', [
