@@ -1,14 +1,14 @@
 <?php
 return [
     'id' => 'kanban-tests-console',
-    'basePath' => __DIR__,
-    'vendorPath' => dirname(__DIR__) . '/vendor',
+    'basePath' => dirname(__DIR__),
+    'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'language' => 'de-CH',
     'sourceLanguage' => 'en-US',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm' => '@vendor/npm-asset',
-        '@simialbi/yii2/kanban' => dirname(__DIR__) . '/src'
+        '@simialbi/yii2/kanban' => dirname(dirname(__DIR__)) . '/src'
     ],
     'modules' => [
         'kanban' => [

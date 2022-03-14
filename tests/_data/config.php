@@ -2,8 +2,8 @@
 
 return [
     'id' => 'kanban-tests',
-    'basePath' => __DIR__,
-    'vendorPath' => dirname(__DIR__) . '/vendor',
+    'basePath' => dirname(__DIR__),
+    'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'language' => 'de-CH',
     'sourceLanguage' => 'en-US',
     'aliases' => [
