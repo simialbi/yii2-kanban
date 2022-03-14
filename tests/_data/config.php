@@ -3,7 +3,8 @@
 return [
     'id' => 'kanban-tests',
     'basePath' => dirname(__DIR__),
-    'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
+    'runtimePath' => dirname(__DIR__) . '/_output',
+    'vendorPath' => dirname(__DIR__, 2) . '/vendor',
     'language' => 'de-CH',
     'sourceLanguage' => 'en-US',
     'aliases' => [
@@ -16,6 +17,9 @@ return [
         ]
     ],
     'components' => [
+        'assetManager' => [
+            'basePath' => '@webroot/_output'
+        ],
         'request' => [
             'cookieValidationKey' => 'wefJDF8sfdsfSDefwqdxj9oq',
             'scriptFile' => __DIR__ . '/index.php',
