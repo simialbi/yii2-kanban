@@ -7,7 +7,8 @@ return [
     'sourceLanguage' => 'en-US',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm' => '@vendor/npm-asset'
+        '@npm' => '@vendor/npm-asset',
+        '@simialbi/yii2/kanban' => dirname(__DIR__) . '/src'
     ],
     'modules' => [
         'kanban' => [

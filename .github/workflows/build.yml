@@ -8,7 +8,7 @@ jobs:
     codeception:
         name: PHP ${{ matrix.php-version }}-mysql-${{ matrix.mysql-version }}
         env:
-            extensions: pdo, pdo_mysql
+            extensions: pdo, pdo_mysql, gd, mbstring
             key: cache-v1
             TEST_MYSQL_HOST: 127.0.0.1
             TEST_MYSQL_DB: yiitest
