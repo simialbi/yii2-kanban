@@ -3,6 +3,7 @@
 [![Latest Stable Version](https://poser.pugx.org/simialbi/yii2-kanban/v/stable?format=flat-square)](https://packagist.org/packages/simialbi/yii2-kanban)
 [![Total Downloads](https://poser.pugx.org/simialbi/yii2-kanban/downloads?format=flat-square)](https://packagist.org/packages/simialbi/yii2-kanban)
 [![License](https://poser.pugx.org/simialbi/yii2-kanban/license?format=flat-square)](https://packagist.org/packages/simialbi/yii2-kanban)
+[![build](https://github.com/simialbi/yii2-kanban/actions/workflows/build.yml/badge.svg)](https://github.com/simialbi/yii2-kanban/actions/workflows/build.yml)
 
 ## Resources
 

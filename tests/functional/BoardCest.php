@@ -26,7 +26,7 @@ class BoardCest
     public function submitCreateFormEmpty(FunctionalTester $I)
     {
         $I->amOnRoute('kanban/plan/create');
-        $I->submitForm('#w0', []);
+        $I->submitForm('#sa-kanban-create-plan-form', []);
         $I->see('Name darf nicht leer sein.', '.invalid-feedback');
     }
 }
