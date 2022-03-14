@@ -13,6 +13,7 @@ class m220314_110926_init_tests extends Migration
 {
     /**
      * {@inheritDoc}
+     * @throws \Exception
      */
     public function safeUp()
     {
@@ -46,6 +47,12 @@ class m220314_110926_init_tests extends Migration
                 Yii::$app->security->generateRandomString()
             ]
         ]);
+
+        $auth = Yii::$app->authManager;
+        if ($auth) {
+            $role = $auth->getRole('kanbanSurveillanceOperator');
+            $auth->assign($role, 1);
+        }
     }
 
     /**

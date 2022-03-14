@@ -8,6 +8,7 @@ namespace simialbi\extensions\kanban\functional;
 
 use simialbi\extensions\kanban\FunctionalTester;
 use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\kanban\models\BoardUserAssignment;
 
 class BoardCest
 {
@@ -53,6 +54,11 @@ class BoardCest
         $I->assertEquals(false, $board->is_public);
         $I->assertEquals(1, $board->created_by);
         $I->assertNull($board->image);
+
+        $I->seeRecord(BoardUserAssignment::class, [
+            'board_id' => 1,
+            'user_id' => 1
+        ]);
     }
 
     public function submitUpdateForm(FunctionalTester $I)

@@ -26,7 +26,7 @@ $form = ActiveForm::begin([
             'turbo-frame' => 'bucket-' . $id . '-frame'
         ]
     ],
-    'id' => 'createTaskForm',
+    'id' => 'sa-kanban-create-task-form',
     'validateOnSubmit' => false,
     'fieldConfig' => function ($model, $attribute) {
         /* @var $model \yii\base\Model */

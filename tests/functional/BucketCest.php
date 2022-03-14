@@ -54,4 +54,18 @@ class BucketCest
         $I->assertEquals(1, $bucket->sort);
         $I->assertEquals(1, $bucket->board_id);
     }
+
+    public function viewBucketOnBoard(FunctionalTester $I)
+    {
+        $I->amOnPage(['kanban/plan/view', 'id' => 1]);
+        $I->seeResponseCodeIs(200);
+        $I->seeInSource('<turbo-frame id="bucket-1-frame"');
+    }
+
+    public function viewBucket(FunctionalTester $I)
+    {
+        $I->amOnPage(['kanban/bucket/view', 'id' => 1, 'readonly' => 0]);
+        $I->seeElement('#sa-kanban-create-task-form');
+        $I->seeElement('#dropdown-user-create-task-1');
+    }
 }
