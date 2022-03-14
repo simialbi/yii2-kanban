@@ -83,7 +83,7 @@ jobs:
               run: vendor/bin/yii migrate/up --appconfig="tests/_data/console.php" --interactive=0 --color=1
 
             - name: Build needed classes with codeception
-              run: vendor/bin/codecept build
+              run: vendor/bin/codecept build --ansi
 
             - name: Run tests with codeception
-              run: vendor/bin/codecept run
+              run: vendor/bin/codecept run -vvv --ansi

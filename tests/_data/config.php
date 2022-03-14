@@ -18,7 +18,8 @@ return [
     ],
     'components' => [
         'assetManager' => [
-            'basePath' => '@webroot/_output'
+            'basePath' => dirname(__DIR__) . '/_output',
+            'baseUrl' => 'http://127.0.0.1'
         ],
         'request' => [
             'cookieValidationKey' => 'wefJDF8sfdsfSDefwqdxj9oq',
