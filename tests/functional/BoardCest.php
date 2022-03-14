@@ -60,7 +60,6 @@ class BoardCest
 
         $I->seeInFormFields('#sa-kanban-update-plan-form', [
             'Board[name]' => 'Test',
-            'Board[uploadedFile]' => '',
             'Board[is_public]' => false
         ]);
 
