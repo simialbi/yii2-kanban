@@ -21,7 +21,7 @@ return [
             'scriptFile' => __DIR__ . '/index.php',
             'scriptUrl' => '/index.php'
         ],
-        'users' => [
+        'user' => [
             'class' => '\yii\web\User',
             'identityClass' => '\simialbi\extensions\kanban\models\User'
         ],
