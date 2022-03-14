@@ -53,4 +53,30 @@ class BoardCest
         $I->assertEquals(false, $board->is_public);
         $I->assertNull($board->image);
     }
+
+    public function submitUpdateForm(FunctionalTester $I)
+    {
+        $I->amOnRoute('kanban/plan/update', ['id' => 1]);
+
+        $I->seeInFormFields('#sa-kanban-update-plan-form', [
+            'Board[name]' => 'Test',
+            'Board[uploadedFile]' => '',
+            'Board[is_public]' => false
+        ]);
+
+        $I->submitForm('#sa-kanban-update-plan-form', [
+            'Board[name]' => 'Test 2'
+        ]);
+
+        /** @var Board $board */
+        $board = $I->grabRecord(Board::class, [
+            'id' => 1
+        ]);
+        $I->assertNotNull($board);
+        $I->assertInstanceOf(Board::class, $board);
+        $I->assertEquals('Test 2', $board->name);
+        $I->assertEquals(1, $board->id);
+        $I->assertEquals(false, $board->is_public);
+        $I->assertNull($board->image);
+    }
 }

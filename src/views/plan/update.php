@@ -20,7 +20,9 @@ $this->params['breadcrumbs'] = [
     <h1><?= Html::encode($this->title); ?></h1>
 
     <div class="mt-3">
-        <?php $form = ActiveForm::begin([]); ?>
+        <?php $form = ActiveForm::begin([
+            'id' => 'sa-kanban-update-plan-form'
+        ]); ?>
         <?= $this->render('_form', [
             'form' => $form,
             'model' => $model
