@@ -21,7 +21,7 @@ class BoardCest
 
     public function checkCreateForm(FunctionalTester $I)
     {
-        $I->amOnRoute('kanban/plan/create');
+        $I->amOnPage(['kanban/plan/create']);
         $I->seeInTitle('Neuer Plan');
 //        $I->see('<h1>Neuer Plan</h1>');
         $I->seeCheckboxIsChecked('#board-is_public');
@@ -29,14 +29,14 @@ class BoardCest
 
     public function submitCreateFormEmpty(FunctionalTester $I)
     {
-        $I->amOnRoute('kanban/plan/create');
+        $I->amOnPage(['kanban/plan/create']);
         $I->submitForm('#sa-kanban-create-plan-form', []);
         $I->see('Name darf nicht leer sein.', '.invalid-feedback');
     }
 
     public function submitCreateForm(FunctionalTester $I)
     {
-        $I->amOnRoute('kanban/plan/create');
+        $I->amOnPage(['kanban/plan/create']);
         $I->submitForm('#sa-kanban-create-plan-form', [
             'Board[name]' => 'Test',
             'Board[is_public]' => 0
@@ -56,7 +56,7 @@ class BoardCest
 
     public function submitUpdateForm(FunctionalTester $I)
     {
-        $I->amOnRoute('kanban/plan/update', ['id' => 1]);
+        $I->amOnPage(['kanban/plan/update', 'id' => 1]);
 
         $I->seeInFormFields('#sa-kanban-update-plan-form', [
             'Board[name]' => 'Test',
