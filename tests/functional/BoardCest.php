@@ -23,7 +23,7 @@ class BoardCest
     {
         $I->amOnPage(['kanban/plan/create']);
         $I->seeInTitle('Neuer Plan');
-//        $I->see('<h1>Neuer Plan</h1>');
+        $I->seeInSource('<h1>Neuer Plan</h1>');
         $I->seeCheckboxIsChecked('#board-is_public');
     }
 
@@ -51,6 +51,7 @@ class BoardCest
         $I->assertEquals('Test', $board->name);
         $I->assertEquals(1, $board->id);
         $I->assertEquals(false, $board->is_public);
+        $I->assertEquals(1, $board->created_by);
         $I->assertNull($board->image);
     }
 
@@ -76,5 +77,45 @@ class BoardCest
         $I->assertEquals(1, $board->id);
         $I->assertEquals(false, $board->is_public);
         $I->assertNull($board->image);
+    }
+
+    public function viewBoardOnOverview(FunctionalTester $I)
+    {
+        $I->amOnPage(['kanban/plan/index']);
+        $I->seeInTitle('Kanban Hub');
+        $I->see('Test 2');
+        $I->seeInSource('<a href="/kanban/plan/view?id=1" class="flex-grow-1 text-body text-decoration-none">');
+        $I->seeInSource('<a class="text-body" href="/kanban/plan/update?id=1" title="Plan bearbeiten">');
+        $I->seeInSource('<a class="text-body" href="/kanban/plan/delete?id=1" title="Plan löschen" data-confirm="Wollen Sie diesen Eintrag wirklich löschen?" data-method="post">');
+    }
+
+    /**
+     * @throws \Codeception\Exception\ModuleException
+     */
+    public function dontViewBoardOnOverviewAsJane(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+        $I->amOnPage(['kanban/plan/index']);
+        $I->seeResponseCodeIs(200);
+        $I->dontSee('Test 2');
+    }
+
+    public function viewBoard(FunctionalTester $I)
+    {
+        $I->amOnPage(['kanban/plan/view', 'id' => 1]);
+        $I->seeResponseCodeIs(200);
+        $I->seeInTitle('Test 2');
+        $I->see('Test 2');
+        $I->see('Neuen Bucket hinzufügen');
+    }
+
+    /**
+     * @throws \Codeception\Exception\ModuleException
+     */
+    public function viewBoardAsJaneError(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+        $I->amOnPage(['kanban/plan/view', 'id' => 1]);
+        $I->seeResponseCodeIs(403);
     }
 }
