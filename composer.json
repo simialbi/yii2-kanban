@@ -44,9 +44,11 @@
 	"require-dev": {
         "ext-gd": "*",
         "ext-mbstring": "*",
+        "codeception/module-asserts": "^2.0.1",
+        "codeception/module-yii2": "^1.0",
         "simialbi/yii2-ticket": "~1.0@dev",
 		"yiisoft/yii2-coding-standards": "~2.0",
-		"phpunit/phpunit": "<7"
+        "yiisoft/yii2-symfonymailer": "^2.0.3"
 	},
     "suggest": {
         "ext-gd": "For autogeneration of visualisations",
@@ -59,7 +61,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"yiiunit\\extensions\\kanban\\": "tests"
+			"simialbi\\extensions\\kanban\\": "tests"
 		}
 	},
 	"repositories": [
@@ -71,6 +73,11 @@
 	"extra": {
 		"branch-alias": {
 			"dev-master": "1.0.x-dev"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"yiisoft/yii2-composer": true
 		}
 	}
 }

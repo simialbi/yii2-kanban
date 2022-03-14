@@ -123,8 +123,10 @@ class Module extends \simialbi\yii2\base\Module
         // TODO: Cache somehow
         $this->users = ArrayHelper::index(call_user_func([Yii::$app->user->identityClass, 'findIdentities']), 'id');
         if (Yii::$app->has('authManager')) {
-            $this->roles = ArrayHelper::getColumn(ArrayHelper::index(Yii::$app->authManager->getRoles(), 'name'),
-                'description');
+            $this->roles = ArrayHelper::getColumn(
+                ArrayHelper::index(Yii::$app->authManager->getRoles(), 'name'),
+                'description'
+            );
         }
 
         Yii::$app->view->registerJs(
