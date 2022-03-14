@@ -12,6 +12,8 @@ jobs:
             key: cache-v1
             TEST_MYSQL_HOST: 127.0.0.1
             TEST_MYSQL_DB: yiitest
+            TEST_MYSQL_USER: root
+            TEST_MYSQL_PASS: root
 
         runs-on: ${{ matrix.os }}
 

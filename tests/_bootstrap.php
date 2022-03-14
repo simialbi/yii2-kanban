@@ -4,6 +4,7 @@ error_reporting(-1);
 
 const YII_ENABLE_ERROR_HANDLER = false;
 const YII_DEBUG = true;
+const YII_ENV = 'test';
 
 //$_SERVER['SCRIPT_NAME'] = '/' . __DIR__;
 //$_SERVER['SCRIPT_FILENAME'] = __FILE__;

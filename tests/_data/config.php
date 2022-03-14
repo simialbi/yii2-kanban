@@ -33,10 +33,10 @@ return [
         'db' => [
             'class' => '\yii\db\Connection',
             'dsn' => 'mysql:host=' . getenv('TEST_MYSQL_HOST') . ';dbname=' . getenv('TEST_MYSQL_DB'),
-            'username' => 'root',
-            'password' => 'root',
+            'username' => getenv('TEST_MYSQL_USER'),
+            'password' => getenv('TEST_MYSQL_PASS'),
             'charset' => 'utf8mb4',
-            'tablePrefix' => 'test_',
+            'tablePrefix' => 're_',
             'enableSchemaCache' => false,
             'enableQueryCache' => false
         ],
