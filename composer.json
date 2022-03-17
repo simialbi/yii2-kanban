@@ -35,7 +35,7 @@
         "rmrevin/yii2-fontawesome": "^3.4.0",
         "sandritsch91/yii2-widget-flatpickr": "^1.0.0",
         "simialbi/yii2-simialbi-base": ">=0.10.2 <1.0 | ^1.0.0",
-        "simialbi/yii2-summernote": "^1.1.0",
+        "simialbi/yii2-summernote": "^1.2.1",
         "simialbi/yii2-widget-chart": "^0.7.0",
         "simialbi/yii2-widget-hideseek": "^1.0.0",
         "simialbi/yii2-widget-turbo": "^1.0.0",

@@ -33,7 +33,7 @@ Frame::begin([
 ?>
     <div class="kanban-task-modal">
         <?php $form = ActiveForm::begin([
-            'id' => 'taskModalForm',
+            'id' => 'sa-kanban-task-modal-form',
             'action' => [
                 'task/update',
                 'id' => $model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id,

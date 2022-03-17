@@ -7,7 +7,6 @@
 namespace simialbi\extensions\kanban\functional;
 
 use simialbi\extensions\kanban\FunctionalTester;
-use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
 
 class BucketCest

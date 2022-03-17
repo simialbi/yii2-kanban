@@ -18,7 +18,7 @@ Frame::begin([
     ]
 ]);
 $options = [
-    'id' => 'taskModalForm',
+    'id' => 'sa-kanban-task-modal-form',
     'fieldConfig' => [
         'labelOptions' => [
             'class' => ['col-form-label-sm', 'py-0']

@@ -182,8 +182,9 @@ class Task extends ActiveRecord
                             return Rule::createFromString(
                                 $value,
                                 Yii::$app->formatter->asDatetime($start, 'yyyy-MM-dd HH:mm:ss'),
-                                $this->end_date ? Yii::$app->formatter->asDate($this->end_date,
-                                    'yyyy-MM-dd HH:mm:ss') : null,
+                                $this->end_date
+                                    ? Yii::$app->formatter->asDate($this->end_date, 'yyyy-MM-dd HH:mm:ss')
+                                    : null,
                                 YIi::$app->timeZone
                             );
                         }

@@ -19,7 +19,7 @@ Frame::begin([
 ?>
     <div class="kanban-task-modal">
         <?php $form = ActiveForm::begin([
-            'id' => 'taskModalForm',
+            'id' => 'sa-kanban-task-modal-form',
             'fieldConfig' => [
                 'labelOptions' => [
                     'class' => ['py-0']
