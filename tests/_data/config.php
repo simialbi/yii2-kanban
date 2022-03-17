@@ -49,5 +49,8 @@ return [
         'authManager' => [
             'class' => '\yii\rbac\DbManager',
         ]
+    ],
+    'params' => [
+        'bsVersion' => '4.x'
     ]
 ];
