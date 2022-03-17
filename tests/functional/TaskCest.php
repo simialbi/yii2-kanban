@@ -50,10 +50,10 @@ class TaskCest
         $I->assertEmpty($task->checklistElements);
         $I->assertEmpty($task->links);
         $I->assertEmpty($task->attachments);
-        $I->assertFalse($task->is_recurring);
-        $I->assertFalse($task->card_show_description);
-        $I->assertFalse($task->card_show_checklist);
-        $I->assertFalse($task->card_show_links);
+        $I->assertFalse((bool)$task->is_recurring);
+        $I->assertFalse((bool)$task->card_show_description);
+        $I->assertFalse((bool)$task->card_show_checklist);
+        $I->assertFalse((bool)$task->card_show_links);
     }
 
     public function checkUpdateForm(FunctionalTester $I)
