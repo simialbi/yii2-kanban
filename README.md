@@ -82,7 +82,7 @@ or configure your console like this:
         'migrate' => [
             'class' => 'yii\console\controllers\MigrateController',
             'migrationNamespaces' => [
-                'simialbi\yii2\ticket\migrations'
+                'simialbi\yii2\kanban\migrations'
             ]
         ]
     ]
