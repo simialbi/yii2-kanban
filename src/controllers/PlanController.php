@@ -475,9 +475,8 @@ class PlanController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model = BoardUserAssignment::findOne(['board_id' => $id, 'user_id' => $userId]);
-
-        $model->delete();
+        $assignment = BoardUserAssignment::findOne(['board_id' => $id, 'user_id' => $userId]);
+        $assignment->delete();
 
         return $this->renderAjax('assignees', [
             'model' => $model,
