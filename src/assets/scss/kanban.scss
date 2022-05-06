@@ -200,7 +200,7 @@ turbo-frame {
 }
 
 .kanban-bucket-header {
-    &:hover {
+    &.draggable:hover {
         .kanban-bucket-more > .btn, .kanban-bucket-sort-handle {
             opacity: 1;
         }

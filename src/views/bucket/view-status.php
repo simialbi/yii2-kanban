@@ -26,6 +26,8 @@ Frame::begin([
 echo $this->render('_header', [
     'id' => $status,
     'title' => ArrayHelper::getValue($statuses, $status, $status),
+    'renderButtons' => false,
+    'readonly' => $readonly,
 ]);
 ?>
 

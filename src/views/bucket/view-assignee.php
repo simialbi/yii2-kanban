@@ -29,7 +29,9 @@ echo $this->render('_header', [
         : $this->render('/task/_user', [
             'assigned' => false,
             'user' => $user
-        ])
+        ]),
+    'renderButtons' => false,
+    'readonly' => $readonly,
 ]);
 ?>
 

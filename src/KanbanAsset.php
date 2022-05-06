@@ -32,4 +32,11 @@ class KanbanAsset extends AssetBundle
         'rmrevin\yii\fontawesome\AssetBundle',
         'simialbi\yii2\kanban\KanbanSwiperAsset'
     ];
+
+    /**
+     * {@inheritDoc}
+     */
+    public $publishOptions = [
+        'forceCopy' => YII_DEBUG
+    ];
 }

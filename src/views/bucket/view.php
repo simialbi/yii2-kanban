@@ -29,7 +29,9 @@ Frame::begin([
     'id' => $model->id,
     'title' => Html::tag('span', $model->name, [
         'class' => ['d-block', 'text-truncate']
-    ])
+    ]),
+    'renderButtons' => true,
+    'readonly' => $readonly,
 ]);
 if (!$readonly):
     ?>
