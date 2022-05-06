@@ -119,8 +119,9 @@ Frame::begin([
                                         'id' => $userId,
                                         'title' => $this->render('_user', [
                                             'assigned' => false,
-                                            'user' => $users[$userId]
-                                        ])
+                                            'user' => $users[$userId],
+                                        ]),
+                                        'renderButtons' => false,
                                     ]); ?>
                                     <div class="kanban-tasks flex-grow-1 mt-4">
                                         <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>

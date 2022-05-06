@@ -6,16 +6,9 @@ use simialbi\yii2\turbo\Frame;
 /* @var $this \yii\web\View */
 /* @var $kanbanModuleName string */
 
-Frame::begin([
-    'options' => [
-        'id' => 'kanban-todo-frame'
-    ]
-]);
 echo ToDo::widget([
     'kanbanModuleName' => $kanbanModuleName,
-    'renderModal' => false
+    'renderModal' => false,
+    'addBoardFilter' => true,
+    'cacheDuration' => -1
 ]);
-?>
-    <script>jQuery('#task-modal').modal('hide');</script>
-<?php
-Frame::end();

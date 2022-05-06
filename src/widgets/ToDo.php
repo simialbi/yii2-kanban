@@ -77,6 +77,11 @@ class ToDo extends Widget
     public $renderModal = true;
 
     /**
+     * @var int seconds to cache the task-query
+     */
+    public $cacheDuration = 60;
+
+    /**
      * {@inheritDoc}
      * @throws \yii\base\InvalidConfigException
      */
@@ -86,7 +91,7 @@ class ToDo extends Widget
         $this->view->registerAssetBundle(KanbanAsset::class);
 
         $tasks = Task::find()
-            ->cache(60)
+            ->cache($this->cacheDuration)
             ->alias('t')
             ->with(['checklistElements', 'comments'])
             ->innerJoinWith('bucket bu')
@@ -223,6 +228,8 @@ JS;
 
         echo Html::endTag('div');
         echo Html::endTag('div');
+
+        $this->view->registerJs('jQuery("#task-modal").modal("hide")');
 
         Frame::end();
 
