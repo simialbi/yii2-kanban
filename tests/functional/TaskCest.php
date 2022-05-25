@@ -61,5 +61,14 @@ class TaskCest
         $I->amOnPage(['kanban/task/update', 'id' => 1, 'return' => 'card', 'readonly' => 0]);
 
         $I->seeElement('#sa-kanban-task-modal-form');
+        $I->seeInFormFields('#sa-kanban-task-modal-form', [
+            'Task[subject]' => 'Test task',
+            'Task[bucket_id]' => 1,
+            'Task[status]' => Task::STATUS_NOT_BEGUN,
+            'Task[start_date]' => '',
+            'Task[end_date]' => date('d.m.Y'),
+            'Task[responsible_id]' => '',
+            'Task[description]' => ''
+        ]);
     }
 }
