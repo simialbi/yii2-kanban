@@ -1,0 +1,70 @@
+@import "npm-asset/bootstrap/scss/functions";
+@import "npm-asset/bootstrap/scss/mixins";
+@import "npm-asset/bootstrap/scss/variables";
+
+.splitterContainer {
+    height: 100%;
+    width: 100%;
+}
+
+.splitElement {
+    height: 100%;
+    outline-style: none;
+    position: absolute;
+
+    &.splitBox1 {
+        overflow: scroll hidden;
+    }
+    &.splitBox2 {
+        overflow: scroll auto;
+    }
+    &.vSplitBar {
+        background-color: rgba($black, .5);
+        cursor: ew-resize;
+        position: relative;
+        width: 5px;
+
+        .toLeft, .toRight, .toCenter {
+            background-color: rgba($black, .5);
+            margin-top: 0;
+            position: absolute;
+            top: 0;
+            width: 15px;
+            z-index: 2;
+        }
+    }
+}
+
+.gdfTable {
+    background-color: $white;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+th, .tableHeader {
+    font-weight: normal;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.unselectable {
+    user-select: none;
+}
+
+.ganttTable {
+    background-color: $white;
+    table-layout: fixed;
+
+    td {
+        font-weight: normal;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.ganttFixHead {
+    position: absolute;
+    top: 0;
+    z-index: 2;
+}

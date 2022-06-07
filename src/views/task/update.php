@@ -7,21 +7,24 @@ use Recurr\Transformer\Translator;
 use rmrevin\yii\fontawesome\FAS;
 use sandritsch91\yii2\flatpickr\Flatpickr;
 use simialbi\yii2\hideseek\HideSeek;
+use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
 use yii\helpers\ReplaceArrayValue;
 use yii\helpers\Url;
+use yii\widgets\MaskedInput;
 
 /* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Task */
+/* @var $model Task */
 /* @var $buckets array */
 /* @var $statuses array */
 /* @var $updateSeries boolean */
 /* @var $users \simialbi\yii2\models\UserInterface[] */
 /* @var $return string */
 /* @var $readonly boolean */
+/* @var $tasks Task[] */
 
 $isAutor = $model->created_by == \Yii::$app->user->id;
 
@@ -59,7 +62,7 @@ Frame::begin([
                         : 'task-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '-frame'
                         /*/
                         : ($model->isRecurrentInstance() ? 'bucket-' . $model->bucket_id . '-frame' : 'task-' . $model->id . '-frame')
-                        //*/
+                    //*/
                 ]
             ]
         ]); ?>
@@ -247,39 +250,84 @@ Frame::begin([
 
 
             <div class="row">
-                <?= $form->field($model, 'bucket_id', [
-                    'options' => [
-                        'class' => ['form-group', 'col-6', 'col-md-3']
-                    ]
-                ])->dropDownList($buckets); ?>
-                <?= $form->field($model, 'status', [
-                    'options' => [
-                        'class' => ['form-group', 'col-6', 'col-md-3']
-                    ]
-                ])->dropDownList($statuses); ?>
-                <?php if ($model->start_date) {
-                    $model->start_date =  Yii::$app->formatter->asDate($model->start_date, 'dd.MM.yyyy');
-                } ?>
-                <?php if ($model->end_date) {
-                    $model->end_date =  Yii::$app->formatter->asDate($model->end_date, 'dd.MM.yyyy');
-                } ?>
-                <?= $form->field($model, 'start_date', [
-                    'options' => [
-                        'class' => ['form-group', 'col-6', 'col-md-3']
-                    ]
-                ])->widget(Flatpickr::class, [
-                    'customAssetBundle' => false
-                ]); ?>
-                <?= $form->field($model, 'end_date', [
-                    'options' => [
-                        'class' => ['form-group', 'col-6', 'col-md-3']
-                    ]
-                ])->widget(Flatpickr::class, [
-                    'customAssetBundle' => false,
-                    'options' => [
-                        'placeholder' => (null === $model->endDate) ? '' : Yii::$app->formatter->asDate($model->endDate, 'dd.MM.yyyy')
-                    ]
-                ]); ?>
+                <div class="col-12 col-md-6">
+                    <div class="row">
+                        <?= $form->field($model, 'bucket_id', [
+                            'options' => [
+                                'class' => ['form-group', 'col-12', 'col-md-6']
+                            ]
+                        ])->dropDownList($buckets); ?>
+                        <?= $form->field($model, 'status', [
+                            'options' => [
+                                'class' => ['form-group', 'col-12', 'col-md-6']
+                            ]
+                        ])->dropDownList($statuses); ?>
+                        <?php if ($model->start_date) {
+                            $model->start_date = Yii::$app->formatter->asDate($model->start_date, 'dd.MM.yyyy');
+                        } ?>
+                        <?php if ($model->end_date) {
+                            $model->end_date = Yii::$app->formatter->asDate($model->end_date, 'dd.MM.yyyy');
+                        } ?>
+                        <?= $form->field($model, 'start_date', [
+                            'options' => [
+                                'class' => ['form-group', 'col-12', 'col-md-4']
+                            ]
+                        ])->widget(Flatpickr::class, [
+                            'customAssetBundle' => false
+                        ]); ?>
+                        <?= $form->field($model, 'end_date', [
+                            'options' => [
+                                'class' => ['form-group', 'col-12', 'col-md-4']
+                            ]
+                        ])->widget(Flatpickr::class, [
+                            'customAssetBundle' => false,
+                            'options' => [
+                                'placeholder' => (null === $model->endDate) ? '' : Yii::$app->formatter->asDate($model->endDate,
+                                    'dd.MM.yyyy')
+                            ]
+                        ]); ?>
+                        <?= $form->field($model, 'percentage_done', [
+                            'options' => [
+                                'class' => ['form-group', 'col-12', 'col-md-4']
+                            ]
+                        ])->widget(MaskedInput::class, [
+                            'clientOptions' => [
+                                'alias' => 'percentage'
+                            ]
+                        ]) ?>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 border-left">
+                    <h5><?= Yii::t('simialbi/kanban/task', 'Depends on') ?></h5>
+                    <div class="list-group" id="task-dependencies">
+                        <?php foreach ($model->dependencies as $dependency): ?>
+                            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                               href="javascript:;" onclick="window.sa.kanban.removeDependency.call(this);"
+                                <?php if ($dependency->status === Task::STATUS_DONE): ?> style="text-decoration: line-through;"<?php endif;?>>
+                                <input type="hidden" name="dependencies[]" value="<?= $dependency->id; ?>">
+                                <?= $dependency->subject; ?><br>
+                                <span class="badge badge-light">
+                                    <?= Yii::$app->formatter->asDate($dependency->endDate, 'dd.MM.yyyy'); ?>
+                                </span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="dropdown mt-3">
+                        <a href="#" class="btn btn-primary" data-toggle="dropdown" role="button" aria-expanded="false">
+                            <?= Yii::t('simialbi/kanban/task', 'Add dependency'); ?>
+                        </a>
+                        <div class="dropdown-menu">
+                            <?php foreach ($tasks as $task): ?>
+                                <a class="dropdown-item" href="javascript:;" onclick="window.sa.kanban.addDependency.call(this, <?= $task->id; ?>);"
+                                   data-subject="<?= $task->subject; ?>" data-end-date='<?= Yii::$app->formatter->asDate($task->endDate, 'dd.MM.yyyy'); ?>'
+                                   data-done="<?= $task->status === Task::STATUS_DONE; ?>"
+                                   <?php if ($task->status === Task::STATUS_DONE): ?> style="text-decoration: line-through;"<?php endif;?>>
+                                    <?= $task->subject; ?> (<?= Yii::$app->formatter->asDate($task->endDate, 'dd.MM.yyyy'); ?>)
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="row mb-3 <?php if ($model->isRecurrentInstance()) : ?>d-none<?php endif; ?>">
                 <div class="col-12">
@@ -327,107 +375,118 @@ Frame::begin([
                                 ]); ?>
                             </div>
                             <div class="col-12 col-sm-7 col-md-8 col-lg-9">
-                                <div id="recurrence-daily"<?php if ($freq !== 'DAILY'): ?> style="display: none;"<?php endif; ?>>
+                                <div
+                                    id="recurrence-daily"<?php if ($freq !== 'DAILY'): ?> style="display: none;"<?php endif; ?>>
                                     <?= Yii::t('simialbi/kanban/recurrence', 'Recur every {input} day(s)', [
-                                        'input' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), $interval, [
+                                        'input' => Html::textInput(Html::getInputName($model,
+                                            'recurrence_pattern[INTERVAL]'), $interval, [
                                             'class' => ['form-control', 'form-control-sm', 'mx-1'],
                                             'style' => [
                                                 'display' => 'inline-block',
                                                 'vertical-algin' => 'middle',
-                                                'width' =>  '3rem'
+                                                'width' => '3rem'
                                             ],
                                             'disabled' => $freq !== 'DAILY'
                                         ])
                                     ]); ?>
                                 </div>
-                                <div id="recurrence-weekly"<?php if ($freq !== 'WEEKLY'): ?> style="display: none;"<?php endif; ?>>
+                                <div
+                                    id="recurrence-weekly"<?php if ($freq !== 'WEEKLY'): ?> style="display: none;"<?php endif; ?>>
                                     <?= Yii::t('simialbi/kanban/recurrence', 'Recur every {input} week(s) on:', [
-                                        'input' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), $interval, [
+                                        'input' => Html::textInput(Html::getInputName($model,
+                                            'recurrence_pattern[INTERVAL]'), $interval, [
                                             'class' => ['form-control', 'form-control-sm', 'mx-1'],
                                             'style' => [
                                                 'display' => 'inline-block',
                                                 'vertical-algin' => 'middle',
-                                                'width' =>  '3rem'
+                                                'width' => '3rem'
                                             ],
                                             'disabled' => $freq !== 'WEEKLY'
                                         ])
                                     ]); ?>
 
-                                    <?= Html::checkboxList(Html::getInputName($model, 'recurrence_pattern[BYDAY]'), $byDay, [
-                                        'MO' => Yii::t('simialbi/kanban/recurrence', 'Monday'),
-                                        'TU' => Yii::t('simialbi/kanban/recurrence', 'Tuesday'),
-                                        'WE' => Yii::t('simialbi/kanban/recurrence', 'Wednesday'),
-                                        'TH' => Yii::t('simialbi/kanban/recurrence', 'Thursday'),
-                                        'FR' => Yii::t('simialbi/kanban/recurrence', 'Friday'),
-                                        'SA' => Yii::t('simialbi/kanban/recurrence', 'Saturday'),
-                                        'SU' => Yii::t('simialbi/kanban/recurrence', 'Sunday')
-                                    ], [
-                                        'class' => ['form-inline', 'justify-content-around', 'flex-wrap', 'mt-3'],
-                                        'itemOptions' => [
-                                            'disabled' => $freq !== 'WEEKLY'
-                                        ]
-                                    ]); ?>
+                                    <?= Html::checkboxList(Html::getInputName($model, 'recurrence_pattern[BYDAY]'),
+                                        $byDay, [
+                                            'MO' => Yii::t('simialbi/kanban/recurrence', 'Monday'),
+                                            'TU' => Yii::t('simialbi/kanban/recurrence', 'Tuesday'),
+                                            'WE' => Yii::t('simialbi/kanban/recurrence', 'Wednesday'),
+                                            'TH' => Yii::t('simialbi/kanban/recurrence', 'Thursday'),
+                                            'FR' => Yii::t('simialbi/kanban/recurrence', 'Friday'),
+                                            'SA' => Yii::t('simialbi/kanban/recurrence', 'Saturday'),
+                                            'SU' => Yii::t('simialbi/kanban/recurrence', 'Sunday')
+                                        ], [
+                                            'class' => ['form-inline', 'justify-content-around', 'flex-wrap', 'mt-3'],
+                                            'itemOptions' => [
+                                                'disabled' => $freq !== 'WEEKLY'
+                                            ]
+                                        ]); ?>
                                 </div>
-                                <div id="recurrence-monthly"<?php if ($freq !== 'MONTHLY'): ?> style="display: none;"<?php endif; ?>>
+                                <div
+                                    id="recurrence-monthly"<?php if ($freq !== 'MONTHLY'): ?> style="display: none;"<?php endif; ?>>
                                     <?= Html::radioList('pseudo', ($byDay !== null) ? 1 : 0, [
-                                        Yii::t('simialbi/kanban/recurrence', 'Day {input1} of every {input2} month(s).', [
-                                            'input1' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[BYMONTHDAY]'), $byMonthDay, [
-                                                'class' => ['form-control', 'form-control-sm', 'mx-1'],
-                                                'style' => [
-                                                    'width' =>  '3rem'
-                                                ],
-                                                'disabled' => $byDay !== null || $freq !== 'MONTHLY'
+                                        Yii::t('simialbi/kanban/recurrence', 'Day {input1} of every {input2} month(s).',
+                                            [
+                                                'input1' => Html::textInput(Html::getInputName($model,
+                                                    'recurrence_pattern[BYMONTHDAY]'), $byMonthDay, [
+                                                    'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                    'style' => [
+                                                        'width' => '3rem'
+                                                    ],
+                                                    'disabled' => $byDay !== null || $freq !== 'MONTHLY'
+                                                ]),
+                                                'input2' => Html::textInput(Html::getInputName($model,
+                                                    'recurrence_pattern[INTERVAL]'), $interval, [
+                                                    'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                    'style' => [
+                                                        'width' => '3rem'
+                                                    ],
+                                                    'disabled' => $byDay !== null || $freq !== 'MONTHLY'
+                                                ])
                                             ]),
-                                            'input2' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), $interval, [
-                                                'class' => ['form-control', 'form-control-sm', 'mx-1'],
-                                                'style' => [
-                                                    'width' =>  '3rem'
-                                                ],
-                                                'disabled' => $byDay !== null || $freq !== 'MONTHLY'
-                                            ])
-                                        ]),
-                                        Yii::t('simialbi/kanban/recurrence', 'The {input1} {input2} of every {input3} month(s)', [
-                                            'input1' => Html::dropDownList(
-                                                Html::getInputName($model, 'recurrence_pattern[BYDAY][int]'),
-                                                $byDayInt,
-                                                [
-                                                    '1' => Yii::t('simialbi/kanban/recurrence', 'first'),
-                                                    '2' => Yii::t('simialbi/kanban/recurrence', 'second'),
-                                                    '3' => Yii::t('simialbi/kanban/recurrence', 'third'),
-                                                    '4' => Yii::t('simialbi/kanban/recurrence', 'fourth'),
-                                                    '5' => Yii::t('simialbi/kanban/recurrence', 'fifth'),
-                                                    '-1' => Yii::t('simialbi/kanban/recurrence', 'last')
-                                                ],
-                                                [
+                                        Yii::t('simialbi/kanban/recurrence',
+                                            'The {input1} {input2} of every {input3} month(s)', [
+                                                'input1' => Html::dropDownList(
+                                                    Html::getInputName($model, 'recurrence_pattern[BYDAY][int]'),
+                                                    $byDayInt,
+                                                    [
+                                                        '1' => Yii::t('simialbi/kanban/recurrence', 'first'),
+                                                        '2' => Yii::t('simialbi/kanban/recurrence', 'second'),
+                                                        '3' => Yii::t('simialbi/kanban/recurrence', 'third'),
+                                                        '4' => Yii::t('simialbi/kanban/recurrence', 'fourth'),
+                                                        '5' => Yii::t('simialbi/kanban/recurrence', 'fifth'),
+                                                        '-1' => Yii::t('simialbi/kanban/recurrence', 'last')
+                                                    ],
+                                                    [
+                                                        'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                        'disabled' => $byDay === null || $freq !== 'MONTHLY'
+                                                    ]
+                                                ),
+                                                'input2' => Html::dropDownList(
+                                                    Html::getInputName($model, 'recurrence_pattern[BYDAY][string]'),
+                                                    $byDayString,
+                                                    [
+                                                        'MO' => Yii::t('simialbi/kanban/recurrence', 'Monday'),
+                                                        'TU' => Yii::t('simialbi/kanban/recurrence', 'Tuesday'),
+                                                        'WE' => Yii::t('simialbi/kanban/recurrence', 'Wednesday'),
+                                                        'TH' => Yii::t('simialbi/kanban/recurrence', 'Thursday'),
+                                                        'FR' => Yii::t('simialbi/kanban/recurrence', 'Friday'),
+                                                        'SA' => Yii::t('simialbi/kanban/recurrence', 'Saturday'),
+                                                        'SU' => Yii::t('simialbi/kanban/recurrence', 'Sunday')
+                                                    ],
+                                                    [
+                                                        'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                        'disabled' => $byDay === null || $freq !== 'MONTHLY'
+                                                    ]
+                                                ),
+                                                'input3' => Html::textInput(Html::getInputName($model,
+                                                    'recurrence_pattern[INTERVAL]'), $interval, [
                                                     'class' => ['form-control', 'form-control-sm', 'mx-1'],
+                                                    'style' => [
+                                                        'width' => '3rem'
+                                                    ],
                                                     'disabled' => $byDay === null || $freq !== 'MONTHLY'
-                                                ]
-                                            ),
-                                            'input2' => Html::dropDownList(
-                                                Html::getInputName($model, 'recurrence_pattern[BYDAY][string]'),
-                                                $byDayString,
-                                                [
-                                                    'MO' => Yii::t('simialbi/kanban/recurrence', 'Monday'),
-                                                    'TU' => Yii::t('simialbi/kanban/recurrence', 'Tuesday'),
-                                                    'WE' => Yii::t('simialbi/kanban/recurrence', 'Wednesday'),
-                                                    'TH' => Yii::t('simialbi/kanban/recurrence', 'Thursday'),
-                                                    'FR' => Yii::t('simialbi/kanban/recurrence', 'Friday'),
-                                                    'SA' => Yii::t('simialbi/kanban/recurrence', 'Saturday'),
-                                                    'SU' => Yii::t('simialbi/kanban/recurrence', 'Sunday')
-                                                ],
-                                                [
-                                                    'class' => ['form-control', 'form-control-sm', 'mx-1'],
-                                                    'disabled' => $byDay === null || $freq !== 'MONTHLY'
-                                                ]
-                                            ),
-                                            'input3' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), $interval, [
-                                                'class' => ['form-control', 'form-control-sm', 'mx-1'],
-                                                'style' => [
-                                                    'width' =>  '3rem'
-                                                ],
-                                                'disabled' => $byDay === null || $freq !== 'MONTHLY'
+                                                ])
                                             ])
-                                        ])
                                     ], [
                                         'class' => ['multiple-choices'],
                                         'encode' => false,
@@ -438,9 +497,11 @@ Frame::begin([
                                         ]
                                     ]); ?>
                                 </div>
-                                <div id="recurrence-yearly"<?php if ($freq !== 'YEARLY'): ?> style="display: none;"<?php endif; ?>>
+                                <div
+                                    id="recurrence-yearly"<?php if ($freq !== 'YEARLY'): ?> style="display: none;"<?php endif; ?>>
                                     <?= Yii::t('simialbi/kanban/recurrence', 'Recur every {input} year(s)', [
-                                        'input' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[INTERVAL]'), $interval, [
+                                        'input' => Html::textInput(Html::getInputName($model,
+                                            'recurrence_pattern[INTERVAL]'), $interval, [
                                             'class' => ['form-control', 'form-control-sm', 'mx-1'],
                                             'style' => [
                                                 'display' => 'inline-block',
@@ -452,7 +513,8 @@ Frame::begin([
                                     ]); ?>
                                     <?= Html::radioList('pseudo', $byMonth === null ? 0 : 1, [
                                         Yii::t('simialbi/kanban/recurrence', 'On: {input1} {input2}', [
-                                            'input1' => Html::textInput(Html::getInputName($model, 'recurrence_pattern[BYMONTHDAY]'), $byMonthDay, [
+                                            'input1' => Html::textInput(Html::getInputName($model,
+                                                'recurrence_pattern[BYMONTHDAY]'), $byMonthDay, [
                                                 'class' => ['form-control', 'form-control-sm', 'mx-1'],
                                                 'style' => [
                                                     'width' => '3rem'
@@ -569,7 +631,8 @@ Frame::begin([
                             <?= Html::textInput('', $model->responsible_id ? $model->responsible->fullname : null, [
                                 'id' => 'task-responsible_id-dummy',
                                 'class' => [
-                                    'form-control', 'form-control-sm'
+                                    'form-control',
+                                    'form-control-sm'
                                 ],
                                 'data' => [
                                     'toggle' => 'dropdown'
@@ -624,7 +687,8 @@ Frame::begin([
                                 ]
                             ]); ?>
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" <?=($isAutor ? 'onclick="window.sa.kanban.removeResponsible();"' : 'disabled')?>>
+                                <button class="btn btn-outline-secondary"
+                                        type="button" <?= ($isAutor ? 'onclick="window.sa.kanban.removeResponsible();"' : 'disabled') ?>>
                                     <?= FAS::i('times') ?>
                                 </button>
                             </div>
@@ -713,7 +777,8 @@ Frame::begin([
                             ); ?>
                             <?= Flatpickr::widget([
                                 'name' => 'checklist[' . $checklistElement->id . '][end_date]',
-                                'value' => $checklistElement->end_date ? Yii::$app->formatter->asDate($checklistElement->end_date, 'dd.MM.yyyy') : null,
+                                'value' => $checklistElement->end_date ? Yii::$app->formatter->asDate($checklistElement->end_date,
+                                    'dd.MM.yyyy') : null,
                                 'id' => 'task-' . $model->id . '-ce-' . $checklistElement->id . '-end-date',
                                 'customAssetBundle' => false,
                                 'options' => [
@@ -763,8 +828,8 @@ Frame::begin([
                             'clientOptions' => [
                                 'minDate' => 'today',
                                 'maxDate' => ($model->end_date)
-                                        ? Yii::$app->formatter->asTimestamp($model->end_date) * 1000
-                                        : null
+                                    ? Yii::$app->formatter->asTimestamp($model->end_date) * 1000
+                                    : null
                             ]
                         ]); ?>
                         <div class="input-group-append">
@@ -812,13 +877,14 @@ Frame::begin([
                         'inline' => true,
                         'class' => 'custom-control-input'
                     ]); ?>
-                    <?= Html::a(FAS::i('trash-alt'), ['attachment/delete', 'id' => $attachment->id, 'readonly' => $readonly], [
-                        'class' => ['remove-attachment'],
-                        'data' => [
-                            'turbo' => 'true',
-                            'turbo-frame' => 'task-' . $model->id . '-update-frame'
-                        ]
-                    ]); ?>
+                    <?= Html::a(FAS::i('trash-alt'),
+                        ['attachment/delete', 'id' => $attachment->id, 'readonly' => $readonly], [
+                            'class' => ['remove-attachment'],
+                            'data' => [
+                                'turbo' => 'true',
+                                'turbo-frame' => 'task-' . $model->id . '-update-frame'
+                            ]
+                        ]); ?>
                     <?php $i++; ?>
                 </div>
             <?php endforeach; ?>

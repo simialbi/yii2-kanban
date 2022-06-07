@@ -106,7 +106,7 @@ class Task extends ActiveRecord
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'start_date'],
             ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
-            ['percentage_done', 'integer', 'min' => 0, 'max' => 100],
+            ['percentage_done', 'match', 'pattern' => '#^\d+ ?%?$#'],
             [['description'], 'string'],
             [['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'], 'boolean'],
 
@@ -232,6 +232,7 @@ class Task extends ActiveRecord
             'status' => Yii::t('simialbi/kanban/model/task', 'Status'),
             'start_date' => Yii::t('simialbi/kanban/model/task', 'Start date'),
             'end_date' => Yii::t('simialbi/kanban/model/task', 'End date'),
+            'percentage_done' => Yii::t('simialbi/kanban/model/task', 'Percentage done'),
             'is_recurring' => Yii::t('simialbi/kanban/model/task', 'Is recurring'),
             'recurrence_pattern' => Yii::t('simialbi/kanban/model/task', 'Recurrence'),
             'description' => Yii::t('simialbi/kanban/model/task', 'Description'),

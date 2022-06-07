@@ -59,7 +59,7 @@ class PlanController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'schedule', 'chart']
+                        'actions' => ['index', 'schedule', 'chart', 'gantt']
                     ],
                     [
                         'allow' => true,
@@ -195,6 +195,36 @@ class PlanController extends Controller
     }
 
     /**
+     * Gantt view
+     *
+     * @param integer $id
+     * @return string
+     *
+     * @throws NotFoundHttpException
+     */
+    public function actionGantt($id)
+    {
+        $model = $this->findModel($id);
+
+        $users = [];
+        /** @var \simialbi\yii2\models\UserInterface $user */
+        foreach ($this->module->users as $user) {
+            $users[] = ['id' => $user->getId(), 'name' => $user->getName()];
+        }
+        $tasks = [];
+        foreach ($model->tasks as $task) {
+
+        }
+
+        return $this->render('gantt', [
+            'model' => $model,
+            'users' => $users
+        ]);
+    }
+
+    /**
+     * Chart view
+     *
      * @param integer $id
      *
      * @return string

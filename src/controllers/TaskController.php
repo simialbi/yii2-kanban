@@ -298,13 +298,13 @@ class TaskController extends Controller
             $newAttachments = UploadedFile::getInstancesByName('attachments');
             $links = Yii::$app->request->getBodyParam('link', []);
             $newLinkElements = ArrayHelper::remove($links, 'new', []);
+            $dependencies = Yii::$app->request->getBodyParam('dependencies', []);
 
             ChecklistElement::deleteAll([
                 'and',
                 ['task_id' => $model->id],
                 ['not', ['id' => array_keys($checklistElements)]]
             ]);
-
             foreach ($checklistElements as $id => $checklistElement) {
                 $element = ChecklistElement::findOne($id);
                 if (!$element) {
@@ -347,6 +347,13 @@ class TaskController extends Controller
                     'task' => $model,
                     'user' => ArrayHelper::getValue($this->module->users, $assigneeId)
                 ]));
+            }
+            $model->unlinkAll('dependencies');
+            foreach ($dependencies as $dependency) {
+                $dependency = Task::findOne($dependency);
+                if ($dependency) {
+                    $model->link('dependencies', $dependency);
+                }
             }
 
             if ($comment) {
@@ -496,7 +503,11 @@ class TaskController extends Controller
             ->where(['board_id' => $model->board->id])
             ->indexBy('id')
             ->column();
-
+        $tasks = $model->board->getTasks()
+            ->where(['not', ['id' => $model->id]])
+            ->andWhere(['not', ['id' => ArrayHelper::getColumn($model->dependencies, 'id')]])
+            ->orderBy(['subject' => SORT_ASC])
+            ->all();
         if ($model->start_date !== null) {
             $model->start_date = Yii::$app->formatter->asDate($model->start_date);
         }
@@ -514,7 +525,8 @@ class TaskController extends Controller
             'updateSeries' => $updateSeries,
             'statuses' => $statuses,
             'return' => $return,
-            'readonly' => $readonly
+            'readonly' => $readonly,
+            'tasks' => $tasks
         ]);
     }
 

@@ -8,7 +8,7 @@ namespace simialbi\yii2\kanban\migrations;
 
 use yii\db\Migration;
 
-class m220603_initialize_project extends Migration
+class m220603_111502_initialize_project extends Migration
 {
     /**
      * {@inheritDoc}
@@ -24,7 +24,7 @@ class m220603_initialize_project extends Migration
         $this->createTable('{{%kanban__task_dependency}}', [
             'parent_id' => $this->integer()->unsigned()->notNull(),
             'dependant_id' => $this->integer()->unsigned()->notNull(),
-            'PRIMARY ([[parent_id]], [[dependant_id]])'
+            'PRIMARY KEY ([[parent_id]], [[dependant_id]])'
         ]);
 
         $this->addForeignKey(
