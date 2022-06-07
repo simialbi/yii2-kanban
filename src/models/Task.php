@@ -33,6 +33,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $status
  * @property integer|string|\DateTime $start_date
  * @property integer|string|\DateTime $end_date
+ * @property integer $percentage_done
  * @property string|Rule $recurrence_pattern
  * @property integer $recurrence_parent_id
  * @property boolean $is_recurring
@@ -68,6 +69,8 @@ use yii\helpers\ArrayHelper;
  * @property-read Ticket $ticket
  * @property-read Task $recurrenceParent
  * @property-read UserInterface $responsible
+ * @property-read Task[] $dependants
+ * @property-read Task[] $dependencies
  */
 class Task extends ActiveRecord
 {
@@ -103,6 +106,7 @@ class Task extends ActiveRecord
             ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
             ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'start_date'],
             ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
+            ['percentage_done', 'integer', 'min' => 0, 'max' => 100],
             [['description'], 'string'],
             [['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'], 'boolean'],
 
@@ -568,5 +572,27 @@ class Task extends ActiveRecord
     public function getResponsible()
     {
         return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->responsible_id);
+    }
+
+    /**
+     * Get dependant tasks
+     * @return \yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getDependants()
+    {
+        return $this->hasMany(Task::class, ['id' => 'parent_id'])
+            ->viaTable('{{%kanban__task_dependency}}', ['dependant_id' => 'id']);
+    }
+
+    /**
+     * Get dependency tasks
+     * @return \yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getDependencies()
+    {
+        return $this->hasMany(Task::class, ['id' => 'dependant_id'])
+            ->viaTable('{{%kanban__task_dependency}}', ['parent_id' => 'id']);
     }
 }
