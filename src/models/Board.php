@@ -11,6 +11,7 @@ use simialbi\yii2\models\UserInterface;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\DbDependency;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\web\UploadedFile;
@@ -82,8 +83,12 @@ class Board extends ActiveRecord
             $id = Yii::$app->user->id;
         }
 
+        $dep = new DbDependency([
+            'sql' => 'SELECT COUNT([[id]]) FROM ' . static::tableName(),
+        ]);
+
         $query = static::find()
-            ->cache(60)
+            ->cache(60, $dep)
             ->alias('b')
             ->joinWith('assignments ba', false)
             ->joinWith('buckets.tasks.assignments ta', false)
