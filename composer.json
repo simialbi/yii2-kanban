@@ -1,33 +1,34 @@
 {
-	"name": "simialbi/yii2-kanban",
-	"type": "yii2-extension",
-	"description": "Kanban board module for yii2",
-	"keywords": [
-		"yii2",
-		"kanban",
-		"kanban board",
-		"timetable",
-		"todo",
-		"to do"
-	],
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "simialbi",
-			"email": "simi.albi@outlook.com"
-		}
-	],
-	"support": {
-		"source": "https://github.com/simialbi/yii2-kanban",
-		"issues": "https://github.com/simialbi/yii2-kanban/issues"
-	},
-	"minimum-stability": "beta",
-	"require": {
-		"php": ">=5.6",
-		"yiisoft/yii2": "^2.0.20",
+    "name": "simialbi/yii2-kanban",
+    "type": "yii2-extension",
+    "description": "Kanban board module for yii2",
+    "keywords": [
+        "yii2",
+        "kanban",
+        "kanban board",
+        "timetable",
+        "todo",
+        "to do"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "simialbi",
+            "email": "simi.albi@outlook.com"
+        }
+    ],
+    "support": {
+        "source": "https://github.com/simialbi/yii2-kanban",
+        "issues": "https://github.com/simialbi/yii2-kanban/issues"
+    },
+    "minimum-stability": "beta",
+    "require": {
+        "php": ">=5.6",
+        "yiisoft/yii2": "^2.0.20",
         "yiisoft/yii2-bootstrap4": "^2.0.4",
         "arogachev/yii2-sortable": "^0.1.6",
         "bower-asset/fullcalendar": "4.2.*",
+        "creocoder/yii2-nested-sets": "^0.9",
         "fortawesome/font-awesome": "^5.12.0",
         "kartik-v/yii2-widget-fileinput": "^1.0.9",
         "npm-asset/highlight.js": "^9.18.1",
@@ -41,44 +42,44 @@
         "simialbi/yii2-widget-turbo": "^1.0.0",
         "simshaun/recurr": "^5.0.0"
     },
-	"require-dev": {
+    "require-dev": {
         "ext-gd": "*",
         "ext-mbstring": "*",
         "codeception/module-asserts": "^2.0.1",
         "codeception/module-filesystem": "^2.0.1",
         "codeception/module-yii2": "^1.0",
         "simialbi/yii2-ticket": "~1.0@dev",
-		"yiisoft/yii2-coding-standards": "~2.0",
+        "yiisoft/yii2-coding-standards": "~2.0",
         "yiisoft/yii2-symfonymailer": "^2.0.3"
-	},
+    },
     "suggest": {
         "ext-gd": "For autogeneration of visualisations",
         "ext-mbstring": "For encoding conversion"
     },
-	"autoload": {
-		"psr-4": {
-			"simialbi\\yii2\\kanban\\": "src"
-		}
-	},
-	"autoload-dev": {
-		"psr-4": {
-			"simialbi\\extensions\\kanban\\": "tests"
-		}
-	},
-	"repositories": [
-		{
-			"type": "composer",
-			"url": "https://asset-packagist.org"
-		}
-	],
-	"extra": {
-		"branch-alias": {
-			"dev-master": "1.0.x-dev"
-		}
-	},
-	"config": {
-		"allow-plugins": {
-			"yiisoft/yii2-composer": true
-		}
-	}
+    "autoload": {
+        "psr-4": {
+            "simialbi\\yii2\\kanban\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "simialbi\\extensions\\kanban\\": "tests"
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.0.x-dev"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true
+        }
+    }
 }

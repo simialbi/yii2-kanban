@@ -56,6 +56,13 @@ $action = Yii::$app->controller->action->id;
         <?= Nav::widget([
             'items' => [
                 [
+                    'label' => Yii::t('simialbi/kanban/plan', 'Gantt'),
+                    'url' => ['gantt', 'id' => $model->id],
+                    'linkOptions' => [],
+                    'active' => $action === 'grid',
+                    'visible' => !$readonly
+                ],
+                [
                     'label' => Yii::t('simialbi/kanban/plan', 'Board'),
                     'url' => ['view', 'id' => $model->id],
                     'linkOptions' => [],

@@ -155,6 +155,37 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             return slider;
         },
         /**
+         *
+         * @param {int} id
+         */
+        addDependency: function (id) {
+            var $this = $(this);
+            var $dependencies = $('#task-dependencies');
+            var style = '';
+            if ($this.data('done')) {
+                style = ' style="text-decoration: line-through;"';
+            }
+            var $dependency = $(
+                '<a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"' + style +
+                '   href="javascript:;" onclick="window.sa.kanban.removeDependency.call(this);"' +
+                '>\n' +
+                '<input type="hidden" name="dependencies[]" value="' + id + '">\n' +
+                $this.data('subject') + '\n' +
+                '<span class="badge badge-light">\n' +
+                $this.data('endDate') + '\n' +
+                '</span>\n' +
+                '</a>'
+            );
+            $dependencies.append($dependency);
+            $this.remove();
+        },
+        /**
+         * Remove dependency
+         */
+        removeDependency: function () {
+            $(this).remove();
+        },
+        /**
          * Add assignee
          * @param {string} id
          */
@@ -210,7 +241,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         /**
          * remove responsible person
          */
-        removeResponsible: function() {
+        removeResponsible: function () {
             var id = $('#task-responsible_id').val();
             if (id) {
                 $('#task-responsible_id-dummy').val('');
@@ -275,11 +306,15 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             }
 
             var ignoreScrollEvents = false;
-            function syncScroll(element1, element2) {
+
+            function syncScroll(element1, element2)
+            {
                 element1.scroll(function () {
                     var ignore = ignoreScrollEvents
                     ignoreScrollEvents = false
-                    if (ignore) return
+                    if (ignore) {
+                        return
+                    }
 
                     ignoreScrollEvents = true
                     element2.scrollLeft(element1.scrollLeft())
