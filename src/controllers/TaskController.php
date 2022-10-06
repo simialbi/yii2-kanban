@@ -476,7 +476,8 @@ class TaskController extends Controller
                     'statuses' => $this->module->statuses,
                     'users' => $this->module->users,
                     'closeModal' => true,
-                    'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id')
+                    'finishedTasks' => $model->bucket->getTasks()->where(['status' => Task::STATUS_DONE])->count('id'),
+                    'readonly' => $readonly
                 ]);
             } elseif ($return === 'list-item') {
                 return $this->renderAjax('/task/list-item', [
