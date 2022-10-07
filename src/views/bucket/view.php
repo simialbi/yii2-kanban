@@ -20,7 +20,7 @@ if (!isset($closeModal)) {
 Frame::begin([
     'options' => [
         'id' => 'bucket-' . $model->id . '-frame',
-        'class' => ['kanban-bucket', 'mr-md-4', 'pb-6', 'pb-md-0', 'd-flex', 'flex-column', 'flex-shrink-0'],
+        'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
         'data' => ['id' => $model->id, 'action' => 'change-parent', 'key-name' => 'bucket_id', 'sort' => 'true']
     ]
 ]);

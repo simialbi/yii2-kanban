@@ -295,7 +295,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                 syncScroll($bottomScrollBar, $topScrollBar);
             } else {
                 slider = new Swiper('.kanban-bottom-scrollbar', {
-                    wrapperClass: 'kanban-plan-sortable',
+                    wrapperClass: 'sw-wrapper',
                     slideClass: 'kanban-bucket',
                     navigation: {
                         nextEl: '.kanban-button-next',

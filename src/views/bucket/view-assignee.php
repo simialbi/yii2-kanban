@@ -17,7 +17,7 @@ use yii\helpers\Url;
 Frame::begin([
     'options' => [
         'id' => 'bucket-assignee-' . $id . '-frame',
-        'class' => ['kanban-bucket', 'mr-md-4', 'pb-6', 'pb-md-0', 'd-flex', 'flex-column', 'flex-shrink-0'],
+        'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
         'data' => ['id' => $id, 'action' => 'change-assignee', 'key-name' => 'user_id', 'sort' => 'false']
     ]
 ]);

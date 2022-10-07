@@ -169,7 +169,7 @@ Frame::begin([
                 <?php endif; ?>
                 <?php if ($model->endDate): ?>
                     <?php $options = [
-                        'class' => ['btn', 'btn-sm', 'mr-3', 'px-0', 'position-relative'],
+                        'class' => ['btn', 'btn-sm', 'mr-3', 'px-0', 'position-relative', 'd-none', 'd-md-block'],
                         'style' => ['z-index' => '1'],
                         'onClick' => new JsExpression('document.querySelector(\'#task-end_date-' . ($model->isRecurrentInstance() ? $model->recurrence_parent_id : $model->id) . '\')._flatpickr.open()')
                     ]; ?>

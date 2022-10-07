@@ -114,7 +114,7 @@ Frame::begin([
                     <div class="d-flex flex-row kanban-plan-sortable">
                         <?php foreach ($tasks as $userId => $userTasks): ?>
                             <?php if (isset($users[$userId])): ?>
-                                <div class="kanban-bucket mr-md-4 pb-6 pb-md-0 d-flex flex-column flex-shrink-0">
+                                <div class="kanban-bucket mr-md-4 d-flex flex-column flex-shrink-0">
                                     <?= $this->render('/bucket/_header', [
                                         'id' => $userId,
                                         'title' => $this->render('_user', [

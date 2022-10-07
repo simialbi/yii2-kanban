@@ -8,7 +8,7 @@ use yii\helpers\Url;
 /* @var $model \simialbi\yii2\kanban\models\Board */
 /* @var $readonly boolean */
 
-echo Html::beginTag('div', ['class' => ['d-flex', 'flex-row']]);
+echo Html::beginTag('div', ['class' => ['d-flex', 'flex-row', 'sw-wrapper']]);
 
 $query = $model->getTasks()
     ->alias('t')
@@ -22,7 +22,7 @@ foreach ($query->column() as $id) {
         'options' => [
             'id' => 'bucket-status-' . $id . '-frame',
             'src' => Url::to(['bucket/view-status', 'status' => $id, 'boardId' => $model->id, 'readonly' => $readonly]),
-            'class' => ['kanban-bucket', 'mr-md-4', 'pb-6', 'pb-md-0', 'd-flex', 'flex-column', 'flex-shrink-0'],
+            'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
             'data' => ['id' => $id, 'action' => 'change-status', 'key-name' => 'status', 'sort' => 'false']
         ]
     ]);

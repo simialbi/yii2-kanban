@@ -16,7 +16,7 @@ Frame::begin([
     ]
 ]);
 ?>
-<div class="kanban-bucket-header d-flex flex-row align-items-center <?php if ($renderButtons && !$readonly) : ?>draggable<?php endif; ?>">
+<div class="kanban-bucket-header d-flex flex-row align-items-center mb-2 mb-md-0 <?php if ($renderButtons && !$readonly) : ?>draggable<?php endif; ?>">
     <h5 class="m-0 mx-auto mx-md-0"><?= $title; ?></h5>
     <?=FAS::i('arrows-alt', [
         'class' => ['ml-auto', 'kanban-bucket-sort-handle', 'd-none', 'd-md-block']

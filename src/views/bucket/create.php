@@ -13,7 +13,7 @@ Frame::begin([
         'id' => 'create-bucket-frame'
     ]
 ]); ?>
-<div class="kanban-bucket" data-id="<?= $model->id; ?>">
+<div data-id="<?= $model->id; ?>">
     <?php $form = ActiveForm::begin([
         'action' => ['bucket/create', 'boardId' => $model->board_id],
         'id' => 'sa-kanban-create-bucket-form',

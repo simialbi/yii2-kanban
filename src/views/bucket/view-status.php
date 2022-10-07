@@ -18,7 +18,7 @@ if (!isset($closeModal)) {
 Frame::begin([
     'options' => [
         'id' => 'bucket-status-' . $status . '-frame',
-        'class' => ['kanban-bucket', 'mr-md-4', 'pb-6', 'pb-md-0', 'd-flex', 'flex-column', 'flex-shrink-0'],
+        'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
         'data' => ['id' => $status, 'action' => 'change-status', 'key-name' => 'status', 'sort' => 'false']
     ]
 ]);

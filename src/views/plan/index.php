@@ -20,7 +20,7 @@ $this->title = Yii::t('simialbi/kanban/plan', 'Kanban Hub');
 $this->params['breadcrumbs'] = [$this->title];
 ?>
 
-<div class="kanban-plan-index pb-6 pb-md-0 position-relative">
+<div class="kanban-plan-index position-relative">
     <h1><?= Html::encode($this->title); ?></h1>
 
     <?php $this->beginBlock('tab-hub'); ?>
