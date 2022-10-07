@@ -71,7 +71,8 @@ echo $this->render('_header', [
                 'src' => Url::to([
                     'bucket/view-assignee-finished',
                     'id' => $id,
-                    'boardId' => $boardId
+                    'boardId' => $boardId,
+                    'readonly' => $readonly
                 ])
             ],
             'lazyLoading' => true,

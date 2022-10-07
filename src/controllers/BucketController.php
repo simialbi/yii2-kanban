@@ -177,7 +177,7 @@ class BucketController extends Controller
      * @return string
      * @throws \Exception
      */
-    public function actionViewAssigneeFinished($boardId, $id = null)
+    public function actionViewAssigneeFinished($boardId, $id = null, $readonly = false)
     {
         $query = Task::find()
             ->alias('t')
@@ -197,7 +197,8 @@ class BucketController extends Controller
             'tasks' => $query->all(),
             'user' => ArrayHelper::getValue($this->module->users, $id),
             'statuses' => $this->module->statuses,
-            'users' => $this->module->users
+            'users' => $this->module->users,
+            'readonly' => $readonly
         ]);
     }
 

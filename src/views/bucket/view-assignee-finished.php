@@ -9,6 +9,7 @@ use simialbi\yii2\turbo\Frame;
 /* @var $user array|null */
 /* @var $users array */
 /* @var $statuses array */
+/* @var $readonly boolean */
 
 Frame::begin([
     'options' => [
@@ -23,7 +24,8 @@ foreach ($tasks as $task) {
         'model' => $task,
         'statuses' => $statuses,
         'users' => $users,
-        'closeModal' => false
+        'closeModal' => false,
+        'readonly' => $readonly
     ]);
 }
 
