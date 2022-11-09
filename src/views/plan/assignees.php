@@ -4,6 +4,7 @@ use simialbi\yii2\hideseek\HideSeek;
 use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
+use yii\web\JsExpression;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Board */
@@ -123,10 +124,16 @@ Frame::begin([
                 ]));
 
                 echo Dropdown::widget([
+                    'id' => 'dropdown-plan-assignees-' . $model->id,
                     'items' => $items,
                     'encodeLabels' => false,
                     'options' => [
                         'class' => ['kanban-plan-assignees-dropdown', 'w-100']
+                    ],
+                    'clientEvents' => [
+                        'shown.bs.dropdown' => new JsExpression('function(e) {
+                            $(e.target).closest(".dropdown").find(".search-field input").trigger("focus");
+                        }'),
                     ]
                 ]);
             }

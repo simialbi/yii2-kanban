@@ -6,6 +6,7 @@ use simialbi\yii2\hideseek\HideSeek;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
+use yii\web\JsExpression;
 
 /* @var $this \yii\web\View */
 /* @var $board \simialbi\yii2\kanban\models\Board */
@@ -145,6 +146,11 @@ $form = ActiveForm::begin([
                         'encodeLabels' => false,
                         'options' => [
                             'class' => ['kanban-create-task-assignees', 'w-100']
+                        ],
+                        'clientEvents' => [
+                            'shown.bs.dropdown' => new JsExpression('function(e) {
+                                $(e.target).closest(".dropdown").find(".search-field input").trigger("focus");
+                            }'),
                         ]
                     ]); ?>
                 </div>

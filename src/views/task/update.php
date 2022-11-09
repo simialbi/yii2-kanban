@@ -14,6 +14,7 @@ use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
 use yii\helpers\ReplaceArrayValue;
 use yii\helpers\Url;
+use yii\web\JsExpression;
 use yii\widgets\MaskedInput;
 
 /* @var $this \yii\web\View */
@@ -237,10 +238,16 @@ Frame::begin([
                             ]));
                             ?>
                             <?= Dropdown::widget([
+                                'id' => 'dropdown-assignees-' . $model->id,
                                 'items' => $items,
                                 'encodeLabels' => false,
                                 'options' => [
                                     'class' => ['kanban-assignees', 'w-100']
+                                ],
+                                'clientEvents' => [
+                                    'shown.bs.dropdown' => new JsExpression('function(e) {
+                                        $(e.target).closest(".dropdown").find(".search-field input").trigger("focus");
+                                    }'),
                                 ]
                             ]); ?>
                         </div>
@@ -680,10 +687,16 @@ Frame::begin([
                             ]));
                             ?>
                             <?= Dropdown::widget([
+                                'id' => 'responsible-dropdown-' . $model->id,
                                 'items' => $items,
                                 'encodeLabels' => false,
                                 'options' => [
                                     'class' => ['kanban-responsible', 'w-100']
+                                ],
+                                'clientEvents' => [
+                                    'shown.bs.dropdown' => new JsExpression('function(e) {
+                                        $(e.target).closest(".dropdown").find(".search-field input").trigger("focus");
+                                    }'),
                                 ]
                             ]); ?>
                             <div class="input-group-append">

@@ -556,10 +556,16 @@ Frame::begin([
                         ]));
                         ?>
                         <?= Dropdown::widget([
+                            'id' => 'dropdown-item-' . $model->id,
                             'items' => $items,
                             'encodeLabels' => false,
                             'options' => [
                                 'class' => ['kanban-footer-task-assignees-' . $model->hash, 'w-100']
+                            ],
+                            'clientEvents' => [
+                                'shown.bs.dropdown' => new JsExpression('function(e) {
+                                    $(e.target).closest(".dropdown").find(".search-field input").trigger("focus");
+                                }'),
                             ]
                         ]); ?>
                     </div>

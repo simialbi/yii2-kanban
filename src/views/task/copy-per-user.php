@@ -6,6 +6,7 @@ use simialbi\yii2\turbo\Frame;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Dropdown;
 use yii\bootstrap4\Html;
+use yii\web\JsExpression;
 
 /* @var $this \yii\web\View */
 /* @var $model \simialbi\yii2\kanban\models\Task */
@@ -149,11 +150,17 @@ if ($group !== 'assignee') {
                             ]));
                             ?>
                             <?= Dropdown::widget([
+                                'id' => 'dropdown-copy-per-user',
                                 'items' => $items,
                                 'encodeLabels' => false,
                                 'options' => [
                                     'id' => 'kanban-copy-task-per-user-dropdown',
                                     'class' => ['kanban-assignees', 'w-100']
+                                ],
+                                'clientEvents' => [
+                                    'shown.bs.dropdown' => new JsExpression('function(e) {
+                                        $(e.target).closest(".dropdown").find(".search-field input").trigger("focus");
+                                    }'),
                                 ]
                             ]); ?>
                         </div>
