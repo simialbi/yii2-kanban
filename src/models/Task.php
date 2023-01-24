@@ -418,7 +418,7 @@ class Task extends ActiveRecord
         }
         /** @var ChecklistElement[] $checklistElements */
         $grouped = ArrayHelper::index(
-            $this->getChecklistElements()->where(['not', ['end_date' => null]])->all(),
+            array_filter($this->checklistElements, function($item) {return $item->end_date != null;}),
             null,
             'is_done'
         );
