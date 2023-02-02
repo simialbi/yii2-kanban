@@ -20,6 +20,7 @@ use simialbi\yii2\kanban\Module;
 use simialbi\yii2\kanban\TaskEvent;
 use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\ticket\models\Ticket;
+use simialbi\yii2\ticket\models\Topic;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -433,22 +434,7 @@ class TaskController extends Controller
             }
 
             if ($hasStatusChanged) {
-                if ($model->ticket_id && ($ticket = $model->ticket)) {
-                    switch ($model->status) {
-                        case Task::STATUS_IN_PROGRESS:
-                            $ticket->status = Ticket::STATUS_IN_PROGRESS;
-                            break;
-                        case Task::STATUS_NOT_BEGUN:
-                        default:
-                            $ticket->status = Ticket::STATUS_OPEN;
-                            break;
-                        case Task::STATUS_DONE:
-                            $ticket->status = Ticket::STATUS_RESOLVED;
-                            break;
-                    }
-
-                    $ticket->save();
-                }
+                $this->setTicketStatus($model);
                 $this->module->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
                     'task' => $model,
                     'data' => $model->status
@@ -775,22 +761,7 @@ class TaskController extends Controller
 
         $model->refresh();
 
-        if ($model->ticket_id && ($ticket = $model->ticket)) {
-            switch ($model->status) {
-                case Task::STATUS_IN_PROGRESS:
-                    $ticket->status = Ticket::STATUS_IN_PROGRESS;
-                    break;
-                case Task::STATUS_NOT_BEGUN:
-                default:
-                    $ticket->status = Ticket::STATUS_OPEN;
-                    break;
-                case Task::STATUS_DONE:
-                    $ticket->status = Ticket::STATUS_RESOLVED;
-                    break;
-            }
-
-            $ticket->save();
-        }
+        $this->setTicketStatus($model);
 
         $this->module->trigger(Module::EVENT_TASK_STATUS_CHANGED, new TaskEvent([
             'task' => $model,
@@ -1013,6 +984,37 @@ class TaskController extends Controller
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+    }
+
+    /**
+     * @param Task $model
+     * @return void
+     * @throws \Exception
+     */
+    protected function setTicketStatus(Task $model)
+    {
+        if ($model->ticket_id && ($ticket = $model->ticket)) {
+
+            /** @var \simialbi\yii2\ticket\Module $module */
+            if ($module = Yii::$app->getModule('ticket')) {
+                $module->attachNotificationBehaviors(Topic::EVENT_ON_TICKET_RESOLUTION, $ticket);
+            }
+
+            switch ($model->status) {
+                case Task::STATUS_IN_PROGRESS:
+                    $ticket->status = Ticket::STATUS_IN_PROGRESS;
+                    break;
+                case Task::STATUS_NOT_BEGUN:
+                default:
+                    $ticket->status = Ticket::STATUS_OPEN;
+                    break;
+                case Task::STATUS_DONE:
+                    $ticket->status = Ticket::STATUS_RESOLVED;
+                    break;
+            }
+
+            $ticket->save();
         }
     }
 }
