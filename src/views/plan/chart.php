@@ -145,11 +145,15 @@ foreach ($statuses as $status => $label) {
                     <?= Yii::t('simialbi/kanban/chart', 'Assignee'); ?>
                 </h5>
                 <div class="card-body">
+                    <?php
+                    $height = 100;
+                    $height += count($barSeries) * 50;
+                    ?>
                     <?= LineChart::widget([
                         'options' => [
                             'style' => [
                                 'width' => '100%',
-                                'height' => '400px'
+                                'height' => $height . 'px'
                             ]
                         ],
                         'series' => $barSeries,
