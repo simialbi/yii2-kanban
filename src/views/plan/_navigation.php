@@ -2,15 +2,18 @@
 
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\hideseek\HideSeek;
-use yii\bootstrap4\ButtonDropdown;
-use yii\bootstrap4\Html;
-use yii\bootstrap4\Nav;
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\models\UserInterface;
+use yii\bootstrap5\ButtonDropdown;
+use yii\bootstrap5\Nav;
 use yii\web\JsExpression;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $boards \simialbi\yii2\kanban\models\Board[] */
-/* @var $model \simialbi\yii2\kanban\models\Board */
-/* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $this View */
+/* @var $boards Board[] */
+/* @var $model Board */
+/* @var $users UserInterface[] */
 /* @var $readonly boolean */
 
 $group = Yii::$app->request->getQueryParam('group', 'bucket');
@@ -27,7 +30,7 @@ $action = Yii::$app->controller->action->id;
                 </span>
             <?php endif; ?>
         </div>
-        <div class="ml-3">
+        <div class="ms-3">
             <h2 class="mb-0">
                 <?php if (empty($boards)): ?>
                     <?= Html::encode($model->name); ?>
@@ -35,18 +38,26 @@ $action = Yii::$app->controller->action->id;
                     <?php $items = []; ?>
                     <?php foreach ($boards as $board): ?>
                         <?php $items[] = [
-                            'label' => $board->name,
+                            'label' => $board->fullname,
                             'url' => ['plan/view', 'id' => $board->id]
                         ]; ?>
                     <?php endforeach; ?>
                     <?php echo ButtonDropdown::widget([
-                        'label' => $model->name,
+                        'label' => Html::tag('span', $model->fullName, [
+                            'class' => ['d-inline-block', 'text-truncate'],
+                            'style' => [
+                                'max-width' => '200px'
+                            ],
+                            'title' => $model->fullName
+                        ]),
+                        'encodeLabel' => false,
                         'id' => 'boardSwitchDropdown',
                         'buttonOptions' => [
                             'class' => ['widget' => 'bg-transparent', 'h2', 'm-0', 'p-0', 'border-0']
                         ],
                         'dropdown' => [
-                            'items' => $items
+                            'items' => $items,
+                            'encodeLabels' => false
                         ]
                     ]); ?>
                 <?php endif; ?>
@@ -55,13 +66,6 @@ $action = Yii::$app->controller->action->id;
         </div>
         <?= Nav::widget([
             'items' => [
-                [
-                    'label' => Yii::t('simialbi/kanban/plan', 'Gantt'),
-                    'url' => ['gantt', 'id' => $model->id],
-                    'linkOptions' => [],
-                    'active' => $action === 'grid',
-                    'visible' => !$readonly
-                ],
                 [
                     'label' => Yii::t('simialbi/kanban/plan', 'Board'),
                     'url' => ['view', 'id' => $model->id],
@@ -83,7 +87,7 @@ $action = Yii::$app->controller->action->id;
                 ]
             ],
             'options' => [
-                'class' => ['nav-pills', 'ml-5']
+                'class' => ['nav-pills', 'ms-5']
             ]
         ]); ?>
     </div>
@@ -98,22 +102,29 @@ $action = Yii::$app->controller->action->id;
             <?php endif; ?>
             <?php if ($action === 'view'): ?>
                 <?= HideSeek::widget([
-                    'fieldTemplate' => '<div class="search-field mr-auto mr-md-0 flex-grow-1">{input}</div>',
+                    'fieldTemplate' => '<div class="search-field me-auto me-md-0 flex-grow-1">{input}</div>',
                     'options' => [
                         'id' => 'search-tasks-widget',
-                        'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                        'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword'),
+                        'style' => [
+                            'min-width' => '150px'
+                        ]
                     ],
                     'clientOptions' => [
-                        'list' => '.kanban-tasks',
+                        'list' => '.kanban-tasks, .finished-tasks',
+                        'ignore' => '.finished-tasks, a, script',
                         'attribute' => 'alt'
                     ],
                 ]); ?>
             <?php elseif ($action === 'schedule'): ?>
                 <?= HideSeek::widget([
-                    'fieldTemplate' => '<div class="search-field mr-auto mr-md-0 flex-grow-1">{input}</div>',
+                    'fieldTemplate' => '<div class="search-field me-auto me-md-0 flex-grow-1">{input}</div>',
                     'options' => [
                         'id' => 'search-tasks-widget',
-                        'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
+                        'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword'),
+                        'style' => [
+                            'min-width' => '150px'
+                        ]
                     ],
                     'clientOptions' => [
                         'list' => '.kanban-tasks'
@@ -147,7 +158,7 @@ $action = Yii::$app->controller->action->id;
                     ),
                     'encodeLabel' => false,
                     'buttonOptions' => [
-                        'class' => ['btn-outline-secondary', 'ml-2']
+                        'class' => ['btn-outline-secondary', 'ms-2']
                     ],
                     'dropdown' => [
                         'options' => [

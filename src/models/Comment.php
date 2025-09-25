@@ -7,10 +7,12 @@
 
 namespace simialbi\yii2\kanban\models;
 
+use simialbi\yii2\kanban\Module;
 use simialbi\yii2\models\UserInterface;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -18,11 +20,12 @@ use yii\helpers\ArrayHelper;
  * Class Comment
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
- * @property integer $task_id
+ * @property int $id
+ * @property int $task_id
  * @property string $text
- * @property integer|string $created_by
- * @property integer|string $created_at
+ * @property int|string $created_by
+ * @property int|string $created_at
+ * @property int $sync_id
  *
  * @property-read UserInterface $author
  * @property-read Task $task
@@ -34,7 +37,7 @@ class Comment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__comment}}';
     }
@@ -42,11 +45,12 @@ class Comment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'task_id'], 'integer'],
             ['text', 'string'],
+            ['sync_id', 'string', 'max' => 255],
 
             [['task_id', 'text'], 'required']
         ];
@@ -55,7 +59,7 @@ class Comment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'blameable' => [
@@ -76,7 +80,7 @@ class Comment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/comment', 'Id'),
@@ -90,35 +94,36 @@ class Comment extends ActiveRecord
     /**
      * Get author
      * @return UserInterface
+     * @throws \Exception
      */
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->created_by);
     }
 
     /**
      * Get associated task
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getTask()
+    public function getTask(): ActiveQuery
     {
         return $this->hasOne(Task::class, ['id' => 'task_id']);
     }
 
     /**
      * Get associated bucket
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getBucket()
+    public function getBucket(): ActiveQuery
     {
         return $this->hasOne(Bucket::class, ['id' => 'bucket_id'])->via('task');
     }
 
     /**
      * Get associated board
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getBoard()
+    public function getBoard(): ActiveQuery
     {
         return $this->hasOne(Board::class, ['id' => 'board_id'])->via('bucket');
     }

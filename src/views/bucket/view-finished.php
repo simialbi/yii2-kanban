@@ -1,22 +1,16 @@
 <?php
 
-use simialbi\yii2\turbo\Frame;
+use simialbi\yii2\kanban\models\Bucket;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Bucket */
+/* @var $this View */
+/* @var $model Bucket */
 /* @var $statuses array */
 /* @var $users array */
 /* @var $readonly boolean */
 
-Frame::begin([
-    'options' => [
-        'id' => 'bucket-' . $model->id . '-finished-frame'
-    ]
-]);
-
-/** @var \simialbi\yii2\kanban\models\Task $task */
 foreach ($model->finishedTasks as $task) {
-    echo $this->render('/task/item', [
+    echo $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/item.php'), [
         'boardId' => $model->board_id,
         'model' => $task,
         'statuses' => $statuses,
@@ -26,5 +20,3 @@ foreach ($model->finishedTasks as $task) {
         'group' => 'bucket'
     ]);
 }
-
-Frame::end();

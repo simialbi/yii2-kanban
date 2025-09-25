@@ -7,10 +7,13 @@
 
 namespace simialbi\yii2\kanban\models;
 
+use simialbi\yii2\kanban\helpers\FileHelper;
+use simialbi\yii2\kanban\Module;
 use simialbi\yii2\models\UserInterface;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -18,17 +21,18 @@ use yii\helpers\ArrayHelper;
  * Class Attachment
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
- * @property integer $task_id
+ * @property int $id
+ * @property int $task_id
  * @property string $name
  * @property string $path
  * @property string $mime_type
- * @property integer $size
+ * @property int $size
  * @property boolean $card_show
- * @property integer|string $created_by
- * @property integer|string $updated_by
- * @property integer|string $created_at
- * @property integer|string $updated_at
+ * @property int|string $created_by
+ * @property int|string $updated_by
+ * @property int|string $created_at
+ * @property int|string $updated_at
+ * @property int $sync_id
  *
  * @property-read string $icon
  * @property-read UserInterface $author
@@ -40,7 +44,7 @@ class Attachment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__attachment}}';
     }
@@ -48,11 +52,11 @@ class Attachment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'task_id', 'size'], 'integer'],
-            [['name', 'mime_type'], 'string', 'max' => 255],
+            [['name', 'mime_type', 'sync_id'], 'string', 'max' => 255],
             ['path', 'file'],
             ['card_show', 'boolean'],
 
@@ -65,7 +69,7 @@ class Attachment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'blameable' => [
@@ -88,7 +92,7 @@ class Attachment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/attachment', 'Id'),
@@ -105,7 +109,30 @@ class Attachment extends ActiveRecord
         ];
     }
 
-    public function getIcon()
+    /**
+     * {@inheritDoc}
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        /** @var Module $module */
+        $module = Yii::$app->controller->module;
+        FileHelper::unlink(FileHelper::normalizePath(Yii::getAlias(
+            $module->uploadWebRoot . '/task/' . $this->task_id . '/' . $this->name
+        )));
+
+        return true;
+    }
+
+    /**
+     * Get the icon type based on the MIME type of the file.
+     *
+     * @return string The icon type corresponding to the file MIME type.
+     */
+    public function getIcon(): string
     {
         switch ($this->mime_type) {
             case 'image/png':
@@ -175,26 +202,28 @@ class Attachment extends ActiveRecord
     /**
      * Get author
      * @return UserInterface
+     * @throws \Exception
      */
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->created_by);
     }
 
     /**
      * Get user last updated
-     * @return mixed
+     * @return UserInterface
+     * @throws \Exception
      */
-    public function getUpdater()
+    public function getUpdater(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->updated_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->updated_by);
     }
 
     /**
      * Get associated task
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getTask()
+    public function getTask(): ActiveQuery
     {
         return $this->hasOne(Task::class, ['id' => 'task_id']);
     }

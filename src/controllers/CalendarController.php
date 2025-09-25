@@ -8,7 +8,11 @@
 namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\kanban\Module;
 use Yii;
+use yii\base\Exception;
+use yii\base\InvalidConfigException;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 
@@ -16,7 +20,7 @@ use yii\web\Response;
  * Class CalendarController
  * @package simialbi\yii2\kanban\controllers
  *
- * @property-read \simialbi\yii2\kanban\Module $module
+ * @property-read Module $module
  */
 class CalendarController extends Controller
 {
@@ -26,12 +30,31 @@ class CalendarController extends Controller
     public $defaultAction = 'get-ics';
 
     /**
+     * {@inheritDoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['get-ics'],
+                        'roles' => ['@']
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    /**
      * Creates an ics-File with all open and assigned tasks
      * Sends the file to the browser to import into Outlook or any other email program.
-     * @throws \yii\base\Exception
-     * @throws \yii\base\InvalidConfigException
+     * @throws Exception
+     * @throws InvalidConfigException
      */
-    public function actionGetIcs()
+    public function actionGetIcs(): string
     {
         $str = "BEGIN:VCALENDAR\r\n";
         $str .= "VERSION:2.0\r\n";
@@ -94,10 +117,12 @@ class CalendarController extends Controller
 
     /**
      * Tries to convert text in p-tags and br to new lines
-     * @param string $text
+     *
+     * @param string|null $text
+     *
      * @return string
      */
-    private function br2nl($text = '')
+    protected function br2nl(?string $text = ''): string
     {
         if (empty($text)) {
             return '';

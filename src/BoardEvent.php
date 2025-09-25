@@ -18,5 +18,5 @@ class BoardEvent extends Event
     /**
      * @var Board The board which triggered the event
      */
-    public $board;
+    public Board $board;
 }

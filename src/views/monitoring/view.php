@@ -11,21 +11,28 @@ use simialbi\yii2\chart\models\series\PieSeries;
 use simialbi\yii2\chart\models\style\Color;
 use simialbi\yii2\chart\widgets\LineChart;
 use simialbi\yii2\chart\widgets\PieChart;
+use simialbi\yii2\kanban\helpers\Html;
 use simialbi\yii2\kanban\KanbanAsset;
+use simialbi\yii2\kanban\models\MonitoringList;
+use simialbi\yii2\kanban\models\SearchTask;
+use simialbi\yii2\models\UserInterface;
+use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\web\JsExpression;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\MonitoringList */
-/* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $this View */
+/* @var $model MonitoringList */
+/* @var $users UserInterface[] */
 /* @var $boards array */
 /* @var $statuses array */
 /* @var $byStatus array */
 /* @var $byBoard array */
 /* @var $byAssignee array */
 /* @var $colors array */
-/* @var $searchModel \simialbi\yii2\kanban\models\SearchTask */
-/* @var $dataProvider \yii\data\ActiveDataProvider */
+/* @var $searchModel SearchTask */
+/* @var $dataProvider ActiveDataProvider */
 
 KanbanAsset::register($this);
 
@@ -87,37 +94,40 @@ foreach ($statuses as $status => $label) {
 }
 ?>
 <div class="kanban-monitoring-view">
-    <div class="mt-5 row">
+    <div class="row">
         <div class="col-12">
             <?= GridView::widget([
+                'title' => $model->name,
                 'filterModel' => $searchModel,
                 'dataProvider' => $dataProvider,
-                'pjax' => false,
                 'bordered' => false,
                 'export' => false,
-                'toolbar' => false,
+                'toolbar' => Html::tag(
+                    'div',
+                    Html::responsiveButtons([
+                        Html::a(
+                            FAS::i('file-excel'),
+                            Url::to(['csv', ...Yii::$app->request->queryParams]),
+                            [
+                                'target' => '_blank',
+                                'class' => ['btn', 'btn-secondary'],
+                                'data' => [
+                                    'pjax' => '0'
+                                ]
+                            ]
+                        )
+                    ])
+                ),
                 'options' => [
                     'id' => 'monitoringTaskPanel'
                 ],
-                'panel' => [
-                    'heading' => $model->name,
-                    'type' => 'light',
-                    'before' => '{summary}',
-                    'options' => [
-                        'class' => ['rounded-0']
-                    ],
-                    'headingOptions' => [
-                        'class' => ['card-header', 'bg-light']
-                    ]
-                ],
-                'panelHeadingTemplate' => '{title}',
-                'panelTemplate' => '{panelHeading}{panelBefore}{items}{panelFooter}',
                 'columns' => [
                     ['class' => '\kartik\grid\SerialColumn'],
                     [
                         'class' => '\kartik\grid\DataColumn',
                         'attribute' => 'subject',
-                        'vAlign' => GridView::ALIGN_MIDDLE
+                        'vAlign' => GridView::ALIGN_MIDDLE,
+                        'responsiveHeaderColumn' => true
                     ],
                     [
                         'class' => '\kartik\grid\DataColumn',
@@ -134,25 +144,38 @@ foreach ($statuses as $status => $label) {
                     ],
                     [
                         'class' => '\kartik\grid\DataColumn',
-                        'attribute' => 'assignee_id',
-                        'value' => function ($model) {
-                            /** @var $model \simialbi\yii2\kanban\models\Task */
-                            return implode(', ', ArrayHelper::getColumn($model->assignees, 'name'));
-                        },
-                        'filter' => ArrayHelper::getColumn($users, 'name', true),
+                        'attribute' => 'responsible_id',
+                        'value' => 'responsible.name',
+                        'filter' => ArrayHelper::getColumn($users, 'name'),
                         'filterType' => GridView::FILTER_SELECT2,
                         'filterWidgetOptions' => [
                             'theme' => Select2::THEME_BOOTSTRAP,
                             'options' => ['placeholder' => '', 'multiple' => true],
                             'pluginOptions' => ['allowClear' => true]
                         ],
-                        'vAlign' => GridView::ALIGN_MIDDLE
+                        'vAlign' => GridView::ALIGN_MIDDLE,
+                    ],
+                    [
+                        'class' => '\kartik\grid\DataColumn',
+                        'attribute' => 'assignee_id',
+                        'value' => function ($model) {
+                            return implode(', ', ArrayHelper::getColumn($model->assignees, 'name'));
+                        },
+                        'filter' => ArrayHelper::getColumn($users, 'name'),
+                        'filterType' => GridView::FILTER_SELECT2,
+                        'filterWidgetOptions' => [
+                            'theme' => Select2::THEME_BOOTSTRAP,
+                            'options' => ['placeholder' => '', 'multiple' => true],
+                            'pluginOptions' => ['allowClear' => true]
+                        ],
+                        'vAlign' => GridView::ALIGN_MIDDLE,
+                        'responsiveHeaderColumn' => true
                     ],
                     [
                         'class' => '\kartik\grid\DataColumn',
                         'attribute' => 'created_by',
                         'value' => 'author.name',
-                        'filter' => ArrayHelper::getColumn($users, 'name', true),
+                        'filter' => ArrayHelper::getColumn($users, 'name'),
                         'filterType' => GridView::FILTER_SELECT2,
                         'filterWidgetOptions' => [
                             'theme' => Select2::THEME_BOOTSTRAP,
@@ -172,7 +195,6 @@ foreach ($statuses as $status => $label) {
                             'pluginOptions' => ['allowClear' => true]
                         ],
                         'value' => function ($model) use ($statuses) {
-                            /** @var $model \simialbi\yii2\kanban\models\Task */
                             return ArrayHelper::getValue($statuses, $model->status);
                         },
                         'vAlign' => GridView::ALIGN_MIDDLE
@@ -182,9 +204,6 @@ foreach ($statuses as $status => $label) {
                         'format' => 'date',
                         'attribute' => 'end_date',
                         'filterType' => '\sandritsch91\yii2\flatpickr\Flatpickr',
-                        'filterWidgetOptions' => [
-                            'customAssetBundle' => false,
-                        ],
                         'vAlign' => GridView::ALIGN_MIDDLE
                     ],
                     [
@@ -192,9 +211,6 @@ foreach ($statuses as $status => $label) {
                         'format' => 'datetime',
                         'attribute' => 'created_at',
                         'filterType' => '\sandritsch91\yii2\flatpickr\Flatpickr',
-                        'filterWidgetOptions' => [
-                            'customAssetBundle' => false,
-                        ],
                         'vAlign' => GridView::ALIGN_MIDDLE
                     ],
                     [
@@ -202,9 +218,6 @@ foreach ($statuses as $status => $label) {
                         'format' => 'datetime',
                         'attribute' => 'updated_at',
                         'filterType' => '\sandritsch91\yii2\flatpickr\Flatpickr',
-                        'filterWidgetOptions' => [
-                            'customAssetBundle' => false,
-                        ],
                         'vAlign' => GridView::ALIGN_MIDDLE
                     ]
                 ]

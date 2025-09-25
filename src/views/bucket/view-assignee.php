@@ -1,11 +1,13 @@
 <?php
 
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\Html;
 use yii\helpers\Url;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $tasks \simialbi\yii2\kanban\models\Task[] */
+/* @var $this View */
+/* @var $tasks Task[] */
 /* @var $id integer|null */
 /* @var $boardId integer */
 /* @var $user array|null */
@@ -17,7 +19,7 @@ use yii\helpers\Url;
 Frame::begin([
     'options' => [
         'id' => 'bucket-assignee-' . $id . '-frame',
-        'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
+        'class' => ['kanban-bucket', 'me-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
         'data' => ['id' => $id, 'action' => 'change-assignee', 'key-name' => 'user_id', 'sort' => 'false']
     ]
 ]);
@@ -26,7 +28,7 @@ echo $this->render('_header', [
     'id' => $id,
     'title' => empty($id)
         ? '<span class="kanban-user">' . Yii::t('simialbi/kanban', 'Not assigned') . '</span>'
-        : $this->render('/task/_user', [
+        : $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/_user.php'), [
             'assigned' => false,
             'user' => $user
         ]),
@@ -37,9 +39,9 @@ echo $this->render('_header', [
 
     <div class="kanban-tasks flex-grow-1 mt-4">
         <?php
-        /** @var \simialbi\yii2\kanban\models\Task $task */
+        /** @var Task $task */
         foreach ($tasks as $task) {
-            echo $this->render('/task/item', [
+            echo $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/item.php'), [
                 'boardId' => $boardId,
                 'model' => $task,
                 'statuses' => $statuses,
@@ -49,36 +51,38 @@ echo $this->render('_header', [
                 'readonly' => $readonly
             ]);
         }
-        ?>
-    </div>
-    <script>
-        window.sa.kanban.updateSortable();
-    </script>
-<?php if ($finishedTasks): ?>
-    <?= Html::a(Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
-        'cnt' => $finishedTasks
-    ]), '#bucket-' . $id . '-finished-collapse', [
-        'data' => [
-            'toggle' => 'collapse'
-        ]
-    ]); ?>
 
-    <div class="collapse" id="bucket-<?= $id; ?>-finished-collapse">
-        <?= Frame::widget([
-            'options' => [
-                'id' => 'bucket-' . $id . '-finished-frame',
-                'class' => [],
-                'src' => Url::to([
+        if ($finishedTasks): ?>
+            <?= Html::a(Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
+                'cnt' => $finishedTasks
+            ]), '#bucket-' . $id . '-finished-collapse', [
+                'class' => ['d-block', 'p-2'],
+                'data' => [
+                    'bs-toggle' => 'collapse'
+                ]
+            ]); ?>
+
+            <div class="collapse finished-tasks" id="bucket-<?= $id; ?>-finished-collapse">
+                <?php
+                $url = Url::to([
                     'bucket/view-assignee-finished',
                     'id' => $id,
                     'boardId' => $boardId,
                     'readonly' => $readonly
-                ])
-            ],
-            'lazyLoading' => true,
-            'autoscroll' => true
-        ]); ?>
+                ]);
+                $scrollSelector = '#bucket-assignee-' . $id . '-frame .kanban-tasks';
+                $containerSelector = '#bucket-' . $id . '-finished-collapse';
+                ?>
+            </div>
+            <div class="py-1"></div>
+            <script>
+                window.sa.kanban.initDoneLazyLoading('<?= $url ?>', '<?= $scrollSelector ?>', '<?= $containerSelector ?>');
+            </script>
+        <?php endif; ?>
     </div>
-<?php endif;
+    <script>
+        window.sa.kanban.updateSortable();
+    </script>
 
+<?php
 Frame::end();

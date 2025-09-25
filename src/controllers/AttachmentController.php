@@ -8,24 +8,26 @@
 namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\models\Attachment;
-use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\kanban\Module;
 use Yii;
+use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * Class AttachmentController
  * @package simialbi\yii2\kanban\controllers
  *
- * @property-read \simialbi\yii2\kanban\Module $module
+ * @property-read Module $module
  */
 class AttachmentController extends Controller
 {
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -43,42 +45,28 @@ class AttachmentController extends Controller
 
     /**
      * Delete attachment
-     * @param integer $id
-     * @return string
+     * @param int $id
+     * @param bool $readonly
+     * @param bool $updateSeries
+     * @return Response
      * @throws NotFoundHttpException
+     * @throws StaleObjectException
      * @throws \Throwable
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\db\StaleObjectException
      */
-    public function actionDelete($id, $readonly = false)
+    public function actionDelete(int $id, bool $readonly = false, bool $updateSeries = false): Response
     {
         $model = $this->findModel($id);
         $task = $model->task;
+        $taskId = $task->isRecurrentInstance() ? $task->recurrence_parent_id : $task->id;
 
         $model->delete();
 
-        $buckets = Bucket::find()
-            ->select(['name', 'id'])
-            ->orderBy(['name' => SORT_ASC])
-            ->where(['board_id' => $task->board->id])
-            ->indexBy('id')
-            ->column();
-
-        if ($task->start_date !== null) {
-            $task->start_date = Yii::$app->formatter->asDate($task->start_date);
-        }
-        if ($task->end_date !== null) {
-            $task->end_date = Yii::$app->formatter->asDate($task->end_date);
-        }
-
-        return $this->renderAjax('/task/update', [
-            'model' => $task,
-            'buckets' => $buckets,
-            'users' => $this->module->users,
-            'updateSeries' => false,
-            'statuses' => $this->module->statuses,
+        return $this->redirect([
+            'task/update',
+            'id' => $taskId,
+            'updateSeries' => $updateSeries,
             'return' => 'card',
-            'readonly' => $readonly,
+            'readonly' => $readonly
         ]);
     }
 
@@ -86,12 +74,12 @@ class AttachmentController extends Controller
      * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
+     * @param int $id
      *
      * @return Attachment the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel(int $id): Attachment
     {
         if (($model = Attachment::findOne($id)) !== null) {
             return $model;

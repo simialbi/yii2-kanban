@@ -9,29 +9,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         isActive: true,
 
         init: function () {
-            var $tabs = $('#plan-tabs');
-
-            // $tabs.find('.nav-link').on('click', function (e) {
-            //     var $target = jQuery(e.target);
-            //     if ($target.data('src')) {
-            //         e.preventDefault();
-            //         var $container = jQuery($target.attr('href'));
-            //         $container.load($target.data('src'));
-            //         $target.tab('show');
-            //     }
-            // });
-
-            if ($tabs.length) {
-                $tabs.find('a[data-toggle="tab"]').on('shown.bs.tab', function () {
-                    var $bottomScrollBar = $('.kanban-bottom-scrollbar');
-                    if ($bottomScrollBar.is(':visible')) {
-                        pub.initScrollBars();
-                        $tabs.find('a[data-toggle="tab"]').off('shown.bs.tab');
-                    }
-                });
-            } else {
-                pub.initScrollBars();
-            }
+            pub.initSwiper();
             initSortable();
             initChecklist();
             initLinks();
@@ -41,7 +19,10 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
          * @param {string|HTMLElement|jQuery} el
          */
         initTask: function (el) {
-            $('[data-toggle="tooltip"]').tooltip();
+            $('[data-bs-toggle="tooltip"]').tooltip({
+                trigger: 'hover',
+                boundary: 'body'
+            });
             $(el).off('click.sa.kanban').on('click.sa.kanban', function (evt) {
                 if (!evt.target || !evt.target.tagName) {
                     return;
@@ -155,78 +136,83 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             return slider;
         },
         /**
-         *
-         * @param {int} id
-         */
-        addDependency: function (id) {
-            var $this = $(this);
-            var $dependencies = $('#task-dependencies');
-            var style = '';
-            if ($this.data('done')) {
-                style = ' style="text-decoration: line-through;"';
-            }
-            var $dependency = $(
-                '<a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"' + style +
-                '   href="javascript:;" onclick="window.sa.kanban.removeDependency.call(this);"' +
-                '>\n' +
-                '<input type="hidden" name="dependencies[]" value="' + id + '">\n' +
-                $this.data('subject') + '\n' +
-                '<span class="badge badge-light">\n' +
-                $this.data('endDate') + '\n' +
-                '</span>\n' +
-                '</a>'
-            );
-            $dependencies.append($dependency);
-            $this.remove();
-        },
-        /**
-         * Remove dependency
-         */
-        removeDependency: function () {
-            $(this).remove();
-        },
-        /**
          * Add assignee
-         * @param {string} id
+         * @param {int} id
          */
         addAssignee: function (id) {
             var $this = $(this);
-            var $assignees = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
-            var name = $this.data('name') || '',
-                image = $this.data('image') || '';
-            var img;
-            if (image) {
-                img = '<img src="' + image + '" class="rounded-circle mr-1" alt="' + name + '" title="' + name + '">';
-            } else {
-                img = '<span class="kanban-visualisation mr-1" title="' + name + '">' +
-                    name.substr(0, 1).toUpperCase() +
-                    '</span>';
-            }
-            var $assignee = $(
-                '<span class="kanban-user" data-id="' + id + '">' +
-                '<input type="hidden" name="assignees[]" value="' + id + '">' +
-                img +
-                '</span>'
-            );
-            $assignees.append($assignee);
+            var $dropdown = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
+            var $input = $this.closest('.dropdown-menu').find('.search-field input');
+            var $notAssigned = $this.closest('.dropdown-menu').find('.add-assignee:not(.is-assigned):visible');
 
-            $this.addClass('is-assigned').css('display', 'none');
-            $this.closest('.dropdown-menu').find('.remove-assignee[data-id="' + id + '"]')
-                .addClass('is-assigned').css('display', '');
+            var $toAdd = $this;
+            if (id === 0) {
+                $toAdd = $notAssigned;
+            }
+
+            $.each($toAdd, function () {
+                var id = $(this).data('id');
+                var name = $(this).data('name') || '',
+                    image = $(this).data('image') || '';
+                var img;
+                if (image) {
+                    img = '<img src="' + image + '" class="rounded-circle me-1 mb-1" alt="' + name + '" title="' + name + '">';
+                } else {
+                    img = '<span class="kanban-visualisation me-1 mb-1" title="' + name + '">' +
+                        name.substring(0, 1).toUpperCase() +
+                        '</span>';
+                }
+                var $assignee = $(
+                    '<span class="kanban-user" data-id="' + id + '">' +
+                    '<input type="hidden" name="assignees[]" value="' + id + '">' +
+                    img +
+                    '</span>'
+                );
+                $dropdown.append($assignee);
+
+                $(this).addClass('is-assigned')
+                    .css('display', 'none');
+                $(this).closest('.dropdown-menu')
+                    .find('.remove-assignee[data-id="' + id + '"]')
+                    .addClass('is-assigned')
+                    .css('display', '');
+            });
+
+            var $event = $.Event('keyup');
+            $event.keyCode = 8; // Backspace
+            $input.val("").trigger($event).trigger('focus');
         },
         /**
          * Remove assignee
-         * @param {string} id
+         * @param {int} id
          */
         removeAssignee: function (id) {
-            var $this = $(this);
-            var $assignees = $this.closest('.kanban-task-assignees').find('.dropdown-toggle');
-            var $assignee = $assignees.find('.kanban-user[data-id="' + id + '"');
+            var $dropdown = $(this).closest('.kanban-task-assignees').find('.dropdown-toggle');
+            var $input = $(this).closest('.dropdown-menu').find('.search-field input');
+            var $assignee = $dropdown.find('.kanban-user[data-id="' + id + '"');
+            var $assigned = $dropdown.find('.kanban-user');
 
-            $assignee.remove();
-            $this.removeClass('is-assigned').css('display', 'none');
-            $this.closest('.dropdown-menu').find('.add-assignee[data-id="' + id + '"]')
-                .removeClass('is-assigned').css('display', '');
+            var $toRemove = $assignee;
+            if (id === 0) {
+                $toRemove = $assigned;
+            }
+
+            $.each($toRemove, function () {
+                var id = $(this).data('id');
+                $(this).closest('.kanban-task-assignees')
+                    .find('.remove-assignee[data-id="' + id + '"]')
+                    .removeClass('is-assigned')
+                    .css('display', 'none');
+                $(this).closest('.kanban-task-assignees')
+                    .find('.add-assignee[data-id="' + id + '"]')
+                    .removeClass('is-assigned')
+                    .css('display', '');
+                $(this).remove();
+            });
+
+            var $event = $.Event('keyup');
+            $event.keyCode = 8; // Backspace
+            $input.val("").trigger($event).trigger('focus');
         },
         /**
          * Set responsible person
@@ -241,7 +227,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
         /**
          * remove responsible person
          */
-        removeResponsible: function () {
+        removeResponsible: function() {
             var id = $('#task-responsible_id').val();
             if (id) {
                 $('#task-responsible_id-dummy').val('');
@@ -281,19 +267,11 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             document.removeEventListener('copy', listener);
         },
         /**
-         * Initialises the synced scrollbars 'kanban-top-scrollbar' and 'kanban-bottom-scrollbar'
-         *
+         * Init Swiper if needed
          */
-        initScrollBars: function () {
-            var $topScrollBar = $('.kanban-top-scrollbar'),
-                $bottomScrollBar = $('.kanban-bottom-scrollbar');
-
-            if ($topScrollBar.is(':visible')) {
-                $topScrollBar.find('> div').css('width', $bottomScrollBar.find('> div').prop('scrollWidth'));
-
-                syncScroll($topScrollBar, $bottomScrollBar);
-                syncScroll($bottomScrollBar, $topScrollBar);
-            } else {
+        initSwiper: function () {
+            var $bottomScrollBar = $('.kanban-bottom-scrollbar');
+            if ($bottomScrollBar.css('overflow-x') == 'hidden') {
                 slider = new Swiper('.kanban-bottom-scrollbar', {
                     wrapperClass: 'sw-wrapper',
                     slideClass: 'kanban-bucket',
@@ -304,21 +282,88 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
                     }
                 });
             }
+        },
+        /**
+         * Load checklist template elements into task
+         * @param id checklist template id
+         */
+        loadChecklistTemplate: function(id)
+        {
+            $.get(baseUrl + '/checklist-template/list?id=' + id, function (data) {
+                $.each(data, function(key, item) {
 
-            var ignoreScrollEvents = false;
+                    let checklist = $('.checklist .input-group').last(),
+                        nameInput = checklist.find('input[type="text"]').first(),
+                        dateInput = checklist.find('.flatpickr-input');
 
-            function syncScroll(element1, element2)
-            {
-                element1.scroll(function () {
-                    var ignore = ignoreScrollEvents
-                    ignoreScrollEvents = false
-                    if (ignore) {
-                        return
+                    nameInput.val(item.name);
+
+                    let refDate = $("#task-start_date").val();
+                    if (refDate !== '' && item.dateOffset !== null) {
+                        let split = refDate.split('.');
+                        let date = new Date(split[2], split[1] - 1, split[0]);
+                        date.setDate(date.getDate() + item.dateOffset);
+                        let lang = dateInput[0]._flatpickr.config.locale;
+                        dateInput[0]._flatpickr.setDate(date.toLocaleDateString(new Intl.Locale(lang), {
+                            'day': '2-digit',
+                            'month': '2-digit',
+                            'year': 'numeric'
+                        }));
                     }
 
-                    ignoreScrollEvents = true
-                    element2.scrollLeft(element1.scrollLeft())
+                    nameInput.trigger('change');
                 })
+            });
+        },
+
+        initDoneLazyLoading: function(url, scrollSelector, containerSelector)
+        {
+            let scrollDiv = $(scrollSelector);
+            let threshold = 50;
+            let loading = false;
+            let limit = 50;
+
+            scrollDiv[0].addEventListener('show.bs.collapse', event => {
+                fetchMore(url, containerSelector).catch((reason) => {
+                    console.error('fetching failed with status ' + reason);
+                });
+                scrollDiv.on('scroll', onScroll);
+            });
+            scrollDiv[0].addEventListener('hide.bs.collapse',  event =>  {
+                scrollDiv.off('scroll', onScroll);
+            });
+
+            function onScroll(event)
+            {
+                let $this = $(this);
+                if ($this.scrollTop + $this.innerHeight() > $this[0].scrollHeight - threshold) {
+                    fetchMore(url, containerSelector).catch((reason) => {
+                        console.error('fetching failed with status ' + reason);
+                    });
+                }
+            }
+
+            async function fetchMore(url, containerSelector)
+            {
+                if (loading) {
+                    return;
+                }
+                loading = true;
+
+                let container = $(containerSelector);
+                let start = container[0].hasAttribute('data-start') ? container[0].getAttribute('data-start') : 0;
+
+                let response = await fetch(url + '&start=' + start + '&limit=' + limit);
+                if (response.ok) {
+                    let body  = await response.text();
+
+                    container.append(body);
+                    container[0].setAttribute('data-start', parseInt(start) + limit);
+
+                    loading = false;
+                } else {
+                    return Promise.reject(response.status + ' ' + response.statusText);
+                }
             }
         }
     };
@@ -340,11 +385,11 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             $this.attr('placeholder', $this.val());
             $this.removeAttr('id');
 
-            $inputGroup.append($('<div class="input-group-append" />').append($buttonDelete));
+            $inputGroup.append($buttonDelete);
 
             $addElement.find('input[type="text"]').val('').removeClass(['is-valid', 'is-invalid']);
 
-            $linklist.append($addElement);
+            $addElement.insertAfter($linklist.find('.input-group').last());
         } else {
             if ($this.val() === '') {
                 $this.val($this.attr('placeholder'));
@@ -368,7 +413,7 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             $this.closest('.add-checklist-element').removeClass('add-checklist-element');
             $this.attr('placeholder', $this.val());
 
-            $addElement.find('input').each(function () {
+            $addElement.find('input:not(.flatpickr-calendar input)').each(function () {
                 var $input = $(this),
                     name = $input.prop('name'),
                     parts = name.match(/^checklist\[new\]\[(\d+)\]\[([a-z_]+)\]/),
@@ -385,6 +430,8 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
 
             $checklist.append($addElement);
             $datePicker.removeClass('flatpickr-input');
+
+            $config.defaultDate = null;
             flatpickr($datePicker[0], $config);
         } else {
             if ($this.val() === '') {
@@ -467,14 +514,11 @@ window.sa.kanban = (function ($, Swiper, baseUrl) {
             if ($this.val() === '') {
                 return;
             }
-            if (parseInt(code) === 9 || parseInt(code) === 13) {
+            if (code === 13) {
                 evt.preventDefault();
+            }
+            if (parseInt(code) === 9 || parseInt(code) === 13) {
                 addChecklistElement.apply(this);
-                if (parseInt(code) === 9 && !$this.hasClass('krajee-datepicker')) {
-                    $this.closest('.kanban-task-checklist-element').find('.krajee-datepicker').focus();
-                } else {
-                    $('.add-checklist-element input[type="text"]').not('.krajee-datepicker').focus();
-                }
             }
         });
         $(document).on('change.sa.kanban', '.checklist input[type="text"]', function () {

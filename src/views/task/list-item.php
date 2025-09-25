@@ -1,13 +1,15 @@
 <?php
 
-/** @var Task $task */
-
 use rmrevin\yii\fontawesome\FAR;
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\kanban\helpers\Html;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\turbo\Frame;
-use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\web\View;
+
+/* @var View $this */
+/** @var Task $task */
 
 $class = ['list-group-item', 'list-group-item-action'];
 if ($task->endDate && $task->endDate < time()) {
@@ -17,14 +19,8 @@ if ($task->endDate && $task->endDate < time()) {
 Frame::begin([
     'options' => [
         'class' => $class,
-        'href' => Url::to(['task/update', 'id' => ($task->isRecurrentInstance() ? $task->recurrence_parent_id : $task->id), 'return' => 'list-item']),
         'id' => 'task-' . ($task->isRecurrentInstance() ? $task->recurrence_parent_id : $task->id) . '-frame',
-        'alt' => $task->subject . ' ' . str_replace(["\r", "\n"], ' ', strip_tags($task->description)),
-        'data' => [
-            'target' => '#task-modal',
-            'toggle' => 'modal',
-            'turbo-frame' => 'task-modal-frame'
-        ]
+        'alt' => $task->subject . ' ' . str_replace(["\r", "\n"], ' ', strip_tags((string)$task->description)),
     ]
 ]);
 ?>
@@ -36,9 +32,10 @@ Frame::begin([
                 'fa-mask' => 'fas fa-circle'
             ]); ?>
         <?php endif; ?>
-        <?= Html::encode($task->subject); ?></h6>
+        <?= Html::encode($task->subject); ?>
+    </h6>
     <small>
-        <?= $task->bucket->name; ?>
+        <?= Html::encode($task->bucket->name); ?>
         <?php if ($count = count($task->checklistElements)): ?>
             &nbsp;&bull;&nbsp;<?= $task->checklistStats; ?>
         <?php endif; ?>
@@ -50,6 +47,14 @@ Frame::begin([
             &nbsp;&bull;&nbsp; <?= FAR::i('sticky-note'); ?>
         <?php endif; ?>
     </small>
+    <?= Html::a('', Url::to(['task/update', 'id' => ($task->isRecurrentInstance() ? $task->recurrence_parent_id : $task->id), 'return' => 'list-item']), [
+        'class' => ['stretched-link'],
+        'data' => [
+            'bs-target' => '#task-modal',
+            'bs-toggle' => 'modal',
+            'turbo-frame' => 'task-modal-frame'
+        ]
+    ]); ?>
 
 <script class="ignore">jQuery('#task-modal').modal('hide');</script>
 <?php

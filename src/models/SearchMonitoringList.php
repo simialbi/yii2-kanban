@@ -6,8 +6,10 @@
 
 namespace simialbi\yii2\kanban\models;
 
+use tonic\hq\models\AddresspoolAddress;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class SearchMonitoringList
@@ -16,14 +18,14 @@ use yii\data\ActiveDataProvider;
 class SearchMonitoringList extends MonitoringList
 {
     /**
-     * @var array Member filter
+     * @var string|array Member filter
      */
-    public $member_id = [];
+    public string|array $member_id = '';
 
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['id', 'integer'],
@@ -36,7 +38,7 @@ class SearchMonitoringList extends MonitoringList
     /**
      * {@inheritDoc}
      */
-    public function scenarios()
+    public function scenarios(): array
     {
         return Model::scenarios();
     }
@@ -48,8 +50,9 @@ class SearchMonitoringList extends MonitoringList
      * @param integer|string $userId
      *
      * @return ActiveDataProvider
+     * @throws \Exception
      */
-    public function search($params, $userId)
+    public function search(array $params, int|string $userId): ActiveDataProvider
     {
         $query = MonitoringList::find()
             ->distinct()
@@ -97,6 +100,18 @@ class SearchMonitoringList extends MonitoringList
                     (empty($this->created_at)) ? null : strtotime($this->updated_at . ' +1 day')
                 ],
             ]);
+
+        // mobile-filter
+        $filterMobile = ArrayHelper::getValue($params, 'filter.mobile');
+        if (isset($filterMobile)) {
+            $query->leftJoin(AddresspoolAddress::tableName() . ' a', ['{{m}}.[[user_id]]' => '{{a}}.[[id]]']);
+        }
+        $query->andFilterWhere([
+            'or',
+            ['like', '{{l}}.[[name]]', $filterMobile],
+            ['like', '{{a}}.[[firstname]]', $filterMobile],
+            ['like', '{{a}}.[[lastname]]', $filterMobile],
+        ]);
 
         return $dataProvider;
     }

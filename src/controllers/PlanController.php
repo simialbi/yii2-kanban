@@ -8,29 +8,34 @@
 namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\BoardEvent;
+use simialbi\yii2\kanban\helpers\FileHelper;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\BoardUserAssignment;
+use simialbi\yii2\kanban\models\BoardUserSetting;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\models\TaskUserAssignment;
 use simialbi\yii2\kanban\Module;
 use Yii;
+use yii\base\Exception;
+use yii\base\InvalidConfigException;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\helpers\FileHelper;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 use yii\web\UploadedFile;
 
 /**
  * Class PlanController
  * @package simialbi\yii2\kanban\controllers
  *
- * @property-read \simialbi\yii2\kanban\Module $module
+ * @property-read Module $module
  */
 class PlanController extends Controller
 {
@@ -38,7 +43,7 @@ class PlanController extends Controller
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -46,25 +51,26 @@ class PlanController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create', 'assign-user', 'expel-user'],
+                        'actions' => ['create', 'assign-user', 'expel-user', 'toggle-hidden-boards', 'toggle-board-visibility'],
                         'roles' => ['@']
                     ],
                     [
                         'allow' => true,
                         'actions' => ['update', 'delete'],
-                        'matchCallback' => function () {
+                        'matchCallback' => function (): bool {
                             $board = $this->findModel(Yii::$app->request->getQueryParam('id'));
+
                             return $board->created_by == Yii::$app->user->id;
                         }
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'schedule', 'chart', 'gantt']
+                        'actions' => ['index', 'schedule', 'chart']
                     ],
                     [
                         'allow' => true,
                         'actions' => ['view'],
-                        'matchCallback' => function () {
+                        'matchCallback' => function (): bool {
                             return ArrayHelper::keyExists(
                                 Yii::$app->request->getQueryParam('id'),
                                 ArrayHelper::index(Board::findByUserId(Yii::$app->user->id), 'id')
@@ -85,36 +91,51 @@ class PlanController extends Controller
 
     /**
      * Plan overview
+     *
      * @param string $activeTab One of 'plan', 'tasks', 'delegated', 'responsible'
+     *
      * @return string
      */
-    public function actionIndex($activeTab = 'plan')
+    public function actionIndex(string $activeTab = 'plan'): string
     {
-        $boards = Board::findByUserId();
+        $filters = [
+            '{{s}}.[[is_hidden]]' => [false, null]
+        ];
+        if (Yii::$app->session->get('kanban.plan.showHiddenBoards', false)) {
+            $filters = [];
+        }
+
+        $hiddenBoards = Board::findByUserId(filters: [
+            '{{s}}.[[is_hidden]]' => [true]
+        ]);
+        $boards = Board::findByUserId(filters: $filters);
 
         return $this->render('index', [
             'boards' => $boards,
-            'activeTab' => $activeTab
+            'activeTab' => $activeTab,
+            'hiddenCnt' => count($hiddenBoards)
         ]);
     }
 
     /**
      * Show board
      *
-     * @param integer $id
+     * @param int $id
      * @param string $group
-     * @param integer|null $showTask
+     * @param int|null $showTask
      *
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionView($id, $group = 'bucket', $showTask = null)
+    public function actionView(int $id, string $group = 'bucket', ?int $showTask = null): string
     {
         $model = $this->findModel($id);
         $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
 
         return $this->render('view', [
-            'boards' => Board::findByUserId(),
+            'boards' => Board::findByUserId(filters: [
+                '{{s}}.[[is_hidden]]' => [false, null]
+            ]),
             'model' => $model,
             'readonly' => $readonly,
             'group' => $group,
@@ -125,12 +146,14 @@ class PlanController extends Controller
 
     /**
      * Schedule view
-     * @param integer $id
+     *
+     * @param int $id
+     *
      * @return string
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
-    public function actionSchedule($id)
+    public function actionSchedule(int $id): string
     {
         $model = $this->findModel($id);
         $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
@@ -138,7 +161,7 @@ class PlanController extends Controller
         $taskQuery = $model->getTasks()
             ->where(['not', ['start_date' => null]])
             ->orWhere(['not', ['end_date' => null]]);
-        /* @var $tasks \simialbi\yii2\kanban\models\Task[] */
+        /* @var $tasks Task[] */
 
         if ($readonly) {
             $taskQuery->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
@@ -146,7 +169,7 @@ class PlanController extends Controller
 
         $calendarTasks = [];
         foreach ($taskQuery->all() as $task) {
-            /* @var $task \simialbi\yii2\kanban\models\Task */
+            /* @var $task Task */
             $startDate = (empty($task->start_date))
                 ? Yii::$app->formatter->asDatetime($task->end_date, 'php:c')
                 : Yii::$app->formatter->asDatetime($task->start_date, 'php:c');
@@ -186,7 +209,8 @@ class PlanController extends Controller
                 ])
                 ->with(['bucket'])
                 ->orderBy(['bucket_id' => SORT_ASC])
-                ->andWhere(['not', ['status' => Task::STATUS_DONE]])->all(),
+                ->andWhere(['not', ['status' => Task::STATUS_DONE]])
+                ->all(),
             'calendarTasks' => $calendarTasks,
             'users' => $this->module->users,
             'statuses' => $this->module->statuses,
@@ -195,42 +219,15 @@ class PlanController extends Controller
     }
 
     /**
-     * Gantt view
-     *
-     * @param integer $id
-     * @return string
-     *
-     * @throws NotFoundHttpException
-     */
-    public function actionGantt($id)
-    {
-        $model = $this->findModel($id);
-
-        $users = [];
-        /** @var \simialbi\yii2\models\UserInterface $user */
-        foreach ($this->module->users as $user) {
-            $users[] = ['id' => $user->getId(), 'name' => $user->getName()];
-        }
-        $tasks = [];
-        foreach ($model->tasks as $task) {
-
-        }
-
-        return $this->render('gantt', [
-            'model' => $model,
-            'users' => $users
-        ]);
-    }
-
-    /**
      * Chart view
      *
-     * @param integer $id
+     * @param int $id
      *
      * @return string
      * @throws NotFoundHttpException
+     * @throws \Exception
      */
-    public function actionChart($id)
+    public function actionChart(int $id): string
     {
         $model = $this->findModel($id);
         $readonly = !$model->is_public && !$model->getAssignments()->where(['user_id' => Yii::$app->user->id])->count();
@@ -274,7 +271,8 @@ class PlanController extends Controller
         $query->select([
             'value' => new Expression('COUNT({{t}}.[[id]])'),
             'bucket' => '{{b}}.[[name]]',
-            '{{t}}.[[status]]'
+            '{{t}}.[[status]]',
+            '{{b}}.[[sort]]'
         ])
             ->from(['p' => $model::tableName()])
             ->innerJoin(['b' => Bucket::tableName()], '{{p}}.[[id]] = {{b}}.[[board_id]]')
@@ -292,13 +290,18 @@ class PlanController extends Controller
             ->select([
                 'value' => new Expression('COUNT({{t}}.[[id]])'),
                 'bucket' => '{{b}}.[[name]]',
-                'status' => new Expression('15')
+                'status' => new Expression('15'),
+                '{{b}}.[[sort]]'
             ])
             ->where(['{{p}}.[[id]]' => $id])
             ->andWhere(['not', ['{{t}}.[[end_date]]' => null]])
             ->andWhere(['<', '{{t}}.[[end_date]]', Yii::$app->formatter->asTimestamp('today')])
             ->andWhere(['not', ['{{t}}.[[status]]' => Task::STATUS_DONE]]);
-        $query->union($query2);
+        $query = (new Query())
+            ->from($query->union($query2))
+            ->orderBy([
+                '[[sort]]' => SORT_ASC
+            ]);
         $rows = $query->all();
         $byBucket = [];
         foreach ($rows as $row) {
@@ -367,27 +370,17 @@ class PlanController extends Controller
 
     /**
      * Create new board
-     * @return string|\yii\web\Response
-     * @throws \yii\base\Exception
+     * @return string|Response
+     * @throws Exception
      */
-    public function actionCreate()
+    public function actionCreate(): Response|string
     {
         $model = new Board([
-            'is_public' => true
+            'is_public' => false
         ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $image = UploadedFile::getInstance($model, 'uploadedFile');
-            if ($image) {
-                $path = Yii::getAlias('@webroot/uploads');
-                if (FileHelper::createDirectory($path)) {
-                    $filePath = $path . DIRECTORY_SEPARATOR . $image->baseName . '.' . $image->extension;
-                    if ($image->saveAs($filePath)) {
-                        $model->image = Yii::getAlias('@web/uploads/' . $image->baseName . '.' . $image->extension);
-                        $model->save();
-                    }
-                }
-            }
+            $this->saveImage($model);
 
             Yii::$app->session->addFlash('success', Yii::t(
                 'simialbi/kanban/plan/notification',
@@ -410,28 +403,18 @@ class PlanController extends Controller
     /**
      * Update a board
      *
-     * @param integer $id
-     * @return string|\yii\web\Response
+     * @param int $id
+     *
+     * @return string|Response
      * @throws NotFoundHttpException
-     * @throws \yii\base\Exception
+     * @throws Exception
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id): Response|string
     {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $image = UploadedFile::getInstance($model, 'uploadedFile');
-
-            if ($image) {
-                $path = Yii::getAlias('@webroot/uploads');
-                if (FileHelper::createDirectory($path)) {
-                    $filePath = $path . DIRECTORY_SEPARATOR . $image->baseName . '.' . $image->extension;
-                    if ($image->saveAs($filePath)) {
-                        $model->image = Yii::getAlias('@web/uploads/' . $image->baseName . '.' . $image->extension);
-                        $model->save();
-                    }
-                }
-            }
+            $this->saveImage($model);
 
             Yii::$app->session->addFlash('success', Yii::t(
                 'simialbi/kanban/plan/notification',
@@ -450,13 +433,14 @@ class PlanController extends Controller
     /**
      * Delete a board
      *
-     * @param integer $id
-     * @return string|\yii\web\Response
+     * @param int $id
+     *
+     * @return Response
      * @throws NotFoundHttpException
-     * @throws \yii\base\Exception
+     * @throws Exception
      * @throws \Throwable
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id): Response
     {
         $model = $this->findModel($id);
 
@@ -468,14 +452,14 @@ class PlanController extends Controller
     /**
      * Assign user to plan
      *
-     * @param integer $id
-     * @param integer|string $userId
+     * @param int $id
+     * @param int|string $userId
      *
      * @return string
      * @throws NotFoundHttpException
      * @throws \yii\db\Exception
      */
-    public function actionAssignUser($id, $userId)
+    public function actionAssignUser(int $id, int|string $userId): string
     {
         $model = $this->findModel($id);
 
@@ -494,14 +478,15 @@ class PlanController extends Controller
     /**
      * Expel user from plan
      *
-     * @param integer $id
-     * @param integer|string $userId
+     * @param int $id
+     * @param int|string $userId
      *
      * @return string
      * @throws NotFoundHttpException
-     * @throws \yii\db\Exception
+     * @throws \Throwable
+     * @throws StaleObjectException
      */
-    public function actionExpelUser($id, $userId)
+    public function actionExpelUser(int $id, int|string $userId): string
     {
         $model = $this->findModel($id);
 
@@ -516,20 +501,78 @@ class PlanController extends Controller
     }
 
     /**
+     * Toggle hidden boards
+     * @return Response
+     */
+    public function actionToggleHiddenBoards(): Response
+    {
+        Yii::$app->session->set(
+            'kanban.plan.showHiddenBoards',
+            !Yii::$app->session->get('kanban.plan.showHiddenBoards', false)
+        );
+
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * Toggle a board visibility for the current user
+     *
+     * @param int $id boardId
+     *
+     * @return Response
+     * @throws \yii\db\Exception
+     */
+    public function actionToggleBoardVisibility(int $id): Response
+    {
+        $board = Board::findOne($id);
+        $setting = $board->setting ?? new BoardUserSetting([
+            'board_id' => $board->id,
+            'user_id' => Yii::$app->user->id
+        ]);
+
+        $setting->is_hidden = !$setting->is_hidden;
+        $setting->save();
+
+        return $this->redirect(['index']);
+    }
+
+
+    /**
      * Finds the Event model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
+     * @param mixed $condition
      *
      * @return Board the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel(mixed $condition): Board
     {
-        if (($model = Board::findOne($id)) !== null) {
+        if (($model = Board::findOne($condition)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+    }
+
+    /**
+     * @param Board $model
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function saveImage(Board $model): void
+    {
+        $image = UploadedFile::getInstance($model, 'uploadedFile');
+        if ($image) {
+            $path = Yii::getAlias($this->module->uploadWebRoot . '/plan/' . $model->id);
+            if (FileHelper::createDirectory($path)) {
+                $filePath = $path . DIRECTORY_SEPARATOR . $image->baseName . '.' . $image->extension;
+                if ($image->saveAs($filePath)) {
+                    $model->image = Yii::getAlias($this->module->uploadWeb . '/plan/' . $model->id . '/' . $image->baseName . '.' . $image->extension);
+                    $model->save();
+                }
+            }
         }
     }
 }

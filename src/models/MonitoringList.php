@@ -10,6 +10,7 @@ use simialbi\yii2\models\UserInterface;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -17,12 +18,12 @@ use yii\helpers\ArrayHelper;
  * Class MonitoringList
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
+ * @property int $id
  * @property string $name
- * @property integer|string $created_by
- * @property integer|string $updated_by
- * @property integer|string $created_at
- * @property integer|string $updated_at
+ * @property int|string $created_by
+ * @property int|string $updated_by
+ * @property int|string $created_at
+ * @property int|string $updated_at
  *
  * @property-read MonitoringMember[] $members
  * @property-read UserInterface[] $users
@@ -32,7 +33,7 @@ class MonitoringList extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__monitoring_list}}';
     }
@@ -40,7 +41,7 @@ class MonitoringList extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['id', 'integer'],
@@ -53,7 +54,7 @@ class MonitoringList extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
 
@@ -77,7 +78,7 @@ class MonitoringList extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/monitoring-list', 'Id'),
@@ -92,9 +93,9 @@ class MonitoringList extends ActiveRecord
 
     /**
      * Get associated members
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getMembers()
+    public function getMembers(): ActiveQuery
     {
         return $this->hasMany(MonitoringMember::class, ['list_id' => 'id']);
     }
@@ -103,7 +104,7 @@ class MonitoringList extends ActiveRecord
      * Get associated users
      * @return UserInterface[]
      */
-    public function getUsers()
+    public function getUsers(): array
     {
         return ArrayHelper::getColumn($this->members, 'user');
     }

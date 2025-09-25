@@ -8,6 +8,7 @@ namespace simialbi\yii2\kanban\models;
 
 use Yii;
 use yii\base\Model;
+use yii\db\Exception;
 
 /**
  * Class MonitoringForm
@@ -18,22 +19,22 @@ class MonitoringForm extends Model
     /**
      * @var integer|null the lists id (only update)
      */
-    public $id;
+    public ?int $id = 0;
 
     /**
      * @var string Monitoring list name
      */
-    public $name;
+    public string $name = '';
 
     /**
      * @var array Monitoring list members (who to monitor)
      */
-    public $members = [];
+    public array $members = [];
 
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['id', 'integer'],
@@ -49,7 +50,7 @@ class MonitoringForm extends Model
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/monitoring-form', 'Id'),
@@ -61,8 +62,9 @@ class MonitoringForm extends Model
     /**
      * Save the list (create new or update existing)
      * @return boolean
+     * @throws Exception
      */
-    public function saveList()
+    public function saveList(): bool
     {
         $model = ($this->id) ? MonitoringList::findOne($this->id) : new MonitoringList();
         $model->name = $this->name;

@@ -1,12 +1,14 @@
 <?php
 
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\Html;
 use yii\helpers\Url;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Bucket */
+/* @var $this View */
+/* @var $model Bucket */
 /* @var $statuses array */
 /* @var $users array */
 /* @var $closeModal boolean */
@@ -20,7 +22,7 @@ if (!isset($closeModal)) {
 Frame::begin([
     'options' => [
         'id' => 'bucket-' . $model->id . '-frame',
-        'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
+        'class' => ['kanban-bucket', 'me-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
         'data' => ['id' => $model->id, 'action' => 'change-parent', 'key-name' => 'bucket_id', 'sort' => 'true']
     ]
 ]);
@@ -36,14 +38,14 @@ Frame::begin([
 if (!$readonly):
     ?>
     <?= Html::a(FAS::i('plus'), '#bucket-' . $model->id . '-create-task', [
-        'class' => ['btn', 'btn-primary', 'btn-block'],
+        'class' => ['btn', 'btn-primary'],
         'role' => 'button',
         'aria' => [
             'expanded' => 'false',
             'controls' => 'bucket-' . $model->id . '-create-task'
         ],
         'data' => [
-            'toggle' => 'collapse'
+            'bs-toggle' => 'collapse'
         ]
     ]); ?>
     <div class="collapse" id="bucket-<?= $model->id; ?>-create-task">
@@ -64,7 +66,7 @@ endif;
         <?php
         /** @var \simialbi\yii2\kanban\models\Task $task */
         foreach ($model->openTasks as $task) {
-            echo $this->render('/task/item', [
+            echo $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/item.php'), [
                 'boardId' => $model->board_id,
                 'model' => $task,
                 'statuses' => $statuses,
@@ -75,6 +77,29 @@ endif;
             ]);
         }
         ?>
+
+        <?php if ($finishedTasks): ?>
+            <?= Html::a(Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
+                'cnt' => $finishedTasks
+            ]), '#bucket-' . $model->id . '-finished-collapse', [
+                'class' => ['d-block', 'p-2'],
+                'data' => [
+                    'bs-toggle' => 'collapse'
+                ]
+            ]); ?>
+
+            <div class="collapse finished-tasks" id="bucket-<?= $model->id; ?>-finished-collapse">
+                <?php
+                $url = Url::to(['bucket/view-finished', 'id' => $model->id, 'readonly' => $readonly]);
+                $scrollSelector = '#bucket-' . $model->id . '-frame .kanban-tasks';
+                $containerSelector = '#bucket-' . $model->id . '-finished-collapse';
+                ?>
+            </div>
+            <div class="py-1"></div>
+            <script>
+                window.sa.kanban.initDoneLazyLoading('<?= $url ?>', '<?= $scrollSelector ?>', '<?= $containerSelector ?>');
+            </script>
+        <?php endif; ?>
     </div>
     <script>
         <?php if ($closeModal) : ?>
@@ -83,26 +108,5 @@ endif;
         window.sa.kanban.updateSortable();
     </script>
 
-<?php if ($finishedTasks): ?>
-    <?= Html::a(Yii::t('simialbi/kanban', 'Show done ({cnt,number,integer})', [
-        'cnt' => $finishedTasks
-    ]), '#bucket-' . $model->id . '-finished-collapse', [
-        'data' => [
-            'toggle' => 'collapse'
-        ]
-    ]); ?>
-
-    <div class="collapse" id="bucket-<?= $model->id; ?>-finished-collapse">
-        <?= Frame::widget([
-            'options' => [
-                'id' => 'bucket-' . $model->id . '-finished-frame',
-                'class' => [],
-                'src' => Url::to(['bucket/view-finished', 'id' => $model->id, 'readonly' => $readonly])
-            ],
-            'lazyLoading' => true,
-            'autoscroll' => true
-        ]); ?>
-    </div>
-<?php endif; ?>
 <?php
 Frame::end();

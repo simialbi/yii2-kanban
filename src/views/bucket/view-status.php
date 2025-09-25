@@ -1,10 +1,12 @@
 <?php
 
+use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\turbo\Frame;
 use yii\helpers\ArrayHelper;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $tasks \simialbi\yii2\kanban\models\Task[]  */
+/* @var $this View */
+/* @var $tasks Task[]  */
 /* @var $status integer */
 /* @var $users array */
 /* @var $statuses array */
@@ -18,7 +20,7 @@ if (!isset($closeModal)) {
 Frame::begin([
     'options' => [
         'id' => 'bucket-status-' . $status . '-frame',
-        'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
+        'class' => ['kanban-bucket', 'me-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
         'data' => ['id' => $status, 'action' => 'change-status', 'key-name' => 'status', 'sort' => 'false']
     ]
 ]);
@@ -33,9 +35,9 @@ echo $this->render('_header', [
 
 <div class="kanban-tasks flex-grow-1 mt-4">
     <?php
-    /** @var \simialbi\yii2\kanban\models\Task $task */
+    /** @var Task $task */
     foreach ($tasks as $task) {
-        echo $this->render('/task/item', [
+        echo $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/item.php'), [
             'boardId' => $task->bucket->board_id,
             'model' => $task,
             'statuses' => $statuses,

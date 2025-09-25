@@ -7,13 +7,12 @@
 
 namespace simialbi\yii2\kanban\widgets;
 
+use simialbi\yii2\kanban\helpers\Html;
 use simialbi\yii2\web\FullCalendarAsset;
 use simialbi\yii2\widgets\Widget;
 use Yii;
-use yii\bootstrap4\Html;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
-use yii\web\View;
 
 class Calendar extends Widget
 {
@@ -28,11 +27,11 @@ class Calendar extends Widget
     /**
      * @var array|string either an array or a url to json action
      */
-    public $events;
+    public string|array $events = [];
     /**
      * @var array|string either a selector or an configuration array of a draggable
      */
-    public $draggable;
+    public string|array $draggable = [];
     /**
      * @var array client options (full calendar plugin options)
      */
@@ -40,7 +39,7 @@ class Calendar extends Widget
     /**
      * @var array default client options (full calendar plugin options)
      */
-    private $_defaultClientOptions = [
+    private array $_defaultClientOptions = [
         'timeZone' => 'UTC',
         'plugins' => ['dayGrid', 'timeGrid', 'list', 'bootstrap'],
         'header' => [
@@ -55,7 +54,7 @@ class Calendar extends Widget
     /**
      * @inheritdoc
      */
-    public function init()
+    public function init(): void
     {
         if (empty($this->events)) {
             $this->events = [];
@@ -66,7 +65,7 @@ class Calendar extends Widget
     /**
      * @inheritdoc
      */
-    public function run()
+    public function run(): void
     {
         echo Html::beginTag('div', $this->options);
         echo Html::beginTag('div', ['class' => 'fc-loading', 'style' => 'display: none;']);
@@ -82,7 +81,7 @@ class Calendar extends Widget
      * @param string $pluginName
      * @param string|null $selector
      */
-    protected function registerPlugin($pluginName = 'FullCalendar.Calendar', $selector = null)
+    protected function registerPlugin($pluginName = 'FullCalendar.Calendar', ?string $selector = null): void
     {
         $id = $this->options['id'];
         $view = $this->getView();
@@ -119,9 +118,9 @@ class Calendar extends Widget
             }
         }
 
-        $js[] = "var calendar = new $pluginName(jQuery('$selector').get(0), " . $this->getClientOptions() . ');';
-        $js[] = 'calendar.render();';
-        $view->registerJs(implode("\n", $js), View::POS_READY);
+        $js[] = "window.calendar = new $pluginName(jQuery('$selector').get(0), " . $this->getClientOptions() . ');';
+        $js[] = 'window.calendar.render();';
+        $view->registerJs(implode("\n", $js));
     }
 
     /**
@@ -129,13 +128,14 @@ class Calendar extends Widget
      *
      * @return string
      */
-    protected function getClientOptions()
+    protected function getClientOptions(): string
     {
         $options = [
             'locale' => strtolower(Yii::$app->language),
             'events' => $this->events
         ];
         $options = ArrayHelper::merge($this->_defaultClientOptions, $options, $this->clientOptions);
+
         return Json::encode($options);
     }
 }

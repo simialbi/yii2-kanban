@@ -1,18 +1,20 @@
 <?php
 
 use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\kanban\helpers\Html;
 use simialbi\yii2\kanban\KanbanAsset;
+use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\widgets\ToDo;
 use simialbi\yii2\turbo\Frame;
 use simialbi\yii2\turbo\Modal;
-use yii\bootstrap4\Html;
-use yii\bootstrap4\Tabs;
+use yii\bootstrap5\Tabs;
 use yii\helpers\Url;
-use yii\web\JsExpression;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $boards \simialbi\yii2\kanban\models\Board[] */
+/* @var $this View */
+/* @var $boards Board[] */
 /* @var $activeTab string */
+/* @var $hiddenCnt integer */
 
 KanbanAsset::register($this);
 
@@ -23,65 +25,34 @@ $this->params['breadcrumbs'] = [$this->title];
 <div class="kanban-plan-index position-relative">
     <h1><?= Html::encode($this->title); ?></h1>
 
-    <?php $this->beginBlock('tab-hub'); ?>
+    <?php
+    $this->beginBlock('tab-hub'); ?>
     <div class="mt-3 kanban-boards">
-        <?php $i = 0; ?>
-        <?php foreach ($boards as $board): ?>
-            <?php $options = ['class' => ['kanban-board']]; ?>
-            <?= Html::beginTag('div', $options); ?>
-            <div class="kanban-board-inner">
-                <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
-                   class="kanban-board-image d-flex justify-content-center align-items-center text-decoration-none">
-                    <?php if ($board->image): ?>
-                        <?= Html::img($board->image, ['class' => ['img-fluid']]); ?>
-                    <?php else: ?>
-                        <span class="kanban-visualisation modulo-<?= $board->id % 10; ?>">
-                                <?= substr($board->name, 0, 1); ?>
-                            </span>
-                    <?php endif; ?>
-                </a>
-                <div class="kanban-board-meta">
-                    <div class="d-flex align-items-stretch h-100">
-                        <a href="<?= Url::to(['plan/view', 'id' => $board->id]); ?>"
-                           class="flex-grow-1 text-body text-decoration-none">
-                            <h5 class="pt-0"><?= Html::encode($board->name); ?></h5>
-                            <small
-                                class="text-muted"><?= Yii::$app->formatter->asDatetime($board->updated_at); ?></small>
-                        </a>
-                        <?php if (Yii::$app->user->id == $board->created_by): ?>
-                            <span class="d-flex flex-column justify-content-around">
-                                    <?= Html::a(FAS::i('edit'), ['plan/update', 'id' => $board->id], [
-                                        'class' => ['text-body'],
-                                        'title' => Yii::t('simialbi/kanban/plan', 'Update plan')
-                                    ]); ?>
-                                    <?= Html::a(FAS::i('trash-alt'), ['plan/delete', 'id' => $board->id], [
-                                        'class' => ['text-body'],
-                                        'title' => Yii::t('simialbi/kanban/plan', 'Delete plan'),
-                                        'data' => [
-                                            'confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-                                            'method' => 'post'
-                                        ]
-                                    ]); ?>
-                                </span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-            <?= Html::endTag('div'); ?>
-        <?php endforeach; ?>
-        <div class="kanban-board bg-white p-3 d-none d-md-block position-relative">
-            <h5 class="mb-0 pt-0"><?= Html::encode(Yii::t('simialbi/kanban/plan', 'Create board')); ?></h5>
-            <?= Html::a('', ['plan/create'], [
-                'class' => ['stretched-link']
-            ]); ?>
-        </div>
-        <?= Html::a(FAS::i('plus'), ['plan/create'], [
-            'class' => ['kanban-create-mobile', 'd-md-none', 'rounded-circle', 'bg-secondary', 'text-white', 'p-3'],
-            'title' => Html::encode(Yii::t('simialbi/kanban/plan', 'Create board'))
+        <?= $this->render('_index', [
+            'boards' => array_filter($boards, function ($board) {
+                return !$board->is_checklist;
+            }),
+            'type' => 'plans'
         ]); ?>
     </div>
-    <?php $this->endBlock(); ?>
-    <?php $this->beginBlock('tab-tasks'); ?>
+    <?php
+    $this->endBlock(); ?>
+
+    <?php
+    $this->beginBlock('tab-checklists'); ?>
+    <div class="mt-3 kanban-boards">
+        <?= $this->render('_index', [
+            'boards' => array_filter($boards, function ($board) {
+                return $board->is_checklist;
+            }),
+            'type' => 'checklists'
+        ]); ?>
+    </div>
+    <?php
+    $this->endBlock(); ?>
+
+    <?php
+    $this->beginBlock('tab-tasks'); ?>
     <div class="mt-3">
         <?= ToDo::widget([
             'addBoardFilter' => true,
@@ -90,11 +61,15 @@ $this->params['breadcrumbs'] = [$this->title];
             ],
             'itemOptions' => [
                 'class' => ['list-group-item', 'list-group-item-action', 'rounded-0', 'p-2']
-            ]
+            ],
+            'kanbanModuleName' => 'schedule'
         ]); ?>
     </div>
-    <?php $this->endBlock(); ?>
-    <?php $this->beginBlock('tab-delegated-tasks'); ?>
+    <?php
+    $this->endBlock(); ?>
+
+    <?php
+    $this->beginBlock('tab-delegated-tasks'); ?>
     <?= Frame::widget([
         'options' => [
             'id' => 'delegated-tasks-frame',
@@ -102,8 +77,11 @@ $this->params['breadcrumbs'] = [$this->title];
             'loading' => 'lazy'
         ]
     ]); ?>
-    <?php $this->endBlock(); ?>
-    <?php $this->beginBlock('tab-responsible-tasks'); ?>
+    <?php
+    $this->endBlock(); ?>
+
+    <?php
+    $this->beginBlock('tab-responsible-tasks'); ?>
     <?= Frame::widget([
         'options' => [
             'id' => 'responsible-tasks-frame',
@@ -111,8 +89,11 @@ $this->params['breadcrumbs'] = [$this->title];
             'loading' => 'lazy'
         ]
     ]); ?>
-    <?php $this->endBlock(); ?>
-    <?php $this->beginBlock('tab-monitoring'); ?>
+    <?php
+    $this->endBlock(); ?>
+
+    <?php
+    $this->beginBlock('tab-monitoring'); ?>
     <?= Frame::widget([
         'options' => [
             'id' => 'monitoring-frame',
@@ -120,19 +101,24 @@ $this->params['breadcrumbs'] = [$this->title];
             'loading' => 'lazy'
         ]
     ]); ?>
-    <?php $this->endBlock(); ?>
     <?php
-    $js = <<<JS
-function onHide() {
-    jQuery('.note-editor', this).each(function () {
-        var summernote = jQuery(this).prev().data('summernote');
-        if (summernote) {
-            summernote.destroy();
-        }
-    });
-}
-JS;
+    $this->endBlock(); ?>
+
+    <?php
+    $this->beginBlock('tab-calendar'); ?>
+    <?= Frame::widget([
+        'options' => [
+            'id' => 'calendar-frame',
+            'src' => Url::to(['calendar/index']),
+            'loading' => 'lazy'
+        ]
+    ]); ?>
+    <?php
+    $this->endBlock(); ?>
+
+    <?php
     Modal::begin([
+        'modalClass' => '\yii\bootstrap5\Modal',
         'options' => [
             'id' => 'task-modal',
             'options' => [
@@ -142,10 +128,7 @@ JS;
                 'backdrop' => 'static',
                 'keyboard' => false
             ],
-            'clientEvents' => [
-                'hidden.bs.modal' => new JsExpression($js)
-            ],
-            'size' => \yii\bootstrap4\Modal::SIZE_EXTRA_LARGE,
+            'size' => \yii\bootstrap5\Modal::SIZE_EXTRA_LARGE,
             'title' => null,
             'closeButton' => false
         ]
@@ -155,7 +138,7 @@ JS;
 
     <?= Tabs::widget([
         'options' => [
-            'class' => ['bg-light', 'rounded']
+            'class' => ['bg-light', 'rounded', 'flex-wrap', 'justify-content-start', 'memory',]
         ],
         'id' => 'plan-tabs',
         'navType' => 'nav-kanban',
@@ -164,6 +147,11 @@ JS;
                 'label' => Yii::t('simialbi/kanban/plan', 'All plans'),
                 'content' => $this->blocks['tab-hub'],
                 'active' => ($activeTab === 'plan')
+            ],
+            [
+                'label' => Yii::t('simialbi/kanban/plan', 'Checklists'),
+                'content' => $this->blocks['tab-checklists'],
+                'active' => ($activeTab === 'checklists')
             ],
             [
                 'label' => Yii::t('simialbi/kanban/plan', 'My tasks'),
@@ -185,6 +173,42 @@ JS;
                 'content' => $this->blocks['tab-monitoring'],
                 'active' => ($activeTab === 'monitoring'),
                 'visible' => Yii::$app->user->can('monitorKanbanTasks')
+            ],
+            [
+                'label' => Yii::t('simialbi/kanban/plan', 'Calendar'),
+                'content' => $this->blocks['tab-calendar'],
+                'active' => ($activeTab === 'calendar'),
+                'visible' => Yii::$app->user->can('monitorKanbanTasks')
+            ],
+            [
+                'label' => Yii::$app->session->get('kanban.plan.showHiddenBoards', false) ?
+                    FAS::i('eye-slash')->fixedWidth() :
+                    Html::tag('span', $hiddenCnt, [
+                        'class' => [
+                            'position-absolute',
+                            'start-100',
+                            'translate-middle',
+                            'badge',
+                            'rounded-pill',
+                            'bg-danger',
+                            ($hiddenCnt > 0 ? 'd-block' : 'd-none')
+                        ]
+                    ]) . FAS::i('eye', [
+                        'class' => ['position-relative']
+                    ])->fixedWidth(),
+                'encode' => false,
+                'url' => Url::to(['toggle-hidden-boards']),
+                'active' => ($activeTab === 'settings'),
+                'headerOptions' => [
+                    'class' => ['ms-auto', 'me-2'],
+                    'title' => Yii::t('simialbi/kanban/plan', 'Toggle hidden plans'),
+                    'data' => [
+                        'bs-toggle' => 'tooltip'
+                    ]
+                ],
+                'linkOptions' => [
+                    'class' => ['no-memory', 'position-relative']
+                ]
             ]
         ]
     ]) ?>

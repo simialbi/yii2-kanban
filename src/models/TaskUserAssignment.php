@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  * Class TaskUserAssignment
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $task_id
+ * @property int $task_id
  * @property string $user_id
  */
 class TaskUserAssignment extends ActiveRecord
@@ -21,7 +21,7 @@ class TaskUserAssignment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__task_user_assignment}}';
     }
@@ -29,11 +29,11 @@ class TaskUserAssignment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['task_id', 'integer'],
-            ['user_id', 'string'],
+            ['user_id', 'string', 'max' => 64],
 
             [['task_id', 'user_id'], 'required']
         ];

@@ -8,10 +8,12 @@
 namespace simialbi\yii2\kanban\models;
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
+use simialbi\yii2\kanban\Module;
 use simialbi\yii2\models\UserInterface;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -19,14 +21,15 @@ use yii\helpers\ArrayHelper;
  * Class Bucket
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
- * @property integer $board_id
+ * @property int $id
+ * @property int $board_id
  * @property string $name
- * @property integer $sort
- * @property integer|string $created_by
- * @property integer|string $updated_by
- * @property integer|string $created_at
- * @property integer|string $updated_at
+ * @property int $sort
+ * @property int|string $created_by
+ * @property int|string $updated_by
+ * @property int|string $created_at
+ * @property int|string $updated_at
+ * @property string $sync_id
  *
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
@@ -40,7 +43,7 @@ class Bucket extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__bucket}}';
     }
@@ -48,11 +51,11 @@ class Bucket extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'board_id'], 'integer'],
-            ['name', 'string', 'max' => 255],
+            [['name', 'sync_id'], 'string', 'max' => 255],
 
             ['board_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
@@ -63,7 +66,7 @@ class Bucket extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'blameable' => [
@@ -90,7 +93,7 @@ class Bucket extends ActiveRecord
         ];
     }
 
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/bucket', 'Id'),
@@ -107,35 +110,37 @@ class Bucket extends ActiveRecord
     /**
      * Get author
      * @return UserInterface
+     * @throws \Exception
      */
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->created_by);
     }
 
     /**
      * Get user last updated
-     * @return mixed
+     * @return UserInterface
+     * @throws \Exception
      */
-    public function getUpdater()
+    public function getUpdater(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->updated_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->updated_by);
     }
 
     /**
      * Get associated board
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getBoard()
+    public function getBoard(): ActiveQuery
     {
         return $this->hasOne(Board::class, ['id' => 'board_id']);
     }
 
     /**
      * Get associated tasks
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getTasks()
+    public function getTasks(): ActiveQuery
     {
         return $this->hasMany(Task::class, ['bucket_id' => 'id'])
             ->orderBy([Task::tableName() . '.[[sort]]' => SORT_ASC]);
@@ -144,20 +149,36 @@ class Bucket extends ActiveRecord
     /**
      * Get associated open tasks
      * @param bool $onlyOwn
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOpenTasks($onlyOwn = false)
+    public function getOpenTasks(bool $onlyOwn = false): ActiveQuery
     {
         $query = $this->hasMany(Task::class, ['bucket_id' => 'id'])
             ->where(['not', ['status' => Task::STATUS_DONE]])
             ->orderBy([Task::tableName() . '.[[sort]]' => SORT_ASC])
-            ->with('attachments')
-            ->with('assignments')
-            ->with('comments')
-            ->with('checklistElements')
-            ->with('links');
+            ->with([
+                'attachments',
+                'assignments',
+                'assignees',
+                'comments',
+                'checklistElements',
+                'links',
+                'proposal',
+                'feedback',
+                'ticket',
+                'client',
+                'recurrenceParent',
+                'responsible',
+                'children',
+            ]);
         if ($onlyOwn) {
-            $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+            $query
+                ->innerJoinWith('assignments u')
+                ->andWhere([
+                    'or',
+                    ['{{u}}.[[user_id]]' => Yii::$app->user->id],
+                    [Task::tableName() . '.[[responsible_id]]' => Yii::$app->user->id]
+                ]);
         }
 
         return $query;
@@ -166,9 +187,9 @@ class Bucket extends ActiveRecord
     /**
      * Get associated finished tasks
      * @param bool $onlyOwn
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getFinishedTasks($onlyOwn = false)
+    public function getFinishedTasks(bool $onlyOwn = false): ActiveQuery
     {
         $query = $this->hasMany(Task::class, ['bucket_id' => 'id'])
             ->where(['status' => Task::STATUS_DONE])
@@ -179,9 +200,47 @@ class Bucket extends ActiveRecord
             ->with('checklistElements')
             ->with('links');
         if ($onlyOwn) {
-            $query->innerJoinWith('assignments u')->andWhere(['{{u}}.[[user_id]]' => Yii::$app->user->id]);
+            $query
+                ->joinWith('assignments u')
+                ->andWhere([
+                    'or',
+                    ['{{u}}.[[user_id]]' => Yii::$app->user->id],
+                    [Task::tableName() . '.[[responsible_id]]' => Yii::$app->user->id]
+                ]);
         }
 
         return $query;
+    }
+
+    /**
+     * Returns an array for the Select2 widget, the boards being optgroups
+     *
+     * @param int|null|string $userId
+     * @param bool $checklists if checklists should be included
+     * @return array
+     */
+    public static function getSelect2Options(int|string|null $userId = null, bool $checklists = false): array
+    {
+        $userId = $userId ?? Yii::$app->user->id;
+        $buckets = Bucket::find()
+            ->select([
+                '{{bu}}.[[id]]',
+                '{{bu}}.[[name]]',
+                'board_name' => Board::tableName() . '.[[name]]'
+            ])
+            ->alias('bu')
+            ->innerJoinWith('board.assignments a', false)
+            ->where([
+                '{{a}}.[[user_id]]' => $userId,
+                Board::tableName() . '.[[is_checklist]]' => $checklists
+            ])
+            ->orderBy([
+                Board::tableName() . '.[[name]]' => SORT_ASC,
+                '{{bu}}.[[name]]' => SORT_ASC
+            ])
+            ->asArray()
+            ->indexBy('id')
+            ->all();
+        return ArrayHelper::map($buckets, 'id', 'name', 'board_name');
     }
 }

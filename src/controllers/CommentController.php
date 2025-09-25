@@ -11,6 +11,7 @@ use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\Module;
 use simialbi\yii2\kanban\TaskEvent;
 use Yii;
+use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -26,7 +27,7 @@ class CommentController extends Controller
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -47,13 +48,13 @@ class CommentController extends Controller
     /**
      * Create a new comment in a task
      *
-     * @param integer $taskId
+     * @param int $taskId
      * @param string $group
-     * @param boolean $readonly
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException
+     * @param bool $readonly
+     * @return string
+     * @throws NotFoundHttpException|Exception
      */
-    public function actionCreate($taskId, $group = 'bucket', $readonly = false)
+    public function actionCreate(int $taskId, string $group = 'bucket', bool $readonly = false): string
     {
         $task = $this->findTaskModel($taskId);
         $model = new Comment(['task_id' => $taskId]);
@@ -89,14 +90,14 @@ class CommentController extends Controller
      * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
+     * @param mixed $condition
      *
      * @return Task the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findTaskModel($id)
+    protected function findTaskModel(mixed $condition): Task
     {
-        if (($model = Task::findOne($id)) !== null) {
+        if (($model = Task::findOne($condition)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));

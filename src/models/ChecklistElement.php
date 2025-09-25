@@ -8,7 +8,10 @@
 namespace simialbi\yii2\kanban\models;
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
+use DateTime;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 
@@ -16,12 +19,13 @@ use yii\helpers\Html;
  * Class ChecklistElement
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
- * @property integer $task_id
+ * @property int $id
+ * @property int $task_id
  * @property string $name
- * @property integer|string|\DateTime $end_date
+ * @property int|string|DateTime $end_date
  * @property boolean $is_done
- * @property integer $sort
+ * @property int $sort
+ * @property int $sync_id
  *
  * @property-read string $label
  * @property-read Task $task
@@ -31,7 +35,7 @@ class ChecklistElement extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__checklist_element}}';
     }
@@ -39,11 +43,12 @@ class ChecklistElement extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'task_id'], 'integer'],
             ['name', 'string'],
+            ['sync_id', 'string', 'max' => 255],
             ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
             ['is_done', 'boolean'],
 
@@ -59,7 +64,7 @@ class ChecklistElement extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'sortable' => [
@@ -75,7 +80,7 @@ class ChecklistElement extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/checklist-element', 'Id'),
@@ -90,9 +95,9 @@ class ChecklistElement extends ActiveRecord
     /**
      * Getter function for checklist element label
      * @return string
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
-    public function getLabel()
+    public function getLabel(): string
     {
         $label = Html::encode($this->name);
         if ($this->end_date) {
@@ -107,9 +112,9 @@ class ChecklistElement extends ActiveRecord
 
     /**
      * Get associated task
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getTask()
+    public function getTask(): ActiveQuery
     {
         return $this->hasOne(Task::class, ['id' => 'task_id']);
     }

@@ -2,9 +2,10 @@
 
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\ButtonDropdown;
+use yii\bootstrap5\ButtonDropdown;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
+/* @var $this View */
 /* @var $title string */
 /* @var $id integer */
 /** @var $renderButtons boolean */
@@ -18,20 +19,20 @@ Frame::begin([
 ?>
 <div class="kanban-bucket-header d-flex flex-row align-items-center mb-2 mb-md-0 <?php if ($renderButtons && !$readonly) : ?>draggable<?php endif; ?>">
     <h5 class="m-0 mx-auto mx-md-0"><?= $title; ?></h5>
-    <?=FAS::i('arrows-alt', [
-        'class' => ['ml-auto', 'kanban-bucket-sort-handle', 'd-none', 'd-md-block']
-    ])?>
+    <?= FAS::i('arrows-alt', [
+        'class' => ['ms-auto', 'kanban-bucket-sort-handle', 'd-none', 'd-md-block']
+    ]) ?>
     <?php if ($renderButtons && !$readonly) : ?>
         <?= ButtonDropdown::widget([
             'label' => FAS::i('ellipsis-h'),
             'encodeLabel' => false,
             'direction' => ButtonDropdown::DIRECTION_RIGHT,
             'buttonOptions' => [
-                'class' => ['toggle' => '', 'btn' => 'btn btn-sm']
+                'class' => ['toggle' => '', 'btn' => 'btn btn-sm border-0']
             ],
             'options' => [
                 'id' => 'bucket-dropdown-' . $id,
-                'class' => ['d-none', 'd-md-block', 'ml-auto', 'ml-md-2', 'kanban-bucket-more']
+            'class' => ['d-none', 'd-md-block', 'ms-auto', 'ms-md-2', 'kanban-bucket-more']
             ],
             'dropdown' => [
                 'items' => [

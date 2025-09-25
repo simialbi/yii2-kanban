@@ -19,15 +19,15 @@ class TaskEvent extends Event
     /**
      * @var Task The board which triggered the event
      */
-    public $task;
+    public Task $task;
 
     /**
      * @var UserInterface|null The user which is important with this event
      */
-    public $user;
+    public ?UserInterface $user = null;
 
     /**
      * @var array|null The old attributes
      */
-    public $oldAttributes = null;
+    public ?array $oldAttributes = null;
 }

@@ -18,5 +18,5 @@ class BucketEvent extends Event
     /**
      * @var Bucket The board which triggered the event
      */
-    public $bucket;
+    public Bucket $bucket;
 }

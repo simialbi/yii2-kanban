@@ -1,15 +1,17 @@
 <?php
 
 use kartik\select2\Select2;
-use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\MonitoringForm;
+use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\ActiveForm;
-use yii\bootstrap4\Html;
+use yii\bootstrap5\ActiveForm;
 use yii\helpers\ReplaceArrayValue;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\MonitoringForm */
-/* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $this View */
+/* @var $model MonitoringForm */
+/* @var $users UserInterface[] */
 
 Frame::begin([
     'options' => [
@@ -35,23 +37,14 @@ Frame::begin([
                 'class' => ['my-0', 'w-100']
             ],
             'labelOptions' => [
-                'class' => ['sr-only']
+                'class' => ['visually-hidden']
             ],
             'inputOptions' => [
                 'class' => new ReplaceArrayValue(['form-control']),
                 'placeholder' => $model->getAttributeLabel('name')
             ]
         ])->textInput(); ?>
-        <?= Html::button('<span aria-hidden="true">' . FAS::i('times') . '</span>', [
-            'type' => 'button',
-            'class' => ['close'],
-            'data' => [
-                'dismiss' => 'modal'
-            ],
-            'aria' => [
-                'label' => Yii::t('simialbi/kanban', 'Close')
-            ]
-        ]); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
         <div class="row">
@@ -75,7 +68,7 @@ Frame::begin([
             'type' => 'button',
             'class' => ['btn', 'btn-dark'],
             'data' => [
-                'dismiss' => 'modal'
+                'bs-dismiss' => 'modal'
             ],
             'aria' => [
                 'label' => Yii::t('simialbi/kanban', 'Close')

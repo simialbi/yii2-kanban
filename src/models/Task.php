@@ -8,53 +8,75 @@
 namespace simialbi\yii2\kanban\models;
 
 use arogachev\sortable\behaviors\numerical\ContinuousNumericalSortableBehavior;
+use DateTime;
+use DateTimeZone;
+use Exception;
+use Recurr\Exception\InvalidArgument;
+use Recurr\Exception\InvalidRRule;
 use Recurr\Rule;
+use rmrevin\yii\fontawesome\FAR;
+use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\behaviors\RepeatableBehavior;
+use simialbi\yii2\kanban\enums\ConnectionTypeEnum;
+use simialbi\yii2\kanban\helpers\FileHelper;
+use simialbi\yii2\kanban\Module;
+use simialbi\yii2\kanban\RecurrenceValidator;
 use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\ticket\models\Ticket;
 use Yii;
+use yii\base\ErrorException;
+use yii\base\InvalidConfigException;
 use yii\base\ModelEvent;
 use yii\behaviors\AttributeTypecastBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\bootstrap5\Html;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\AfterSaveEvent;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
+use yii\validators\Validator;
 
 /**
  * Class Task
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
- * @property integer $bucket_id
- * @property integer $ticket_id
- * @property string $responsible_id
+ * @property int $id
+ * @property int $bucket_id
+ * @property int $ticket_id
+ * @property int|string $client_id
+ * @property int $parent_id
+ * @property int $root_parent_id
+ * @property int|string $responsible_id
  * @property string $subject
- * @property integer $status
- * @property integer|string|\DateTime $start_date
- * @property integer|string|\DateTime $end_date
- * @property integer $percentage_done
+ * @property int $status
+ * @property int|string|DateTime $start_date
+ * @property int|string|DateTime $end_date
  * @property string|Rule $recurrence_pattern
- * @property integer $recurrence_parent_id
- * @property boolean $is_recurring
- * @property string $description
- * @property boolean $card_show_description
- * @property boolean $card_show_checklist
- * @property boolean $card_show_links
- * @property integer $sort
- * @property integer|string $created_by
- * @property integer|string $updated_by
- * @property integer|string $finished_by
- * @property integer|string $created_at
- * @property integer|string $updated_at
- * @property integer|string $finished_at
+ * @property int $recurrence_parent_id
+ * @property bool $is_recurring
+ * @property string|null $description
+ * @property bool $card_show_description
+ * @property bool $card_show_checklist
+ * @property bool $card_show_links
+ * @property int $sort
+ * @property int|string $created_by
+ * @property int|string $updated_by
+ * @property int|string $finished_by
+ * @property int|string $created_at
+ * @property int|string $updated_at
+ * @property int|string $finished_at
+ * @property int $sync_id
+ * @property int $connection_id
  *
- * @method boolean isRecurrentInstance() If this model is an instance of an recurrent task
- * @method static getOriginalRecord() The original record if model is recurrent instance
+ * @method bool isRecurrentInstance() If this model is an instance of an recurrent task
+ * @method self getOriginalRecord() The original record if model is recurrent instance
  *
  * @property-read string $hash
  * @property-read string $checklistStats
  * @property-read string|null $endDate
+ * @property-read string $sharePointUrl
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
  * @property-read UserInterface $finisher
@@ -68,27 +90,34 @@ use yii\helpers\ArrayHelper;
  * @property-read Comment[] $comments
  * @property-read Ticket $ticket
  * @property-read Task $recurrenceParent
+ * @property-read UserInterface $client
  * @property-read UserInterface $responsible
- * @property-read Task[] $dependants
- * @property-read Task[] $dependencies
+ * @property-read ConnectionInterface $connection
+ * @property-read TimeWindow[] $timeWindows
+ * @property-read Task $parent
+ * @property-read Task $rootParent
+ * @property-read Task[] $children
  */
 class Task extends ActiveRecord
 {
-    const EVENT_BEFORE_FINISH = 'beforeFinish';
-    const EVENT_AFTER_FINISH = 'afterFinish';
-    const STATUS_DONE = 0;
-    const STATUS_IN_PROGRESS = 5;
-    const STATUS_NOT_BEGUN = 10;
-    const STATUS_LATE = 15;
+    public const EVENT_BEFORE_FINISH = 'beforeFinish';
+    public const EVENT_AFTER_FINISH = 'afterFinish';
+
+    public const STATUS_DONE = 0;
+    public const STATUS_IN_PROGRESS = 5;
+    public const STATUS_NOT_BEGUN = 10;
+    public const STATUS_LATE = 15;
+
+
     /**
-     * @var string Hash
+     * @var string|null Hash
      */
-    private $_hash;
+    private ?string $_hash = null;
 
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__task}}';
     }
@@ -96,17 +125,28 @@ class Task extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['id', 'bucket_id', 'ticket_id', 'status', 'recurrence_parent_id'], 'integer'],
-            ['subject', 'string', 'max' => 255],
-            ['responsible_id', 'string', 'max' => 64],
-            ['responsible_id', 'default', 'value' => null],
-            ['status', 'in', 'range' => [self::STATUS_DONE, self::STATUS_IN_PROGRESS, self::STATUS_NOT_BEGUN]],
+            [
+                [
+                    'id',
+                    'bucket_id',
+                    'ticket_id',
+                    'parent_id',
+                    'root_parent_id',
+                    'status',
+                    'recurrence_parent_id',
+                    'connection_id'
+                ],
+                'integer'
+            ],
+            [['subject', 'sync_id'], 'string', 'max' => 255],
+            [['responsible_id', 'client_id'], 'string', 'max' => 64],
+            [['responsible_id', 'client_id'], 'default', 'value' => null],
+            ['status', 'in', 'range' => array_keys(Module::getInstance()->statuses)],
             ['start_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'start_date'],
             ['end_date', 'date', 'format' => 'dd.MM.yyyy', 'timestampAttribute' => 'end_date'],
-            ['percentage_done', 'match', 'pattern' => '#^\d+ ?%?$#'],
             [['description'], 'string'],
             [['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'], 'boolean'],
 
@@ -129,25 +169,57 @@ class Task extends ActiveRecord
                     return !$model->is_recurring;
                 }
             ],
+            [
+                // client side validation of recurrence
+                'is_recurring',
+                RecurrenceValidator::class,
+                'message' => Yii::t('simialbi/kanban/model/task', 'Recurrence is invalid'),
+                'when' => function () {
+                    return false;
+                },
+                'whenClient' => "function (attribute, value) {
+                    return $('#" . Html::getInputId($this, 'is_recurring') . "').is(':checked');
+                }"
+            ],
 
-            [['bucket_id', 'ticket_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            [
+                ['bucket_id', 'ticket_id', 'client_id', 'responsible_id', 'status'],
+                'filter',
+                'filter' => 'intval',
+                'skipOnEmpty' => true
+            ],
 
             ['status', 'default', 'value' => self::STATUS_NOT_BEGUN],
-            [['start_date', 'end_date', 'description'], 'default'],
             [
                 ['card_show_description', 'card_show_checklist', 'card_show_links', 'is_recurring'],
                 'default',
                 'value' => false
             ],
 
-            [['bucket_id', 'subject', 'status', 'card_show_description', 'card_show_checklist'], 'required']
+            [
+                'start_date',
+                'required',
+                'when' => function ($model) {
+                    /** @var static $model */
+                    return $model->is_recurring;
+                },
+                'whenClient' => "function (attribute, value) {
+                    return $('#" . Html::getInputId($this, 'is_recurring') . "').is(':checked');
+                }"
+            ],
+            [['start_date', 'end_date', 'description'], 'default'],
+
+            [['bucket_id', 'subject', 'status', 'card_show_description', 'card_show_checklist'], 'required'],
+
+            ['parent_id', 'exist', 'targetRelation' => 'parent'],
+            ['root_parent_id', 'exist', 'targetRelation' => 'rootParent'],
         ];
     }
 
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'blameable' => [
@@ -183,13 +255,14 @@ class Task extends ActiveRecord
                         }
                         if (is_string($value)) {
                             $start = (empty($this->start_date)) ? $this->created_at : $this->start_date;
+
                             return Rule::createFromString(
                                 $value,
                                 Yii::$app->formatter->asDatetime($start, 'yyyy-MM-dd HH:mm:ss'),
                                 $this->end_date
                                     ? Yii::$app->formatter->asDate($this->end_date, 'yyyy-MM-dd HH:mm:ss')
                                     : null,
-                                YIi::$app->timeZone
+                                Yii::$app->timeZone
                             );
                         }
 
@@ -212,7 +285,17 @@ class Task extends ActiveRecord
                 'typecastAfterFind' => false
             ],
             'repeatable' => [
-                'class' => RepeatableBehavior::class
+                'class' => RepeatableBehavior::class,
+                'keepRelations' => [
+                    'assignees',
+                    'assignments',
+                    'attachments',
+                    'bucket',
+                    'checklistElements',
+                    'client',
+                    'links',
+                    'responsible',
+                ]
             ]
         ];
     }
@@ -220,19 +303,19 @@ class Task extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/task', 'Id'),
             'bucket_id' => Yii::t('simialbi/kanban/model/task', 'Bucket'),
             'board_id' => Yii::t('simialbi/kanban/model/task', 'Board'),
+            'client_id' => Yii::t('simialbi/kanban/model/task', 'Client'),
             'assignee_id' => Yii::t('simialbi/kanban/model/task', 'Assignee'),
             'responsible_id' => Yii::t('simialbi/kanban/model/task', 'Responsible'),
             'subject' => Yii::t('simialbi/kanban/model/task', 'Subject'),
             'status' => Yii::t('simialbi/kanban/model/task', 'Status'),
             'start_date' => Yii::t('simialbi/kanban/model/task', 'Start date'),
             'end_date' => Yii::t('simialbi/kanban/model/task', 'End date'),
-            'percentage_done' => Yii::t('simialbi/kanban/model/task', 'Percentage done'),
             'is_recurring' => Yii::t('simialbi/kanban/model/task', 'Is recurring'),
             'recurrence_pattern' => Yii::t('simialbi/kanban/model/task', 'Recurrence'),
             'description' => Yii::t('simialbi/kanban/model/task', 'Description'),
@@ -253,17 +336,19 @@ class Task extends ActiveRecord
      * Recurrence validator and transform to string
      *
      * @param string $attribute The attribute name
-     * @param array $params
-     * @param \yii\validators\Validator $validator
-     * @throws \Recurr\Exception\InvalidArgument|\Recurr\Exception\InvalidRRule|\yii\base\InvalidConfigException
+     * @param array|null $params
+     * @param Validator $validator
+     *
+     * @throws InvalidArgument|InvalidRRule|InvalidConfigException
+     * @throws Exception
      */
-    public function validateRecurrence($attribute, $params, $validator)
+    public function validateRecurrence(string $attribute, ?array $params, Validator $validator): void
     {
         if (is_array($this->$attribute) && ArrayHelper::isAssociative($this->$attribute)) {
             $rule = new Rule();
-            $rule->setStartDate(new \DateTime(
+            $rule->setStartDate(new DateTime(
                 Yii::$app->formatter->asDatetime($this->start_date, 'yyyy-MM-dd HH:mm:ss'),
-                new \DateTimeZone(Yii::$app->timeZone)
+                new DateTimeZone(Yii::$app->timeZone)
             ));
             $rule->setTimezone(Yii::$app->timeZone);
             if (isset($this->{$attribute}['FREQ'])) {
@@ -296,7 +381,7 @@ class Task extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function beforeSave($insert)
+    public function beforeSave($insert): bool
     {
         if ($this->isAttributeChanged('status') && (int)$this->status === self::STATUS_DONE) {
             if (!$this->beforeFinish()) {
@@ -305,6 +390,46 @@ class Task extends ActiveRecord
         }
 
         return parent::beforeSave($insert);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        try {
+            /** @var Module $module */
+            $module = Yii::$app->getModule('schedule');
+
+            // Delete attachments
+            FileHelper::removeDirectory(Yii::getAlias($module->uploadWebRoot . '/task/' . $this->id));
+
+            // Delete time windows
+            $timeWindows = TimeWindow::find()
+                ->where([
+                    'task_id' => $this->id,
+                    'user_id' => Yii::$app->user->id
+                ])
+                ->all();
+            foreach ($timeWindows as $timeWindow) {
+                $timeWindow->delete();
+            }
+
+            // Update children
+            foreach ($this->children as $child) {
+                $this->updateChildrenOnParentDelete($child, $this->parent_id, $this->root_parent_id);
+            }
+        } catch (ErrorException $e) {
+            Yii::error('Could not delete folder: ' . $e->getMessage());
+        } catch (StaleObjectException|\Throwable $e) {
+            Yii::error('Could not delete outlook event: ' . $e->getMessage());
+        }
+
+        return true;
     }
 
     /**
@@ -328,7 +453,7 @@ class Task extends ActiveRecord
      * @return bool whether the insertion or updating should continue.
      * If `false`, the insertion or updating will be cancelled.
      */
-    public function beforeFinish()
+    public function beforeFinish(): bool
     {
         $event = new ModelEvent();
         $this->trigger(self::EVENT_BEFORE_FINISH, $event);
@@ -339,7 +464,7 @@ class Task extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function afterSave($insert, $changedAttributes)
+    public function afterSave($insert, $changedAttributes): void
     {
         if (isset($changedAttributes['status']) && (int)$this->status === self::STATUS_DONE) {
             $this->afterFinish($changedAttributes);
@@ -353,6 +478,7 @@ class Task extends ActiveRecord
      * The default implementation will trigger an [[EVENT_AFTER_FINISH]] event.
      * The event class used is [[AfterSaveEvent]]. When overriding this method, make sure you call the
      * parent implementation so that the event is triggered.
+     *
      * @param array $changedAttributes The old values of attributes that had changed and were saved.
      * You can use this parameter to take action based on the changes made for example send an email
      * when the password had changed or implement audit trail that tracks all the changes.
@@ -363,7 +489,7 @@ class Task extends ActiveRecord
      * [[\yii\behaviors\AttributeTypecastBehavior]] to facilitate attribute typecasting.
      * See http://www.yiiframework.com/doc-2.0/guide-db-active-record.html#attributes-typecasting.
      */
-    public function afterFinish($changedAttributes)
+    public function afterFinish(array $changedAttributes): void
     {
         $this->trigger(self::EVENT_AFTER_FINISH, new AfterSaveEvent([
             'changedAttributes' => $changedAttributes,
@@ -374,7 +500,7 @@ class Task extends ActiveRecord
      * Generate unique hash per task
      * @return string
      */
-    public function getHash()
+    public function getHash(): string
     {
         if (!$this->_hash) {
             $string = $this->id . $this->bucket_id . $this->status . $this->end_date . $this->subject;
@@ -387,9 +513,9 @@ class Task extends ActiveRecord
     /**
      * Get checklist status information
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getChecklistStats()
+    public function getChecklistStats(): string
     {
         if (empty($this->checklistElements)) {
             return '';
@@ -404,10 +530,10 @@ class Task extends ActiveRecord
 
     /**
      * Get the end date, either from task or checklist element
-     * @return string|null
-     * @throws \Exception
+     * @return DateTime|int|string|null
+     * @throws Exception
      */
-    public function getEndDate()
+    public function getEndDate(): DateTime|int|string|null
     {
         if ($this->end_date) {
             return $this->end_date;
@@ -418,7 +544,9 @@ class Task extends ActiveRecord
         }
         /** @var ChecklistElement[] $checklistElements */
         $grouped = ArrayHelper::index(
-            array_filter($this->checklistElements, function($item) {return $item->end_date != null;}),
+            array_filter($this->checklistElements, function ($item) {
+                return $item->end_date != null;
+            }),
             null,
             'is_done'
         );
@@ -434,10 +562,20 @@ class Task extends ActiveRecord
     }
 
     /**
-     * Get associated checklist elements
-     * @return \yii\db\ActiveQuery
+     * Get sharepoint url of customer dossier
+     * @return string|false
+     * @throws Exception
      */
-    public function getChecklistElements()
+    public function getSharePointUrl(): string|false
+    {
+        return $this->client?->sharePointUrl ?? false;
+    }
+
+    /**
+     * Get associated checklist elements
+     * @return ActiveQuery
+     */
+    public function getChecklistElements(): ActiveQuery
     {
         return $this->hasMany(ChecklistElement::class, ['task_id' => 'id'])
             ->orderBy([ChecklistElement::tableName() . '.[[sort]]' => SORT_ASC]);
@@ -446,41 +584,41 @@ class Task extends ActiveRecord
     /**
      * Get author
      * @return UserInterface
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->created_by);
     }
 
     /**
      * Get user last updated
      * @return UserInterface
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getUpdater()
+    public function getUpdater(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->updated_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->updated_by);
     }
 
     /**
      * Get user finished
      * @return UserInterface
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getFinisher()
+    public function getFinisher(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->finished_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->finished_by);
     }
 
     /**
      * Get users assigned to this task
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getAssignees()
+    public function getAssignees(): array
     {
-        $allAssignees = Yii::$app->controller->module->users;
+        $allAssignees = Module::getInstance()->users;
 
         $assignees = [];
         foreach ($this->assignments as $assignment) {
@@ -495,105 +633,343 @@ class Task extends ActiveRecord
 
     /**
      * Get assigned user id's
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getAssignments()
+    public function getAssignments(): ActiveQuery
     {
         return $this->hasMany(TaskUserAssignment::class, ['task_id' => 'id']);
     }
 
     /**
      * Get associated bucket
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getBucket()
+    public function getBucket(): ActiveQuery
     {
         return $this->hasOne(Bucket::class, ['id' => 'bucket_id']);
     }
 
     /**
      * Get associated board
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getBoard()
+    public function getBoard(): ActiveQuery
     {
         return $this->hasOne(Board::class, ['id' => 'board_id'])->via('bucket');
     }
 
     /**
      * Get associated links
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getLinks()
+    public function getLinks(): ActiveQuery
     {
         return $this->hasMany(Link::class, ['task_id' => 'id']);
     }
 
     /**
      * Get associated attachments
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getAttachments()
+    public function getAttachments(): ActiveQuery
     {
         return $this->hasMany(Attachment::class, ['task_id' => 'id']);
     }
 
     /**
      * Get associated comments
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getComments()
+    public function getComments(): ActiveQuery
     {
         return $this->hasMany(Comment::class, ['task_id' => 'id'])->orderBy(['created_at' => SORT_DESC]);
     }
 
     /**
      * Get associated ticket
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getTicket()
+    public function getTicket(): ActiveQuery
     {
         return $this->hasOne(Ticket::class, ['id' => 'ticket_id']);
     }
 
     /**
      * Get associated recurrence parent
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getRecurrenceParent()
+    public function getRecurrenceParent(): ActiveQuery
     {
         return $this->hasOne(static::class, ['id' => 'recurrence_parent_id']);
     }
 
     /**
+     * Get associated client
+     * @return UserInterface
+     * @throws Exception
+     */
+    public function getClient(): UserInterface
+    {
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->client_id);
+    }
+
+    /**
      * Get responsible User
      * @return UserInterface
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getResponsible()
+    public function getResponsible(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->responsible_id);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->responsible_id);
     }
 
     /**
-     * Get dependant tasks
-     * @return \yii\db\ActiveQuery
-     * @throws \yii\base\InvalidConfigException
+     * Get related Connection.
+     *
+     * Model depends on the typo of connection.
+     * @return ActiveQuery
+     * @see ConnectionTypeEnum
      */
-    public function getDependants()
+    public function getConnection(): ActiveQuery
     {
-        return $this->hasMany(Task::class, ['id' => 'parent_id'])
-            ->viaTable('{{%kanban__task_dependency}}', ['dependant_id' => 'id']);
+        $connection = Connection::findOne($this->connection_id);
+        $class = ConnectionTypeEnum::tryFrom($connection->type)->getModel();
+
+        return $this->hasOne($class, ['id' => 'connection_id']);
     }
 
     /**
-     * Get dependency tasks
-     * @return \yii\db\ActiveQuery
-     * @throws \yii\base\InvalidConfigException
+     * Get related time windows
+     * @return ActiveQuery
      */
-    public function getDependencies()
+    public function getTimeWindows(): ActiveQuery
     {
-        return $this->hasMany(Task::class, ['id' => 'dependant_id'])
-            ->viaTable('{{%kanban__task_dependency}}', ['parent_id' => 'id']);
+        return $this->hasMany(TimeWindow::class, ['task_id' => 'id']);
+    }
+
+    /**
+     * Get parent task
+     * @return ActiveQuery
+     */
+    public function getParent(): ActiveQuery
+    {
+        return $this->hasOne(static::class, ['id' => 'parent_id']);
+    }
+
+    /**
+     * Get root parent task
+     * @return ActiveQuery
+     */
+    public function getRootParent(): ActiveQuery
+    {
+        return $this->hasOne(static::class, ['id' => 'root_parent_id']);
+    }
+
+    /**
+     * Get children tasks
+     * @return ActiveQuery
+     */
+    public function getChildren(): ActiveQuery
+    {
+        return $this->hasMany(static::class, ['parent_id' => 'id']);
+    }
+
+    /**
+     * Create a tree of subtasks
+     * returns an array of this task with it's children and grandchildren etc
+     * @return array
+     */
+    public function getTree(): array
+    {
+        $tasks = static::find()
+            ->with('board', 'assignees')
+            ->where([
+                'or',
+                ['root_parent_id' => $this->root_parent_id ?? $this->id],
+                ['id' => $this->root_parent_id ?? $this->id]
+            ])
+            ->orderBy([
+                'root_parent_id' => SORT_ASC,
+                'parent_id' => SORT_ASC,
+                'end_date' => SORT_DESC,
+                'subject' => SORT_ASC
+            ])
+            ->all();
+
+        $ret = [];
+
+        // we use this array to store references to the parent tasks, so we can easily find them later
+        $parents = [];
+        foreach ($tasks as $i => $task) {
+            if ($i == 0) {
+                $ret['task'] = $task;
+                $parent = &$ret;
+                $parents[$task->id] = &$parent;
+                continue;
+            }
+
+            // get parent
+            $parent = &$parents[$task->parent_id];
+            // add task to parent
+            $parent['children'][$task->id]['task'] = $task;
+
+            // add to parents array, if not exists
+            if (!array_key_exists($task->id, $parents)) {
+                $parents[$task->id] = &$parent['children'][$task->id];
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Create a html tree of subtasks
+     *
+     * @param array $tree
+     * @param array $statuses
+     * @param ?Task $caller
+     * @param int $level
+     *
+     * @return string
+     * @throws InvalidConfigException
+     * @throws Exception
+     */
+    public function createHtmlTree(
+        array $tree,
+        array $statuses,
+        ?Task $caller,
+        int   $level = 0
+    ): string
+    {
+        $children = ArrayHelper::getValue($tree, 'children', []);
+        $ident = str_repeat('&nbsp;', $level * 4);
+        if ($level > 0) {
+            $ident .= FAS::i('arrow-turn-down-right')->fixedWidth();
+        }
+
+        $html = '';
+        if ($level == 0) {
+            $assigneeText = Yii::t('simialbi/kanban/plan', 'Assigned to');
+            $actionLabel = Yii::t('simialbi/kanban/task', 'Actions');
+            $html = "<thead>
+                        <tr>
+                            <th>{$this->getAttributeLabel('subject')}</th>
+                            <th>{$this->getAttributeLabel('status')}</th>
+                            <th>{$this->getAttributeLabel('end_date')}</th>
+                            <th>$assigneeText</th>
+                            <th>$actionLabel</th>
+                        </tr>
+                    </thead>";
+        }
+
+        /** @var Task $task */
+        $task = $tree['task'];
+        $class = ($task->id == $caller->id) ? 'table-info' : '';
+        $endDate = $task->endDate ? Yii::$app->formatter->asDate($task->endDate) : '';
+        $assignees = '';
+        foreach ($task->assignees as $assignee) {
+            $assignees .= "<img src='$assignee->image' class='rounded-circle me-2' title='$assignee->name' alt='$assignee->name'>";
+        }
+
+        $view = Html::a(
+            FAS::i('eye')->fixedWidth(),
+            // set return to to-do if task is in another board
+            ['task/update', 'id' => $task->id, 'return' => ($task->board->id == $caller->board->id) ? null : 'todo'],
+            [
+                'class' => 'text-decoration-none',
+                'data' => [
+                    'turbo-frame' => 'task-modal-frame'
+                ]
+            ]
+        );
+        $finish = Html::a(
+            FAR::i('circle-check', ['class' => 'ms-1'])->fixedWidth(),
+            ['task/set-status', 'id' => $task->id, 'status' => self::STATUS_DONE, 'return' => 'update'],
+            [
+                'class' => 'text-decoration-none',
+                'data' => [
+                    'turbo-frame' => 'task-modal-frame'
+                ]
+            ]
+        );
+        $actions = '';
+        if ($task->canEdit()) {
+            $actions .= $view;
+            if ($task->status != self::STATUS_DONE) {
+                $actions .= $finish;
+            }
+        }
+
+        $html .= "<tr class='$class'>";
+        $html .= "<td><span title='{$task->board->name} - {$task->bucket->name}'>$ident$task->subject</span></td>";
+        $html .= "<td>{$statuses[$task->status]}</td>";
+        $html .= "<td>$endDate</td>";
+        $html .= "<td>$assignees</td>";
+        $html .= "<td style='width: 35px;'>$actions</td>";
+        $html .= "</tr>";
+
+        foreach ($children as $child) {
+            $html .= $this->createHtmlTree($child, $statuses, $caller, $level + 1);
+        }
+
+        if ($level == 0) {
+            return "<table class='tree-table table table-bordered table-sm table-striped'>$html</table>";
+        }
+
+        return $html;
+    }
+
+    /**
+     * Use this method in other modules (ticket, crm etc) to check if a user can edit the task.
+     *
+     * // todo move to rbac
+     *
+     * @param int|UserInterface|null $user The user to check. If not set, the current user will be used.
+     *
+     * @return bool
+     */
+    public function canEdit(int|null|UserInterface $user = null): bool
+    {
+        if ($user instanceof UserInterface) {
+            $userId = $user->id;
+        } elseif ($user === null) {
+            $userId = Yii::$app->user->id;
+        } else {
+            $userId = $user;
+        }
+
+        /*
+         * A user can edit a task if:
+         * - the task was created by the user OR
+         * - the user is assigned to the task OR
+         * - the user is assigned to the board the task is in
+         */
+
+        return $this->created_by == $userId ||
+            in_array($userId, ArrayHelper::getColumn($this->assignments, 'user_id')) ||
+            in_array($userId, ArrayHelper::getColumn($this->board->assignments, 'user_id'));
+    }
+
+    /**
+     * Updates children on parent delete
+     *
+     * @param Task $task
+     * @param int|null $parentId
+     * @param int|null $rootId
+     *
+     * @return bool
+     * @throws \yii\db\Exception
+     */
+    protected function updateChildrenOnParentDelete(Task $task, ?int $parentId = null, ?int $rootId = null): bool
+    {
+        $task->parent_id = $parentId;
+        $task->root_parent_id = $rootId;
+        $task->save(attributeNames: ['parent_id', 'root_parent_id']);
+
+        foreach ($task->children as $child) {
+            $this->updateChildrenOnParentDelete($child, $task->id, $rootId ?? $task->id);
+        }
+
+        return true;
     }
 }

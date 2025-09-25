@@ -35,6 +35,14 @@ msgid "Create"
 msgstr "Создать"
 
 msgctxt "simialbi/kanban"
+msgid "Create task"
+msgstr "Create task"
+
+msgctxt "simialbi/kanban"
+msgid "Task was created successfully"
+msgstr "Task was created successfully"
+
+msgctxt "simialbi/kanban"
 msgid "Delete series"
 msgstr "Delete series"
 
@@ -357,6 +365,10 @@ msgstr "Доска"
 msgctxt "simialbi/kanban/model/task"
 msgid "Bucket"
 msgstr "Ведро"
+
+msgctxt "simialbi/kanban/model/task"
+msgid "Client"
+msgstr "Клиент"
 
 msgctxt "simialbi/kanban/model/task"
 msgid "Created at"
@@ -774,3 +786,10 @@ msgctxt "simialbi/kanban/task"
 msgid "Not started"
 msgstr "Not started"
 
+msgctxt "simialbi/kanban/task"
+msgid "Url for editing"
+msgstr "Url for editing"
+
+msgctxt "simialbi/kanban/task"
+msgid "Url for downloading"
+msgstr "Url for downloading"

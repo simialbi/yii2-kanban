@@ -1,20 +1,22 @@
 <?php
 
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\Html;
 use yii\helpers\Url;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Board */
+/* @var $this View */
+/* @var $model Board */
 /* @var $readonly boolean */
 
-echo Html::beginTag('div', ['class' => ['d-flex', 'flex-row', 'kanban-plan-sortable', 'sw-wrapper']]);
+echo Html::beginTag('div', ['class' => ['d-flex', 'flex-row', 'kanban-plan-sortable', 'h-100', 'sw-wrapper']]);
 foreach ($model->buckets as $bucket) {
     echo Frame::widget([
         'options' => [
             'id' => 'bucket-' . $bucket->id . '-frame',
             'src' => Url::to(['bucket/view', 'id' => $bucket->id, 'readonly' => $readonly]),
-            'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
+            'class' => ['kanban-bucket', 'me-md-4', 'd-flex', 'flex-column', 'flex-shrink-0'],
             'data' => ['id' => $bucket->id, 'action' => 'change-parent', 'key-name' => 'bucket_id', 'sort' => 'true']
         ]
     ]);
@@ -23,7 +25,7 @@ if (!$readonly) {
     Frame::begin([
         'options' => [
             'id' => 'create-bucket-frame',
-            'class' => ['kanban-bucket', 'mr-md-4', 'd-flex', 'flex-column', 'flex-shrink-0', 'pt-4'],
+            'class' => ['kanban-bucket', 'me-md-4', 'd-flex', 'flex-column', 'flex-shrink-0', 'pt-4']
         ]
     ]);
     ?>

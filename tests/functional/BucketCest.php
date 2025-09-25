@@ -21,7 +21,7 @@ class BucketCest
 
     public function checkCreateForm(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/bucket/create', 'boardId' => 1]);
+        $I->amOnRoute('/kanban/bucket/create', ['boardId' => 1]);
 
         $I->seeElement('#bucket-name');
         $I->seeElement('#sa-kanban-create-bucket-form');
@@ -29,14 +29,14 @@ class BucketCest
 
     public function submitCreateFormEmpty(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/bucket/create', 'boardId' => 1]);
+        $I->amOnRoute('/kanban/bucket/create', ['boardId' => 1]);
         $I->submitForm('#sa-kanban-create-bucket-form', []);
         $I->see('Name darf nicht leer sein.', '.invalid-feedback');
     }
 
     public function submitCreateForm(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/bucket/create', 'boardId' => 1]);
+        $I->amOnRoute('/kanban/bucket/create', ['boardId' => 1]);
         $I->submitForm('#sa-kanban-create-bucket-form', [
             'Bucket[name]' => 'Test bucket'
         ]);
@@ -56,14 +56,14 @@ class BucketCest
 
     public function viewBucketOnBoard(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/plan/view', 'id' => 1]);
+        $I->amOnRoute('/kanban/plan/view', ['id' => 1]);
         $I->seeResponseCodeIs(200);
         $I->seeInSource('<turbo-frame id="bucket-1-frame"');
     }
 
     public function viewBucket(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/bucket/view', 'id' => 1, 'readonly' => 0]);
+        $I->amOnRoute('/kanban/bucket/view', ['id' => 1, 'readonly' => 0]);
         $I->seeElement('#sa-kanban-create-task-form');
         $I->seeElement('#dropdown-user-create-task-1');
     }

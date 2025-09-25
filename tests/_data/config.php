@@ -1,17 +1,33 @@
 <?php
 
+use yii\base\InvalidConfigException;
+
+if (!getenv('YII2_BASE_PATH')) {
+    throw new InvalidConfigException('Missing environmentvariable YII2_BASE_PATH');
+}
+
 return [
-    'id' => 'kanban-tests',
-    'basePath' => dirname(__DIR__),
-    'runtimePath' => dirname(__DIR__) . '/_output',
-    'vendorPath' => dirname(__DIR__, 2) . '/vendor',
+    'id' => 'testapp',
     'language' => 'de-CH',
     'sourceLanguage' => 'en-US',
+    'basePath' => dirname(__DIR__) . getenv('YII2_BASE_PATH'),
+    'vendorPath' => VENDOR_PATH,
+    'layout' => '', // todo
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm' => '@vendor/npm-asset'
+        '@npm' => '@vendor/npm-asset',
     ],
+    'bootstrap' => ['kanban'],
     'modules' => [
+        'gridview' => [
+            'class' => 'kartik\grid\Module',
+            'exportEncryptSalt' => 'ror_HTbRh0Ad7K7DqhAtZOp50GKyia4c',
+            'i18n' => [
+                'class' => 'yii\i18n\PhpMessageSource',
+                'basePath' => '@kvgrid/messages',
+                'forceTranslation' => true
+            ]
+        ],
         'kanban' => [
             'class' => '\simialbi\yii2\kanban\Module'
         ]
@@ -19,16 +35,40 @@ return [
     'components' => [
         'assetManager' => [
             'basePath' => dirname(__DIR__) . '/_output',
-            'baseUrl' => 'http://127.0.0.1'
+            'baseUrl' => 'http://127.0.0.1',
+            'bundles' => [
+                'rmrevin\yii\fontawesome\AssetBundle' => [
+                    'js' => [
+                        'js/brands.min.js',
+                        'js/light.min.js',
+                        'js/regular.min.js',
+                        'js/solid.min.js',
+                        'js/fontawesome.min.js'
+                    ]
+                ],
+                'yii\bootstrap5\BootstrapAsset' => [
+                    'css' => []
+                ],
+                'yii\jui\JuiAsset' => [
+                    'css' => [],
+                    'js' => [
+                        'ui/data.js',
+                        'ui/scroll-parent.js',
+                        'ui/widget.js',
+                        'ui/widgets/mouse.js',
+                        'ui/widgets/sortable.js',
+                    ],
+                    'publishOptions' => [
+                        'only' => [
+                            'ui/*',
+                            'ui/widgets/*'
+                        ]
+                    ]
+                ]
+            ]
         ],
-        'request' => [
-            'cookieValidationKey' => 'wefJDF8sfdsfSDefwqdxj9oq',
-            'scriptFile' => __DIR__ . '/index.php',
-            'scriptUrl' => '/index.php'
-        ],
-        'user' => [
-            'class' => '\yii\web\User',
-            'identityClass' => '\simialbi\extensions\kanban\models\User'
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager'
         ],
         'db' => [
             'class' => '\yii\db\Connection',
@@ -40,17 +80,34 @@ return [
             'enableSchemaCache' => false,
             'enableQueryCache' => false
         ],
-        'mailer' => [
-            'class' => '\yii\symfonymailer\Mailer',
-            'htmlLayout' => '',
-            'textLayout' => '',
-            'useFileTransport' => true
+        'formatter' => [
+            'class' => 'yii\i18n\Formatter',
+            'dateFormat' => 'dd.MM.yyyy',
+            'datetimeFormat' => 'dd.MM.yyyy HH:mm:ss',
+            'decimalSeparator' => '.',
+            'thousandSeparator' => '\'',
+            'currencyCode' => 'CHF',
+            'defaultTimeZone' => 'Europe/Zurich'
         ],
-        'authManager' => [
-            'class' => '\yii\rbac\DbManager',
+        'request' => [
+            'cookieValidationKey' => 'FeVWXG3y1casdJGdGbQacuQt6ZBHLk3W',
+            'enableCsrfValidation' => false
+        ],
+        'user' => [ // todo
+
+        ],
+        'urlManager' => [
+            'class' => 'yii\web\UrlManager',
+            'baseUrl' => '/',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false
+        ],
+        'cache' => [
+            'class' => 'yii\caching\FileCache',
+            'cachePath' => dirname(__DIR__) . '/_output/cache'
+        ],
+        'params' => [
+            'bsVersion' => 5
         ]
-    ],
-    'params' => [
-        'bsVersion' => '4.x'
     ]
 ];

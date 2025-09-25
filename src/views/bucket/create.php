@@ -1,11 +1,15 @@
 <?php
 
+use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\ActiveForm;
+use yii\base\Model;
+use yii\bootstrap5\ActiveForm;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Bucket */
-/* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $this View */
+/* @var $model Bucket */
+/* @var $users UserInterface[] */
 /* @var $statuses array */
 
 Frame::begin([
@@ -18,9 +22,9 @@ Frame::begin([
         'action' => ['bucket/create', 'boardId' => $model->board_id],
         'id' => 'sa-kanban-create-bucket-form',
         'fieldConfig' => function ($model, $attribute) {
-            /* @var $model \yii\base\Model */
+            /* @var $model Model */
             return [
-                'labelOptions' => ['class' => 'sr-only'],
+                'labelOptions' => ['class' => 'visually-hidden'],
                 'inputOptions' => [
                     'class' => ['form-control', 'form-control-sm'],
                     'placeholder' => $model->getAttributeLabel($attribute)

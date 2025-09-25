@@ -7,7 +7,6 @@
 
 namespace simialbi\yii2\kanban;
 
-
 use simialbi\yii2\web\AssetBundle;
 
 class KanbanAsset extends AssetBundle

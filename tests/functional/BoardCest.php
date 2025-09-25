@@ -9,6 +9,7 @@ namespace simialbi\extensions\kanban\functional;
 use simialbi\extensions\kanban\FunctionalTester;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\BoardUserAssignment;
+use simialbi\yii2\kanban\models\Bucket;
 
 class BoardCest
 {
@@ -20,24 +21,33 @@ class BoardCest
         $I->amLoggedInAs(1);
     }
 
+    public function prepareDb()
+    {
+        \Yii::$app->db->createCommand('SET FOREIGN_KEY_CHECKS = 0')->execute();
+        \Yii::$app->db->createCommand('TRUNCATE TABLE ' . Bucket::tableName())->execute();
+        \Yii::$app->db->createCommand('TRUNCATE TABLE ' . Board::tableName())->execute();
+        \Yii::$app->db->createCommand('TRUNCATE TABLE ' . BoardUserAssignment::tableName())->execute();
+        \Yii::$app->db->createCommand('SET FOREIGN_KEY_CHECKS = 1')->execute();
+    }
+
     public function checkCreateForm(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/plan/create']);
+        $I->amOnPage('/kanban/plan/create');
         $I->seeInTitle('Neuer Plan');
         $I->seeInSource('<h1>Neuer Plan</h1>');
-        $I->seeCheckboxIsChecked('#board-is_public');
+        $I->dontSeeCheckboxIsChecked('#board-is_public');
     }
 
     public function submitCreateFormEmpty(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/plan/create']);
+        $I->amOnPage('/kanban/plan/create');
         $I->submitForm('#sa-kanban-create-plan-form', []);
         $I->see('Name darf nicht leer sein.', '.invalid-feedback');
     }
 
     public function submitCreateForm(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/plan/create']);
+        $I->amOnPage('/kanban/plan/create');
         $I->submitForm('#sa-kanban-create-plan-form', [
             'Board[name]' => 'Test',
             'Board[is_public]' => 0
@@ -63,7 +73,7 @@ class BoardCest
 
     public function submitUpdateForm(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/plan/update', 'id' => 1]);
+        $I->amOnRoute('/kanban/plan/update', ['id' => 1]);
 
         $I->seeInFormFields('#sa-kanban-update-plan-form', [
             'Board[name]' => 'Test'
@@ -87,7 +97,7 @@ class BoardCest
 
     public function viewBoardOnOverview(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/plan/index']);
+        $I->amOnPage('/kanban/plan/index');
         $I->seeInTitle('Kanban Hub');
         $I->see('Test 2');
 //        $I->seeInSource('<a href="/kanban/plan/view?id=1" class="flex-grow-1 text-body text-decoration-none">');
@@ -101,14 +111,14 @@ class BoardCest
     public function dontViewBoardOnOverviewAsJane(FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnPage(['kanban/plan/index']);
+        $I->amOnPage('/kanban/plan/index');
         $I->seeResponseCodeIs(200);
         $I->dontSee('Test 2');
     }
 
     public function viewBoard(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/plan/view', 'id' => 1]);
+        $I->amOnRoute('/kanban/plan/view', ['id' => 1]);
         $I->seeResponseCodeIs(200);
         $I->seeInTitle('Test 2');
         $I->see('Test 2');
@@ -121,7 +131,7 @@ class BoardCest
     public function viewBoardAsJaneError(FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnPage(['kanban/plan/view', 'id' => 1]);
+        $I->amOnRoute('/kanban/plan/view', ['id' => 1]);
         $I->seeResponseCodeIs(403);
     }
 }

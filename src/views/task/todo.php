@@ -1,14 +1,17 @@
 <?php
 
 use simialbi\yii2\kanban\widgets\ToDo;
-use simialbi\yii2\turbo\Frame;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
+/* @var $this View */
 /* @var $kanbanModuleName string */
+/* @var $renderModal null|boolean */
+/* @var $addBoardFilter null|boolean */
+/* @var $cacheDuration null|integer */
 
 echo ToDo::widget([
     'kanbanModuleName' => $kanbanModuleName,
-    'renderModal' => false,
-    'addBoardFilter' => true,
-    'cacheDuration' => -1
+    'renderModal' => $renderModal ?? false,
+    'addBoardFilter' => $addBoardFilter ?? true,
+    'cacheDuration' => $cacheDuration ?? -1
 ]);

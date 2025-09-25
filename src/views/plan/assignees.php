@@ -1,14 +1,17 @@
 <?php
 
 use simialbi\yii2\hideseek\HideSeek;
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\Dropdown;
-use yii\bootstrap4\Html;
+use yii\bootstrap5\Dropdown;
 use yii\web\JsExpression;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Board */
-/* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $this View */
+/* @var $model Board */
+/* @var $users UserInterface[] */
 /* @var $readonly boolean */
 
 Frame::begin([
@@ -16,42 +19,46 @@ Frame::begin([
         'id' => 'plan-' . $model->id . '-assignees'
     ]
 ]);
+
+$upper = 3;
+$lower = 1;
+
 ?>
-    <div class="kanban-plan-assignees kanban-assignees d-none d-md-block">
-        <div class="dropdown mr-auto">
-            <a href="javascript:;"<?php if (!$readonly): ?> data-toggle="dropdown"<?php endif; ?>
+    <div class="kanban-plan-assignees kanban-assignees d-none d-xl-block">
+        <div class="dropdown me-auto">
+            <a href="javascript:;"<?php if (!$readonly): ?> data-bs-toggle="dropdown"<?php endif; ?>
                class="dropdown-toggle text-decoration-none text-reset d-flex flex-row">
                 <?php $i = 0; ?>
                 <?php foreach ($model->assignees as $assignee): ?>
-                    <span class="kanban-user<?php if (++$i > 2): ?> d-md-none d-lg-block<?php endif; ?>">
-                        <?php if ($assignee->image): ?>
-                            <?= Html::img($assignee->image, [
-                                'class' => ['rounded-circle', 'mr-1'],
+                    <span class="kanban-user<?php if ($i++ > ($lower - 1)): ?> d-md-none d-5xl-block<?php endif; ?>">
+                        <?php if ($assignee->photo): ?>
+                            <?= Html::img($assignee->photo, [
+                                'class' => ['rounded-circle', 'me-1'],
                                 'title' => Html::encode($assignee->name),
                                 'data' => [
-                                    'toggle' => 'tooltip'
+                                    'bs-toggle' => 'tooltip'
                                 ]
                             ]); ?>
                         <?php else: ?>
-                            <span class="kanban-visualisation mr-1"
+                            <span class="kanban-visualisation me-1"
                                   title="<?= Html::encode($assignee->name); ?>"
-                                  data-toggle="tooltip">
+                                  data-bs-toggle="tooltip">
                                 <?= strtoupper(substr($assignee->name, 0, 1)); ?>
                             </span>
                         <?php endif; ?>
                         </span>
-                    <?php if ($i > 3): ?>
+                    <?php if ($i > ($upper - 1)): ?>
                         <?php break; ?>
                     <?php endif; ?>
                 <?php endforeach; ?>
-                <?php if (($cnt = count($model->assignees)) > 2): ?>
-                    <span class="d-none d-md-block d-lg-none kanban-user-more">
-                        + <?= $cnt - 2; ?>
+                <?php if (($cnt = count($model->assignees)) > $lower): ?>
+                    <span class="d-none d-3xl-block d-5xl-none kanban-user-more">
+                        + <?= $cnt - $lower ; ?>
                     </span>
                 <?php endif; ?>
-                <?php if (($cnt = count($model->assignees)) > 4): ?>
-                    <span class="d-none d-lg-block kanban-user-more">
-                        + <?= $cnt - 4; ?>
+                <?php if (($cnt = count($model->assignees)) > $upper): ?>
+                    <span class="d-none d-5xl-block kanban-user-more">
+                        + <?= $cnt - $upper; ?>
                     </span>
                 <?php endif; ?>
             </a>
@@ -61,7 +68,7 @@ Frame::begin([
                 $newUsers = [];
                 foreach ($model->assignees as $assignee) {
                     $assignees[] = [
-                        'label' => $this->render('/task/_user', [
+                        'label' => $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/_user.php'), [
                             'user' => $assignee,
                             'assigned' => true
                         ]),
@@ -83,7 +90,7 @@ Frame::begin([
                         }
                     }
                     $newUsers[] = [
-                        'label' => $this->render('/task/_user', [
+                        'label' => $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/_user.php'), [
                             'user' => $user,
                             'assigned' => false
                         ]),
@@ -124,7 +131,7 @@ Frame::begin([
                 ]));
 
                 echo Dropdown::widget([
-                    'id' => 'dropdown-plan-assignees-' . $model->id,
+                    'id' => 'dropdown-plan-' . $model->id,
                     'items' => $items,
                     'encodeLabels' => false,
                     'options' => [

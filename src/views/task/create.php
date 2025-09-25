@@ -1,23 +1,22 @@
 <?php
 
-use rmrevin\yii\fontawesome\FAS;
 use sandritsch91\yii2\flatpickr\Flatpickr;
-use simialbi\yii2\hideseek\HideSeek;
-use yii\bootstrap4\ActiveForm;
-use yii\bootstrap4\Dropdown;
-use yii\bootstrap4\Html;
-use yii\web\JsExpression;
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\kanban\models\Bucket;
+use simialbi\yii2\kanban\models\Task;
+use simialbi\yii2\models\UserInterface;
+use yii\base\Model;
+use yii\bootstrap5\ActiveForm;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $board \simialbi\yii2\kanban\models\Board */
-/* @var $task \simialbi\yii2\kanban\models\Task */
+/* @var $this View */
+/* @var $board Board */
+/* @var $task Task */
 /* @var $id integer|string */
 /* @var $keyName string */
-/* @var $bucketName string */
-/* @var $mobile boolean */
-/* @var $users \simialbi\yii2\models\UserInterface[] */
-/* @var $buckets \simialbi\yii2\kanban\models\Bucket[] */
-/* @var $statuses array */
+/* @var $users UserInterface[] */
+/* @var $buckets Bucket[] */
 
 $form = ActiveForm::begin([
     'action' => ['task/create', 'boardId' => $board->id, $keyName => $id],
@@ -30,9 +29,9 @@ $form = ActiveForm::begin([
     'id' => 'sa-kanban-create-task-form',
     'validateOnSubmit' => false,
     'fieldConfig' => function ($model, $attribute) {
-        /* @var $model \yii\base\Model */
+        /* @var $model Model */
         return [
-            'labelOptions' => ['class' => 'sr-only'],
+            'labelOptions' => ['class' => 'visually-hidden'],
             'inputOptions' => [
                 'placeholder' => $model->getAttributeLabel($attribute)
             ]
@@ -41,16 +40,16 @@ $form = ActiveForm::begin([
 ]);
 ?>
 <div class="card">
-    <?= Html::button('<span aria-hidden="true">' . FAS::i('times') . '</span>', [
+    <?= Html::button('', [
         'type' => 'button',
-        'class' => ['close', 'position-absolute'],
+        'class' => ['btn-close', 'position-absolute'],
         'style' => [
-            'font-size' => '1rem',
-            'right' => '.25rem'
+            'font-size' => '0.65rem',
+            'right' => '0'
         ],
         'data' => [
-            'target' => '#bucket-' . $id . '-create-task',
-            'toggle' => 'collapse'
+            'bs-target' => '#bucket-' . $id . '-create-task',
+            'bs-toggle' => 'collapse'
         ],
         'aria' => [
             'label' => Yii::t('simialbi/kanban', 'Close')
@@ -63,98 +62,20 @@ $form = ActiveForm::begin([
         <?php endif; ?>
         <?= $form->field($task, 'end_date', [
             'options' => [
-                'class' => ['form-group', 'mb-0']
+                'class' => ['mb-3']
             ]
         ])->widget(Flatpickr::class, [
             'options' => [
                 'id' => 'flatpickr-create-task-' . $id,
-            ],
-            'customAssetBundle' => false
+            ]
         ]); ?>
         <?php if ($keyName !== 'userId'): ?>
-            <div class="kanban-task-assignees kanban-assignees mt-3">
-                <div class="dropdown">
-                    <a href="javascript:;" data-toggle="dropdown"
-                       class="dropdown-toggle text-decoration-none text-reset d-flex flex-row flex-wrap">
-
-                    </a>
-                    <?php
-                    foreach ($users as $user) {
-                        $linkOptions = [
-                            'class' => ['align-items-center', 'remove-assignee'],
-                            'style' => ['display' => 'none'],
-                            'onclick' => sprintf(
-                                'window.sa.kanban.removeAssignee.call(this, %u);',
-                                $user->getId()
-                            ),
-                            'data' => [
-                                'id' => $user->getId(),
-                                'name' => $user->name,
-                                'image' => $user->image
-                            ]
-                        ];
-
-                        $items[] = [
-                            'label' => $this->render('_user', [
-                                'user' => $user,
-                                'assigned' => true
-                            ]),
-                            'linkOptions' => $linkOptions,
-                            'url' => 'javascript:;'
-                        ];
-                    }
-                    $items[] = ['label' => Yii::t('simialbi/kanban', 'Not assigned')];
-                    foreach ($users as $user) {
-                        $linkOptions = [
-                            'class' => ['align-items-center', 'add-assignee'],
-                            'onclick' => sprintf(
-                                'window.sa.kanban.addAssignee.call(this, %u);',
-                                $user->getId()
-                            ),
-                            'data' => [
-                                'id' => $user->getId(),
-                                'name' => $user->name,
-                                'image' => $user->image
-                            ]
-                        ];
-
-                        $items[] = [
-                            'label' => $this->render('_user', [
-                                'user' => $user,
-                                'assigned' => false
-                            ]),
-                            'linkOptions' => $linkOptions,
-                            'url' => 'javascript:;'
-                        ];
-                    }
-
-                    array_unshift($items, HideSeek::widget([
-                        'fieldTemplate' => '<div class="search-field px-3 mb-3">{input}</div>',
-                        'options' => [
-                            'id' => 'kanban-create-task-assignees-' . $id,
-                            'placeholder' => Yii::t('simialbi/kanban', 'Filter by keyword')
-                        ],
-                        'clientOptions' => [
-                            'list' => '#dropdown-user-create-task-' . $id,
-                            'ignore' => '.search-field,.dropdown-header'
-                        ]
-                    ]));
-                    ?>
-                    <?= Dropdown::widget([
-                        'id' => 'dropdown-user-create-task-' . $id,
-                        'items' => $items,
-                        'encodeLabels' => false,
-                        'options' => [
-                            'class' => ['kanban-create-task-assignees', 'w-100']
-                        ],
-                        'clientEvents' => [
-                            'shown.bs.dropdown' => new JsExpression('function(e) {
-                                $(e.target).closest(".dropdown").find(".search-field input").trigger("focus");
-                            }'),
-                        ]
-                    ]); ?>
-                </div>
-            </div>
+            <?= $this->render('_user-dropdown', [
+                'users' => $users,
+                'id' => $id,
+                'assignees' => [Yii::$app->user->identityClass::findIdentity(Yii::$app->user->id)],
+                'enableAddRemoveAll' => false
+            ]) ?>
         <?php endif; ?>
     </div>
     <div class="list-group list-group-flush">

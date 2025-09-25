@@ -11,6 +11,7 @@ extensions:
         - Codeception\Extension\RunFailed
 settings:
     colors: true
+    error_level: E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED
     memory_limit: 1024M
 modules:
     config:

@@ -1,5 +1,7 @@
 <?php
 
+use simialbi\yii2\chart\models\axis\CategoryAxis;
+use simialbi\yii2\chart\models\axis\ValueAxis;
 use simialbi\yii2\chart\models\Legend;
 use simialbi\yii2\chart\models\series\ColumnSeries;
 use simialbi\yii2\chart\models\series\PieSeries;
@@ -7,10 +9,15 @@ use simialbi\yii2\chart\models\style\Color;
 use simialbi\yii2\chart\widgets\LineChart;
 use simialbi\yii2\chart\widgets\PieChart;
 use simialbi\yii2\kanban\KanbanAsset;
+use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\models\UserInterface;
+use yii\helpers\ArrayHelper;
+use yii\web\JsExpression;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Board */
-/* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $this View */
+/* @var $model Board */
+/* @var $users UserInterface[] */
 /* @var $statuses array */
 /* @var $byStatus array */
 /* @var $byBucket array */
@@ -41,7 +48,7 @@ $js = <<<JS
 {$pieSeries->varName}.slices.template.propertyFields.fill = 'color';
 {$pieSeries->varName}.slices.template.propertyFields.stroke = 'color';
 JS;
-$pieSeries->appendix = new \yii\web\JsExpression($js);
+$pieSeries->appendix = new JsExpression($js);
 
 $columnSeries = [];
 foreach ($statuses as $status => $label) {
@@ -52,10 +59,10 @@ foreach ($statuses as $status => $label) {
         ],
         'stacked' => true,
         'name' => $label,
-        'fill' => new Color(['hex' => \yii\helpers\ArrayHelper::getValue($colors, $status)]),
-        'stroke' => new Color(['hex' => \yii\helpers\ArrayHelper::getValue($colors, $status)])
+        'fill' => new Color(['hex' => ArrayHelper::getValue($colors, $status)]),
+        'stroke' => new Color(['hex' => ArrayHelper::getValue($colors, $status)])
     ]);
-    $series->appendix = new \yii\web\JsExpression(
+    $series->appendix = new JsExpression(
         "{$series->varName}.columns.template.tooltipText = \"{name}: [bold]{valueY}[/]\";\n"
     );
     $columnSeries[] = $series;
@@ -70,10 +77,10 @@ foreach ($statuses as $status => $label) {
         ],
         'stacked' => true,
         'name' => $label,
-        'fill' => new Color(['hex' => \yii\helpers\ArrayHelper::getValue($colors, $status)]),
-        'stroke' => new Color(['hex' => \yii\helpers\ArrayHelper::getValue($colors, $status)])
+        'fill' => new Color(['hex' => ArrayHelper::getValue($colors, $status)]),
+        'stroke' => new Color(['hex' => ArrayHelper::getValue($colors, $status)])
     ]);
-    $series->appendix = new \yii\web\JsExpression("{$series->varName}.columns.template.tooltipText = \"{name}: [bold]{valueX}[/]\";");
+    $series->appendix = new JsExpression("{$series->varName}.columns.template.tooltipText = \"{name}: [bold]{valueX}[/]\";");
     $barSeries[] = $series;
 }
 ?>
@@ -125,12 +132,12 @@ foreach ($statuses as $status => $label) {
                         ],
                         'series' => $columnSeries,
                         'axes' => [
-                            new \simialbi\yii2\chart\models\axis\CategoryAxis([
+                            new CategoryAxis([
                                 'dataFields' => [
                                     'category' => 'bucket'
                                 ]
                             ]),
-                            new \simialbi\yii2\chart\models\axis\ValueAxis()
+                            new ValueAxis()
                         ],
                         'data' => $byBucket
                     ]); ?>
@@ -147,7 +154,7 @@ foreach ($statuses as $status => $label) {
                 <div class="card-body">
                     <?php
                     $height = 100;
-                    $height += count($barSeries) * 50;
+                    $height += count($byAssignee) * 50;
                     ?>
                     <?= LineChart::widget([
                         'options' => [
@@ -158,8 +165,8 @@ foreach ($statuses as $status => $label) {
                         ],
                         'series' => $barSeries,
                         'axes' => [
-                            'x' => new \simialbi\yii2\chart\models\axis\ValueAxis(),
-                            'y' => new \simialbi\yii2\chart\models\axis\CategoryAxis([
+                            'x' => new ValueAxis(),
+                            'y' => new CategoryAxis([
                                 'dataFields' => [
                                     'category' => 'user'
                                 ]

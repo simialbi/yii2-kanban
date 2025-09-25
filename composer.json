@@ -21,33 +21,33 @@
         "source": "https://github.com/simialbi/yii2-kanban",
         "issues": "https://github.com/simialbi/yii2-kanban/issues"
     },
-    "minimum-stability": "beta",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
-        "php": ">=5.6",
+        "php": ">=8.2",
+        "ext-dom": "*",
+        "ext-gd": "*",
         "yiisoft/yii2": "^2.0.20",
-        "yiisoft/yii2-bootstrap4": "^2.0.4",
+        "yiisoft/yii2-bootstrap5": "^2.0.0",
         "arogachev/yii2-sortable": "^0.1.6",
         "bower-asset/fullcalendar": "4.2.*",
-        "creocoder/yii2-nested-sets": "^0.9",
-        "fortawesome/font-awesome": "^5.12.0",
         "kartik-v/yii2-widget-fileinput": "^1.0.9",
-        "npm-asset/highlight.js": "^9.18.1",
-        "npm-asset/swiper": "^6.3.5",
+        "npm-asset/swiper": "^11.1.9",
+        "phpoffice/phpspreadsheet": "^5.1.0",
         "rmrevin/yii2-fontawesome": "^3.4.0",
+        "sandritsch91/yii2-froala-editor": "^1.0.0",
         "sandritsch91/yii2-widget-flatpickr": "^1.0.0",
         "simialbi/yii2-simialbi-base": ">=0.10.2 <1.0 | ^1.0.0",
-        "simialbi/yii2-summernote": "^1.2.1",
-        "simialbi/yii2-widget-chart": "^0.7.0",
+        "simialbi/yii2-widget-chart": "^0.8.0",
         "simialbi/yii2-widget-hideseek": "^1.0.0",
-        "simialbi/yii2-widget-turbo": "^1.0.0",
+        "simialbi/yii2-widget-turbo": "dev-master",
         "simshaun/recurr": "^5.0.0"
     },
     "require-dev": {
-        "ext-gd": "*",
         "ext-mbstring": "*",
-        "codeception/module-asserts": "^2.0.1",
-        "codeception/module-filesystem": "^2.0.1",
-        "codeception/module-yii2": "^1.0",
+        "codeception/module-asserts": "^3.0.0",
+        "codeception/module-filesystem": "^3.0.0",
+        "codeception/module-yii2": "^2.0.0",
         "simialbi/yii2-ticket": "~1.0@dev",
         "yiisoft/yii2-coding-standards": "~2.0",
         "yiisoft/yii2-symfonymailer": "^2.0.3"
@@ -63,7 +63,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "simialbi\\extensions\\kanban\\": "tests"
+			"simialbi\\extensions\\kanban\\": "tests"
         }
     },
     "repositories": [
@@ -74,12 +74,12 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "2.0.x-dev"
+            "dev-master": "2.x-dev"
         }
-    },
-    "config": {
-        "allow-plugins": {
-            "yiisoft/yii2-composer": true
-        }
+	},
+	"config": {
+		"allow-plugins": {
+			"yiisoft/yii2-composer": true
+		}
     }
 }

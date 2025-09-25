@@ -1,12 +1,17 @@
-@import "npm-asset/bootstrap/scss/functions";
-@import "npm-asset/bootstrap/scss/mixins";
+@import "../../../vendor/bower-asset/bootstrap/scss/functions";
+@import "../../../vendor/bower-asset/bootstrap/scss/variables";
+@import "../../../vendor/bower-asset/bootstrap/scss/mixins/border-radius";
+@import "../../../vendor/bower-asset/bootstrap/scss/mixins/box-shadow";
+@import "../../../vendor/bower-asset/bootstrap/scss/mixins/transition";
 
+$enable-reduced-motion: false !default;
 $enable-transitions: true !default;
 $enable-prefers-reduced-motion-media-query: false !default;
 
 $bucket-width: 300px !default;
 $bucket-max-height: 370px !default;
 $kanban-board-image-min-width: 150px !default;
+$kanban-plan-view-image-max-width: 52px !default;
 $user-image-size: 32px !default;
 
 $nav-border-width: 2px !default;
@@ -39,21 +44,17 @@ turbo-frame {
     display: block;
 }
 
-.kanban-top-scrollbar {
-    height: 20px;
-
-    > div {
-        height: 1px;
-        overflow-y: hidden;
-    }
-}
-
 .kanban-bottom-scrollbar {
     @media (max-width: map-get($grid-breakpoints, md) - 1) {
         position: relative;
     }
+
+    .kanban-tasks {
+        overflow-y: scroll;
+    }
 }
-.kanban-top-scrollbar, .kanban-bottom-scrollbar {
+
+.kanban-bottom-scrollbar {
     @media (min-width: map-get($grid-breakpoints, md)) {
         width: 100%;
         overflow-x: scroll;
@@ -108,31 +109,31 @@ turbo-frame {
     max-height: 150px;
     width: 100%;
 
-    .kanban-board-image > img {
-        height: 100%;
-        object-fit: contain;
-        object-position: center;
-        width: 100%;
-    }
+    .kanban-board-image {
+        min-width: $kanban-board-image-min-width;
 
-    &:hover {
-        border-color: var(--dark);
+        > img {
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+            max-height: 150px;
+            padding: 1rem;
+        }
     }
 }
 
 .kanban-board-inner {
-    background-color: var(--white);
+    background-color: var(--bs-white);
     display: flex;
     height: 100%;
     max-height: 150px;
 }
 
 .kanban-board-image {
-    min-width: $kanban-board-image-min-width;
-
     .kanban-visualisation {
         align-items: center;
-        color: var(--white);
+        color: var(--bs-white);
         display: flex;
         font-size: 1.25rem;
         font-weight: bold;
@@ -147,15 +148,38 @@ turbo-frame {
             }
         }
     }
-    > img {
-        max-height: 150px;
-        padding: 1rem;
+}
+
+.kanban-plan-view {
+    .kanban-plan-assignees-dropdown {
+        --bs-dropdown-min-width: 15rem;
+    }
+}
+
+.kanban-plan-view, .kanban-plan-schedule {
+    .kanban-board-image {
+        .kanban-visualisation {
+            min-width: $kanban-plan-view-image-max-width;
+        }
+
+        > img {
+            max-height: $kanban-plan-view-image-max-width;
+            max-width: $kanban-plan-view-image-max-width;
+            width: auto;
+        }
     }
 }
 
 .kanban-board-meta {
     flex-grow: 1;
-    padding: 1rem
+    padding: 1rem;
+}
+
+.kanban-board-options {
+    .dropdown-toggle::after {
+        content: "";
+        display: none;
+    }
 }
 
 .kanban-create-mobile {
@@ -232,9 +256,9 @@ turbo-frame {
     }
 
     > .kanban-visualisation {
-        background-color: var(--gray);
+        background-color: var(--bs-gray);
         border-radius: 50%;
-        color: var(--white);
+        color: var(--bs-white);
         display: inline-block;
         font-size: 1rem;
         font-weight: normal;
@@ -249,7 +273,11 @@ turbo-frame {
     line-height: $user-image-size;
 }
 
-#sa-kanban-create-task-form, #sa-kanban-task-modal-form {
+#sa-kanban-create-task-form, #sa-kanban-task-modal-form, #kanban-create-sub-task-form {
+    .kanban-assignees {
+        // transform: translateX(0px)!important;
+    }
+
     .kanban-task-assignees {
         .dropdown {
             .dropdown-toggle {
@@ -265,7 +293,7 @@ turbo-frame {
                     background-color: transparent;
 
                     &::after {
-                        background-color: var(--light);
+                        background-color: var(--bs-light);
                     }
                 }
 
@@ -288,6 +316,21 @@ turbo-frame {
                     width: calc(#{$user-image-size} + .5rem);
                 }
             }
+
+            .add-all-assignees {
+                &:hover {
+                    background-color: var(--bs-white);
+                    text-decoration: underline;
+                }
+
+                color: var(--bs-link-color);
+                display: inline;
+            }
+
+            .remove-all-assignees {
+                height: calc($user-image-size - 2px);
+                min-width: calc($user-image-size - 2px);
+            }
         }
     }
 
@@ -304,7 +347,6 @@ turbo-frame {
 
 .kanban-task-assignees, .card-footer.kanban-task-assignees, .kanban-plan-assignees, .kanban-task-responsible {
     background: none transparent;
-    padding: 0;
 
     .kanban-user.responsible {
         padding: .5rem .75rem;
@@ -317,6 +359,7 @@ turbo-frame {
     .dropdown {
         .dropdown-toggle {
             padding: .5rem .75rem;
+            outline: none;
 
             &:hover::after {
                 opacity: 1;
@@ -342,7 +385,6 @@ turbo-frame {
 
         .dropdown-menu {
             max-height: $bucket-max-height;
-            min-width: $bucket-width;
             overflow-y: auto;
         }
     }
@@ -353,10 +395,10 @@ turbo-frame {
         .dropdown-toggle {
             @include transition(background-color .2s ease-in-out);
 
-            background-color: var(--white);
+            background-color: var(--bs-white);
 
             &:hover {
-                background-color: var(--light);
+                background-color: var(--bs-light);
             }
         }
     }
@@ -366,8 +408,12 @@ turbo-frame {
     cursor: pointer;
 
     &.status-done, &.status-0 {
-        background-color: var(--light);
+        background-color: var(--bs-light);
         text-decoration: line-through;
+
+        .dropdown-toggle {
+            background-color: var(--bs-light);
+        }
 
         .kanban-task-done-link {
             display: none !important;
@@ -390,12 +436,12 @@ turbo-frame {
         cursor: grab;
     }
 
-    .flatpickr-input {
+    .input-group-addon {
         max-width: 25%;
     }
 
     @media (max-width: map-get($grid-breakpoints, sm) - 1) {
-        .flatpickr-input {
+        .input-group-addon {
             max-width: 33.33333333%;
         }
     }
@@ -409,7 +455,7 @@ turbo-frame {
     &:hover {
         label {
             &::before {
-                background-color: var(--light);
+                background-color: var(--bs-light);
             }
 
             text-decoration: underline;
@@ -424,7 +470,7 @@ turbo-frame {
     opacity: 0;
 
     &:hover {
-        color: var(--success);
+        color: var(--bs-success);
     }
 }
 
@@ -489,9 +535,11 @@ turbo-frame {
         padding-left: 0;
         padding-right: 0;
 
+        /*
         @include hover-focus {
             border-color: $nav-link-hover-border-color;
         }
+        */
 
         &.disabled {
             color: $nav-link-disabled-color;
@@ -512,5 +560,39 @@ turbo-frame {
         .list-group-item {
             cursor: pointer;
         }
+    }
+
+    .list-group-item {
+        --bs-list-group-action-hover-bg: var(--bs-light);
+    }
+}
+
+#kanban-fast-create-form .dropdown {
+    border: $input-border-width solid $input-border-color;
+    @include border-radius($input-border-radius, 0);
+
+    @include box-shadow($input-box-shadow);
+    @include transition($input-transition);
+}
+
+.kanban-task-modal {
+    .tree-table {
+        td, th {
+            font-size: 0.75rem;
+        }
+
+        td img {
+            width: 18px;
+            height: 18px;
+            object-fit: cover;
+            object-position: center;
+        }
+    }
+
+    .modal-footer {
+        position: sticky;
+        bottom: 0;
+        background-color: var(--bs-modal-bg);
+        z-index: $zindex-dropdown - 1;
     }
 }

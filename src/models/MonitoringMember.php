@@ -6,10 +6,12 @@
 
 namespace simialbi\yii2\kanban\models;
 
+use simialbi\yii2\kanban\Module;
 use simialbi\yii2\models\UserInterface;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -17,11 +19,11 @@ use yii\helpers\ArrayHelper;
  * Class MonitoringMember
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
- * @property integer $list_id
- * @property integer|string $user_id
- * @property integer|string $created_by
- * @property integer|string $created_at
+ * @property int $id
+ * @property int $list_id
+ * @property int|string $user_id
+ * @property int|string $created_by
+ * @property int|string $created_at
  *
  * @property-read MonitoringList $list
  * @property-read UserInterface $author
@@ -32,7 +34,7 @@ class MonitoringMember extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__monitoring_member}}';
     }
@@ -40,12 +42,12 @@ class MonitoringMember extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['id', 'integer'],
-            ['list_id', 'integer'],
             ['user_id', 'string', 'max' => 64],
+            ['list_id', 'integer'],
 
             [['list_id', 'user_id'], 'required']
         ];
@@ -54,7 +56,7 @@ class MonitoringMember extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'blameable' => [
@@ -75,7 +77,7 @@ class MonitoringMember extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/monitoring-member', 'Id'),
@@ -88,28 +90,30 @@ class MonitoringMember extends ActiveRecord
 
     /**
      * Get associated monitoring list
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getList()
+    public function getList(): ActiveQuery
     {
         return $this->hasOne(MonitoringList::class, ['id' => 'list_id']);
     }
 
     /**
-     * Get author
+     * Get related User
      * @return UserInterface
+     * @throws \Exception
      */
-    public function getUser()
+    public function getUser(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->user_id);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->user_id);
     }
 
     /**
      * Get author
      * @return UserInterface
+     * @throws \Exception
      */
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->created_by);
     }
 }

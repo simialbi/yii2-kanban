@@ -1,11 +1,12 @@
 <?php
 
-use rmrevin\yii\fontawesome\FAS;
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\Html;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Task */
+/* @var $this View */
+/* @var $model Task */
 /* @var $history array */
 /* @var $statuses array */
 
@@ -18,16 +19,7 @@ Frame::begin([
     <div class="kanban-task-modal">
         <div class="modal-header">
             <h5 class="modal-title"><?= Yii::t('simialbi/kanban', 'View history'); ?></h5>
-            <?= Html::button('<span aria-hidden="true">' . FAS::i('times') . '</span>', [
-                'type' => 'button',
-                'class' => ['close'],
-                'data' => [
-                    'dismiss' => 'modal'
-                ],
-                'aria' => [
-                    'label' => Yii::t('simialbi/kanban', 'Close')
-                ]
-            ]); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             <table class="table table-condensed table-striped">
@@ -58,7 +50,7 @@ Frame::begin([
                 'type' => 'button',
                 'class' => ['btn', 'btn-dark'],
                 'data' => [
-                    'dismiss' => 'modal'
+                    'bs-dismiss' => 'modal'
                 ],
                 'aria' => [
                     'label' => Yii::t('simialbi/kanban', 'Close')

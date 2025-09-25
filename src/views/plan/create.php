@@ -1,10 +1,12 @@
 <?php
 
-use yii\bootstrap4\ActiveForm;
-use yii\bootstrap4\Html;
+use simialbi\yii2\kanban\helpers\Html;
+use simialbi\yii2\kanban\models\Board;
+use yii\bootstrap5\ActiveForm;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $model \simialbi\yii2\kanban\models\Board */
+/* @var $this View */
+/* @var $model Board */
 
 $this->title = Yii::t('simialbi/kanban/plan', 'Create plan');
 $this->params['breadcrumbs'] = [
@@ -27,11 +29,9 @@ $this->params['breadcrumbs'] = [
             'form' => $form,
             'model' => $model
         ]); ?>
-        <div class="form-group">
-            <?= Html::submitButton(Yii::t('simialbi/kanban', 'Create'), [
-                'class' => ['btn', 'btn-primary']
-            ]) ?>
-        </div>
+        <?= Html::submitButton(Yii::t('simialbi/kanban', 'Create'), [
+            'class' => ['btn', 'btn-primary']
+        ]) ?>
         <?php ActiveForm::end(); ?>
     </div>
 </div>

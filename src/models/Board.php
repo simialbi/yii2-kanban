@@ -7,12 +7,19 @@
 
 namespace simialbi\yii2\kanban\models;
 
+use rmrevin\yii\fontawesome\FAL;
+use simialbi\yii2\kanban\helpers\FileHelper;
+use simialbi\yii2\kanban\Module;
 use simialbi\yii2\models\UserInterface;
 use Yii;
+use yii\base\ErrorException;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\DbDependency;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\UploadedFile;
 
@@ -20,15 +27,18 @@ use yii\web\UploadedFile;
  * Class Board
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
+ * @property int $id
  * @property string $name
  * @property string $image
  * @property boolean $is_public
- * @property integer|string $created_by
- * @property integer|string $updated_by
- * @property integer|string $created_at
- * @property integer|string $updated_at
+ * @property boolean $is_checklist
+ * @property int|string $created_by
+ * @property int|string $updated_by
+ * @property int|string $created_at
+ * @property int|string $updated_at
+ * @property int $sync_id
  *
+ * @property-read string $fullName
  * @property-read string $visual
  * @property-read UserInterface $author
  * @property-read UserInterface $updater
@@ -36,17 +46,21 @@ use yii\web\UploadedFile;
  * @property-read BoardUserAssignment[] $assignments
  * @property-read Bucket[] $buckets
  * @property-read Task[] $tasks
+ * @property-read BoardUserSetting[] $settings              // all settings for this board
+ * @property-read BoardUserSetting $setting                 // current user setting for this board
+ * @property-read boolean $hidden                           // if the board is hidden for the current user
+ * @property-read ChecklistTemplate[] $checklistTemplates
  */
 class Board extends ActiveRecord
 {
     /**
-     * @var UploadedFile
+     * @var string|UploadedFile|null
      */
-    public $uploadedFile;
+    public UploadedFile|string|null $uploadedFile = null;
     /**
      * @var array Colors to user for visualisation generation
      */
-    private $_colors = [
+    private array $_colors = [
         [0, 123, 255],
         [102, 16, 242],
         [111, 66, 193],
@@ -61,30 +75,37 @@ class Board extends ActiveRecord
     /**
      * @var string Visualisation
      */
-    private $_visual;
+    private string $_visual;
 
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__board}}';
     }
 
     /**
      * Find boards assigned to user
+     *
      * @param integer|string|null $id
+     * @param array $filters
      *
      * @return Board[]
      */
-    public static function findByUserId($id = null)
+    public static function findByUserId(int|string|null $id = null, array $filters = []): array
     {
         if ($id === null) {
             $id = Yii::$app->user->id;
         }
 
+        $sql = <<<SQL
+SELECT COUNT(`b`.`id`) as cnt1, (SELECT COUNT(`s`.`id`) FROM `re_kanban__board_user_setting` as `s` WHERE `is_hidden` = true) AS cnt2
+FROM `re_kanban__board` AS `b`
+SQL;
+
         $dep = new DbDependency([
-            'sql' => 'SELECT COUNT([[id]]) FROM ' . static::tableName(),
+            'sql' => $sql
         ]);
 
         $query = static::find()
@@ -92,9 +113,18 @@ class Board extends ActiveRecord
             ->alias('b')
             ->joinWith('assignments ba', false)
             ->joinWith('buckets.tasks.assignments ta', false)
-            ->where(['{{b}}.[[is_public]]' => 1])
-            ->orWhere(['{{ba}}.[[user_id]]' => $id])
-            ->orWhere(['{{ta}}.[[user_id]]' => $id])
+            ->leftJoin(['s' => BoardUserSetting::tableName()], [
+                '{{s}}.[[board_id]]' => new Expression('{{b}}.[[id]]'),
+                '{{s}}.[[user_id]]' => Yii::$app->user->id
+            ])
+            ->where([
+                'or',
+                ['{{b}}.[[is_public]]' => 1],
+                ['{{ba}}.[[user_id]]' => $id],
+                ['{{ta}}.[[user_id]]' => $id],
+                [Task::tableName() . '.[[responsible_id]]' => $id],
+            ])
+            ->andFilterWhere($filters)
             ->orderBy(['{{b}}.[[name]]' => SORT_ASC]);
 
         return $query->all();
@@ -103,16 +133,16 @@ class Board extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['id', 'integer'],
-            ['name', 'string', 'max' => 255],
+            [['name', 'image', 'sync_id'], 'string', 'max' => 255],
             ['uploadedFile', 'file', 'mimeTypes' => 'image/*'],
-            ['image', 'string', 'max' => 255],
-            ['is_public', 'boolean'],
+            [['is_public', 'is_checklist'], 'boolean'],
 
             ['is_public', 'default', 'value' => true],
+            ['is_checklist', 'default', 'value' => false],
             ['image', 'default'],
 
             [['name', 'is_public'], 'required']
@@ -122,7 +152,7 @@ class Board extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'blameable' => [
@@ -145,13 +175,14 @@ class Board extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/board', 'Id'),
             'name' => Yii::t('simialbi/kanban/model/board', 'Name'),
             'image' => Yii::t('simialbi/kanban/model/board', 'Image'),
             'is_public' => Yii::t('simialbi/kanban/model/board', 'Is public'),
+            'is_checklist' => Yii::t('simialbi/kanban/model/board', 'Is checklist'),
             'created_by' => Yii::t('simialbi/kanban/model/board', 'Created by'),
             'updated_by' => Yii::t('simialbi/kanban/model/board', 'Updated by'),
             'created_at' => Yii::t('simialbi/kanban/model/board', 'Created at'),
@@ -161,24 +192,58 @@ class Board extends ActiveRecord
 
     /**
      * {@inheritDoc}
-     * @throws \yii\db\Exception
+     * @throws Exception
      */
-    public function afterSave($insert, $changedAttributes)
+    public function afterSave($insert, $changedAttributes): void
     {
         if ($insert && !Yii::$app->user->isGuest) {
             $assignment = new BoardUserAssignment();
             $assignment->board_id = $this->id;
-            $assignment->user_id = (string) Yii::$app->user->id;
+            $assignment->user_id = (string)Yii::$app->user->id;
             $assignment->save();
         }
         parent::afterSave($insert, $changedAttributes);
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        try {
+            /** @var Module $module */
+            $module = Yii::$app->controller->module;
+            FileHelper::removeDirectory(Yii::getAlias($module->uploadWebRoot . '/plan/' . $this->id));
+        } catch (ErrorException $e) {
+            Yii::error('Could not delete folder: ' . $e->getMessage());
+        }
+
+        return true;
+    }
+
+    /**
+     * Prefixes name with an icon, if board is a checklist
+     * @return string
+     */
+    public function getFullName(): string
+    {
+        $prefix = '';
+        if ($this->is_checklist) {
+            $prefix = FAL::i('clipboard-check') . ' ';
+        }
+
+        return $prefix . $this->name;
+    }
+
+    /**
      * Get visualisation. If set, this method return the image, otherwise generates a visualisation
      * @return string
      */
-    public function getVisual()
+    public function getVisual(): string
     {
         if (!isset($this->image)) {
             if (empty($this->_visual)) {
@@ -214,26 +279,29 @@ class Board extends ActiveRecord
     /**
      * Get author
      * @return UserInterface
+     * @throws \Exception
      */
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->created_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->created_by);
     }
 
     /**
      * Get user last updated
-     * @return mixed
+     * @return UserInterface
+     * @throws \Exception
      */
-    public function getUpdater()
+    public function getUpdater(): UserInterface
     {
-        return ArrayHelper::getValue(Yii::$app->controller->module->users, $this->updated_by);
+        return ArrayHelper::getValue(Module::getInstance()->users, $this->updated_by);
     }
 
     /**
      * Get users assigned to this task
      * @return array
+     * @throws \Exception
      */
-    public function getAssignees()
+    public function getAssignees(): array
     {
         $allAssignees = Yii::$app->controller->module->users;
 
@@ -250,18 +318,18 @@ class Board extends ActiveRecord
 
     /**
      * Get assigned user id's
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getAssignments()
+    public function getAssignments(): ActiveQuery
     {
         return $this->hasMany(BoardUserAssignment::class, ['board_id' => 'id']);
     }
 
     /**
      * Get associated buckets
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getBuckets()
+    public function getBuckets(): ActiveQuery
     {
         return $this->hasMany(Bucket::class, ['board_id' => 'id'])
             ->orderBy([Bucket::tableName() . '.[[sort]]' => SORT_ASC]);
@@ -269,10 +337,51 @@ class Board extends ActiveRecord
 
     /**
      * Get associated tasks
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getTasks()
+    public function getTasks(): ActiveQuery
     {
         return $this->hasMany(Task::class, ['bucket_id' => 'id'])->via('buckets');
+    }
+
+    /**
+     * Get associated board user settings
+     * @return ActiveQuery
+     */
+    public function getSettings(): ActiveQuery
+    {
+        return $this->hasMany(BoardUserSetting::class, ['board_id' => 'id']);
+    }
+
+    /**
+     * Get board user setting for the current user
+     * @return ActiveQuery
+     */
+    public function getSetting(): ActiveQuery
+    {
+        return $this->hasOne(BoardUserSetting::class, ['board_id' => 'id'])
+            ->where([
+                'user_id' => Yii::$app->user->id
+            ]);
+    }
+
+    /**
+     * If board is hidden for current user
+     * @return boolean
+     */
+    public function getHidden(): bool
+    {
+        return $this->setting?->is_hidden ?? false;
+    }
+
+    /**
+     * Related checklist templates
+     * @return ActiveQuery
+     */
+    public function getChecklistTemplates(): ActiveQuery
+    {
+        return $this->hasMany(ChecklistTemplate::class, ['board_id' => 'id'])
+            ->orderBy(['name' => SORT_ASC])
+            ->inverseOf('board');
     }
 }

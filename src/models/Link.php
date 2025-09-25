@@ -16,20 +16,20 @@ use yii\db\ActiveRecord;
  * Class Link
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $id
- * @property integer $task_id
+ * @property int $id
+ * @property int $task_id
  * @property string $url
- * @property integer|string $created_by
- * @property integer|string $updated_by
- * @property integer|string $created_at
- * @property integer|string $updated_at
+ * @property int $created_by
+ * @property int $updated_by
+ * @property int|string $created_at
+ * @property int|string $updated_at
  */
 class Link extends ActiveRecord
 {
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__link}}';
     }
@@ -37,7 +37,7 @@ class Link extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'task_id'], 'integer'],
@@ -55,7 +55,7 @@ class Link extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'blameable' => [
@@ -78,7 +78,7 @@ class Link extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Yii::t('simialbi/kanban/model/link', 'Id'),

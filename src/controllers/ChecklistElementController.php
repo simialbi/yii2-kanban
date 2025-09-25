@@ -8,7 +8,9 @@
 namespace simialbi\yii2\kanban\controllers;
 
 use simialbi\yii2\kanban\models\ChecklistElement;
+use simialbi\yii2\kanban\Module;
 use Yii;
+use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -17,14 +19,14 @@ use yii\web\NotFoundHttpException;
  * Class ChecklistElementController
  * @package simialbi\yii2\kanban\controllers
  *
- * @property-read \simialbi\yii2\kanban\Module $module
+ * @property-read Module $module
  */
 class ChecklistElementController extends Controller
 {
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -42,12 +44,12 @@ class ChecklistElementController extends Controller
 
     /**
      * Set checklist element to done status
-     * @param integer $id
-     * @param boolean $readonly
+     * @param int $id
+     * @param bool $readonly
      * @return string
-     * @throws NotFoundHttpException
+     * @throws NotFoundHttpException|Exception
      */
-    public function actionSetDone($id, $readonly = false)
+    public function actionSetDone(int $id, bool $readonly = false): string
     {
         $model = $this->findModel($id);
 
@@ -68,12 +70,12 @@ class ChecklistElementController extends Controller
      * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
+     * @param int $id
      *
      * @return ChecklistElement the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel(int $id): ChecklistElement
     {
         if (($model = ChecklistElement::findOne($id)) !== null) {
             return $model;

@@ -15,44 +15,44 @@ class TaskCopyForm extends Model
     /**
      * @var string Tasks new subject
      */
-    public $subject;
+    public string $subject = '';
     /**
      * @var integer Id of bucket to copy task in
      */
-    public $bucketId;
+    public int $bucketId = 0;
     /**
      * @var boolean Whether or not to copy task assignments
      */
-    public $copyAssignment;
+    public bool $copyAssignment = false;
     /**
      * @var boolean Whether or not to copy task status
      */
-    public $copyStatus;
+    public bool $copyStatus = false;
     /**
      * @var boolean Whether or not to copy task start and end date
      */
-    public $copyDates;
+    public bool $copyDates = false;
     /**
      * @var boolean Whether or not to copy task description
      */
-    public $copyDescription = true;
+    public bool $copyDescription = true;
     /**
      * @var boolean Whether or not to copy task checklist
      */
-    public $copyChecklist = true;
+    public bool $copyChecklist = true;
     /**
      * @var boolean Whether or not to copy task attachments
      */
-    public $copyAttachments = true;
+    public bool $copyAttachments = true;
     /**
      * @var boolean Whether or not to copy task attachments
      */
-    public $copyLinks = true;
+    public bool $copyLinks = true;
 
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['subject', 'string'],
@@ -79,7 +79,7 @@ class TaskCopyForm extends Model
     /**
      * {@inheritDoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'subject' => Yii::t('simialbi/kanban/model/task-copy-form', 'Subject'),

@@ -29,4 +29,11 @@ class KanbanSwiperAsset extends AssetBundle
     public $js = [
         'swiper-bundle.min.js'
     ];
+
+    /**
+     * {@inheritDoc}
+     */
+    public $publishOptions = [
+        'forceCopy' => YII_DEBUG
+    ];
 }

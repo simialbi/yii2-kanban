@@ -2,14 +2,16 @@
 
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\kanban\KanbanAsset;
+use simialbi\yii2\kanban\models\Board;
+use simialbi\yii2\models\UserInterface;
 use simialbi\yii2\turbo\Modal;
 use yii\helpers\Url;
-use yii\web\JsExpression;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
-/* @var $boards \simialbi\yii2\kanban\models\Board[] */
-/* @var $model \simialbi\yii2\kanban\models\Board */
-/* @var $users \simialbi\yii2\models\UserInterface[] */
+/* @var $this View */
+/* @var $boards Board[] */
+/* @var $model Board */
+/* @var $users UserInterface[] */
 /* @var $group string */
 /* @var $readonly boolean */
 /* @var $showTask integer|null */
@@ -33,9 +35,6 @@ $this->params['breadcrumbs'] = [
             'readonly' => $readonly
         ]); ?>
         <div class="d-flex flex-column mt-3">
-            <div class="kanban-top-scrollbar mb-2 d-none d-md-block">
-                <div></div>
-            </div>
             <div class="kanban-bottom-scrollbar">
                 <?php
                 switch ($group) {
@@ -72,34 +71,35 @@ $this->params['breadcrumbs'] = [
 if ($showTask) {
     $link = Url::to(['task/update', 'id' => $showTask]);
     $js = <<<JS
-var link = jQuery('<a href="$link" data-toggle="modal" data-target="#task-modal" data-turbo-frame="task-modal-frame" />');
+var link = jQuery('<a href="$link" data-bs-toggle="modal" data-bs-target="#task-modal" data-turbo-frame="task-modal-frame" />');
 link.appendTo('body').trigger('click').remove();
 JS;
 
     $this->registerJs($js, $this::POS_LOAD);
 }
 $js = <<<JS
-function onHide() {
-    jQuery('.note-editor', this).each(function () {
-        var summernote = jQuery(this).prev().data('summernote');
-        if (summernote) {
-            summernote.destroy();
-        }
-    });
+// Calculate and apply height
+var el = $('.kanban-bottom-scrollbar');
+var height = Math.floor($(window).height() - el.offset().top - ($('.body').css('padding-bottom')||'12px').replace('px', ''));
+if (!isNaN(height) && height > 200) {
+    el.css('height', height);
 }
 JS;
+$this->registerJs($js, $this::POS_LOAD);
+
 echo Modal::widget([
+    'modalClass' => '\yii\bootstrap5\Modal',
     'options' => [
         'id' => 'task-modal',
         'options' => [
-            'class' => ['modal', 'remote', 'fade']
+            'class' => ['modal', 'remote', 'fade'],
+            'tabindex' => ''
         ],
         'clientOptions' => [
             'backdrop' => 'static',
             'keyboard' => false
         ],
-        'clientEvents' => ['hidden.bs.modal' => new JsExpression($js)],
-        'size' => \yii\bootstrap4\Modal::SIZE_EXTRA_LARGE,
+        'size' => \yii\bootstrap5\Modal::SIZE_EXTRA_LARGE,
         'title' => null,
         'closeButton' => false
     ],

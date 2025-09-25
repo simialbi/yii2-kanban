@@ -13,15 +13,15 @@ use yii\db\ActiveRecord;
  * Class BoardUserAssignment
  * @package simialbi\yii2\kanban\models
  *
- * @property integer $board_id
- * @property string $user_id
+ * @property int $board_id
+ * @property int|string $user_id
  */
 class BoardUserAssignment extends ActiveRecord
 {
     /**
      * {@inheritDoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%kanban__board_user_assignment}}';
     }
@@ -29,12 +29,11 @@ class BoardUserAssignment extends ActiveRecord
     /**
      * {@inheritDoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            ['board_id', 'integer'],
-            ['user_id', 'string'],
-
+            [['board_id'], 'integer'],
+            ['user_id', 'string', 'max' => 64],
             [['board_id', 'user_id'], 'required']
         ];
     }

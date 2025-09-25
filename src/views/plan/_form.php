@@ -1,8 +1,12 @@
 <?php
 
-/* @var $this \yii\web\View */
-/* @var $form \yii\bootstrap4\ActiveForm */
-/* @var $model \simialbi\yii2\kanban\models\Board */
+use simialbi\yii2\kanban\models\Board;
+use yii\bootstrap5\ActiveForm;
+use yii\web\View;
+
+/* @var $this View */
+/* @var $form ActiveForm */
+/* @var $model Board */
 
 ?>
 <?= $form->field($model, 'name')->textInput(); ?>

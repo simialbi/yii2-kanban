@@ -1,0 +1,8 @@
+actor: UnitTester
+suite_namespace: simialbi\extensions\kanban\Unit
+modules:
+    # enable helpers as array
+    enabled:
+        - Yii2:
+            part: [orm, email, fixtures]
+        - Asserts

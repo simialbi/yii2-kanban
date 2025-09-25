@@ -12,19 +12,21 @@ use simialbi\yii2\kanban\models\TaskUserAssignment;
 use simialbi\yii2\kanban\Module;
 use simialbi\yii2\kanban\TaskEvent;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 
 /**
  * {@inheritDoc}
  *
- * @property-read \simialbi\yii2\kanban\Module $module
+ * @property-read Module $module
  */
 class SortController extends \arogachev\sortable\controllers\SortController
 {
     /**
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException|Exception
      */
-    public function actionChangeParent()
+    public function actionChangeParent(): void
     {
         foreach ($this->_model->getSortableScopeCondition() as $attribute => $value) {
             $newValue = Yii::$app->request->post($attribute, $value);
@@ -35,13 +37,11 @@ class SortController extends \arogachev\sortable\controllers\SortController
     }
 
     /**
-     * @throws \yii\db\Exception
+     * @throws Exception|\Exception
      */
-    public function actionChangeAssignee()
+    public function actionChangeAssignee(): void
     {
         $userId = Yii::$app->request->getBodyParam('user_id');
-        $db = call_user_func([$this->_model, 'getDb']);
-        /** @var $db \yii\db\Connection */
         TaskUserAssignment::deleteAll(['task_id' => $this->_model->primaryKey]);
         if (!empty($userId)) {
             $assignment = new TaskUserAssignment();
@@ -56,9 +56,9 @@ class SortController extends \arogachev\sortable\controllers\SortController
     }
 
     /**
-     * @throws \yii\db\Exception
+     * @throws Exception
      */
-    public function actionChangeStatus()
+    public function actionChangeStatus(): void
     {
         $status = Yii::$app->request->getBodyParam('status');
         $this->_model->setAttribute('status', $status);
@@ -76,9 +76,9 @@ class SortController extends \arogachev\sortable\controllers\SortController
     }
 
     /**
-     * @throws \yii\db\Exception
+     * @throws Exception
      */
-    public function actionChangeDate()
+    public function actionChangeDate(): void
     {
         $date = Yii::$app->request->getBodyParam('date');
         $this->_model->setAttribute('end_date', $date);

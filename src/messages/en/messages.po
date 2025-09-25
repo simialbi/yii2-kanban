@@ -31,8 +31,24 @@ msgid "Copy task"
 msgstr "Copy task"
 
 msgctxt "simialbi/kanban"
+msgid "No buckets to copy task to"
+msgstr "No buckets to copy task to"
+
+msgctxt "simialbi/kanban"
+msgid "Move task"
+msgstr "Move task"
+
+msgctxt "simialbi/kanban"
 msgid "Create"
 msgstr "Create"
+
+msgctxt "simialbi/kanban"
+msgid "Create task"
+msgstr "Create task"
+
+msgctxt "simialbi/kanban"
+msgid "Task was created successfully"
+msgstr "Task was created successfully"
 
 msgctxt "simialbi/kanban"
 msgid "Delete series"
@@ -55,6 +71,14 @@ msgid "Go to ticket"
 msgstr "Go to ticket"
 
 msgctxt "simialbi/kanban"
+msgid "Go to feedback"
+msgstr "Go to feedback"
+
+msgctxt "simialbi/kanban"
+msgid "Go to proposal"
+msgstr "Go to proposal"
+
+msgctxt "simialbi/kanban"
 msgid "Include"
 msgstr "Include"
 
@@ -71,6 +95,10 @@ msgid "Save"
 msgstr "Save"
 
 msgctxt "simialbi/kanban"
+msgid "SharePoint customer dossier"
+msgstr "SharePoint customer dossier"
+
+msgctxt "simialbi/kanban"
 msgid "Show done ({cnt,number,integer})"
 msgstr "Show done ({cnt,number,integer})"
 
@@ -79,8 +107,24 @@ msgid "Update series"
 msgstr "Update series"
 
 msgctxt "simialbi/kanban"
+msgid "Create sub task"
+msgstr "Create sub task"
+
+msgctxt "simialbi/kanban"
 msgid "View history"
 msgstr "View history"
+
+msgctxt "simialbi/kanban"
+msgid "Select all"
+msgstr "Select all"
+
+msgctxt "simialbi/kanban"
+msgid "Unselect all"
+msgstr "Unselect all"
+
+msgctxt "simialbi/kanban"
+msgid "Client management"
+msgstr "Client management"
 
 msgctxt "simialbi/kanban/chart"
 msgid "Assignee"
@@ -163,6 +207,10 @@ msgid "Is public"
 msgstr "Is public"
 
 msgctxt "simialbi/kanban/model/board"
+msgid "Is checklist"
+msgstr "Is checklist"
+
+msgctxt "simialbi/kanban/model/board"
 msgid "Name"
 msgstr "Name"
 
@@ -229,6 +277,50 @@ msgstr "Sort"
 msgctxt "simialbi/kanban/model/checklist-element"
 msgid "Task"
 msgstr "Task"
+
+msgctxt "simialbi/kanban/model/checklist-template"
+msgid "Board"
+msgstr "Board"
+
+msgctxt "simialbi/kanban/model/checklist-template"
+msgid "Name"
+msgstr "Name"
+
+msgctxt "simialbi/kanban/model/checklist-template"
+msgid "Created by"
+msgstr "Created by"
+
+msgctxt "simialbi/kanban/model/checklist-template"
+msgid "Updated by"
+msgstr "Updated by"
+
+msgctxt "simialbi/kanban/model/checklist-template"
+msgid "Created at"
+msgstr "Created at"
+
+msgctxt "simialbi/kanban/model/checklist-template"
+msgid "Updated at"
+msgstr "Updated at"
+
+msgctxt "simialbi/kanban/model/checklist-template"
+msgid "Elements"
+msgstr "Elements"
+
+msgctxt "simialbi/kanban/model/checklist-template-element"
+msgid "Template"
+msgstr "Template"
+
+msgctxt "simialbi/kanban/model/checklist-template-element"
+msgid "Name"
+msgstr "Name"
+
+msgctxt "simialbi/kanban/model/checklist-template-element"
+msgid "End date"
+msgstr "End date"
+
+msgctxt "simialbi/kanban/model/checklist-template-element"
+msgid "Days after reference date"
+msgstr "Days after reference date"
 
 msgctxt "simialbi/kanban/model/comment"
 msgid "Created at"
@@ -359,6 +451,10 @@ msgid "Bucket"
 msgstr "Bucket"
 
 msgctxt "simialbi/kanban/model/task"
+msgid "Client"
+msgstr "Client"
+
+msgctxt "simialbi/kanban/model/task"
 msgid "Created at"
 msgstr "Created at"
 
@@ -430,6 +526,10 @@ msgctxt "simialbi/kanban/model/task"
 msgid "Updated by"
 msgstr "Updated by"
 
+msgctxt "simialbi/kanban/model/task"
+msgid "Recurrence is invalid"
+msgstr "Recurrence is invalid"
+
 msgctxt "simialbi/kanban/model/task-copy-form"
 msgid "Assignment"
 msgstr "Assignment"
@@ -465,6 +565,62 @@ msgstr "Status"
 msgctxt "simialbi/kanban/model/task-copy-form"
 msgid "Subject"
 msgstr "New subject"
+
+msgctxt "simialbi/kanban/model/board-user-setting"
+msgid "Board"
+msgstr "Board"
+
+msgctxt "simialbi/kanban/model/board-user-setting"
+msgid "User"
+msgstr "User"
+
+msgctxt "simialbi/kanban/model/board-user-setting"
+msgid "Hidden"
+msgstr "Hidden"
+
+msgctxt "simialbi/kanban/model/connection"
+msgid "User"
+msgstr "User"
+
+msgctxt "simialbi/kanban/model/connection"
+msgid "Bucket"
+msgstr "Bucket"
+
+msgctxt "simialbi/kanban/model/connection"
+msgid "Type"
+msgstr "Type"
+
+msgctxt "simialbi/kanban/model/connection"
+msgid "For the following options to work, you have to grant access to your inbox to the {0} service user."
+msgstr "For the following options to work, you have to grant access to your inbox to the {0} service user."
+
+msgctxt "simialbi/kanban/model/connection"
+msgid "Export time windows"
+msgstr "Export time windows"
+
+msgctxt "simialbi/kanban/model/connection"
+msgid "Import tasks"
+msgstr "Import tasks"
+
+msgctxt "simialbi/kanban/model/connection"
+msgid "Delete tasks after import"
+msgstr "Delete tasks after import"
+
+msgctxt "simialbi/kanban/model/time-window"
+msgid "Task"
+msgstr "Task"
+
+msgctxt "simialbi/kanban/model/time-window"
+msgid "User"
+msgstr "User"
+
+msgctxt "simialbi/kanban/model/time-window"
+msgid "Start"
+msgstr "Start"
+
+msgctxt "simialbi/kanban/model/time-window"
+msgid "End"
+msgstr "End"
 
 msgctxt "simialbi/kanban/monitoring"
 msgid "Export date"
@@ -531,6 +687,10 @@ msgid "List view"
 msgstr "List view"
 
 msgctxt "simialbi/kanban/plan"
+msgid "Checklists"
+msgstr "Checklists"
+
+msgctxt "simialbi/kanban/plan"
 msgid "Monitoring"
 msgstr "Monitoring"
 
@@ -569,6 +729,74 @@ msgstr "end date"
 msgctxt "simialbi/kanban/plan"
 msgid "status"
 msgstr "status"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Calendar"
+msgstr "Calendar"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Filter"
+msgstr "Filter"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Legend"
+msgstr "Legend"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Show / hide plan"
+msgstr "Show / hide plan"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Toggle hidden plans"
+msgstr "Toggle hidden plans"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Hide board"
+msgstr "Hide board"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Show board again"
+msgstr "Show board again"
+
+msgctxt "simialbi/kanban/plan"
+msgid "Checklist templates"
+msgstr "Checklist templates"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "New template"
+msgstr "New template"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "Update template"
+msgstr "Update template"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "Informations"
+msgstr "Informations"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "New element"
+msgstr "New element"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "Update element"
+msgstr "Update element"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "Element moved successfully"
+msgstr "Element moved successfully"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "Element could not be moved"
+msgstr "Element could not be moved"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "+{n,plural,=1{# Day} other{# Days}}"
+msgstr "+{n,plural,=1{# Day} other{# Days}}"
+
+msgctxt "simialbi/kanban/checklist-template"
+msgid "Day(s)"
+msgstr "Day(s)"
 
 msgctxt "simialbi/kanban/plan/notification"
 msgid "Board <b>{board}</b> created"
@@ -739,6 +967,14 @@ msgid "Comments"
 msgstr "Comments"
 
 msgctxt "simialbi/kanban/task"
+msgid "Subtasks"
+msgstr "Subtasks"
+
+msgctxt "simialbi/kanban/task"
+msgid "Actions"
+msgstr "Actions"
+
+msgctxt "simialbi/kanban/task"
 msgid "Create an individual copy of this task for each of the selected users and assign it."
 msgstr "Create an individual copy of this task for each of the selected users and assign it."
 
@@ -774,3 +1010,38 @@ msgctxt "simialbi/kanban/task"
 msgid "Not started"
 msgstr "Not started"
 
+msgctxt "simialbi/kanban/task"
+msgid "Url for editing"
+msgstr "Url for editing"
+
+msgctxt "simialbi/kanban/task"
+msgid "Url for downloading"
+msgstr "Url for downloading"
+
+msgctxt "simialbi/kanban/task"
+msgid "Templates"
+msgstr "Templates"
+
+msgctxt "simialbi/kanban/connection"
+msgid "Create connection"
+msgstr "Create connection"
+
+msgctxt "simialbi/kanban/connection"
+msgid "Update connection"
+msgstr "Update connection"
+
+msgctxt "simialbi/kanban/event"
+msgid "New time window"
+msgstr "New time window"
+
+msgctxt "simialbi/kanban/event"
+msgid "Time windows"
+msgstr "Time windows"
+
+msgctxt "simialbi/kanban/time-window"
+msgid "Link to task <b>{id}</b>"
+msgstr "Link to task <b>{id}</b>"
+
+msgctxt "simialbi/kanban/settings"
+msgid "Show checklist tasks in todo list"
+msgstr "Show checklist tasks in todo list"

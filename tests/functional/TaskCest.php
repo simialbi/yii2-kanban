@@ -21,9 +21,13 @@ class TaskCest
 
     public function submitCreateForm(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/bucket/view', 'id' => 1, 'readonly' => 0]);
+        $I->amOnRoute('/kanban/bucket/view', ['id' => 1, 'readonly' => 0]);
+        \Yii::$app->db->createCommand('Delete from ' . Task::tableName())->execute();
+        \Yii::$app->db->createCommand('SET FOREIGN_KEY_CHECKS = 0;')->execute();
+        \Yii::$app->db->createCommand('Truncate table ' . Task::tableName())->execute();
+        \Yii::$app->db->createCommand('SET FOREIGN_KEY_CHECKS = 1;')->execute();
 
-        $endDate =  date('d.m.Y');
+        $endDate = date('d.m.Y');
 
         $I->submitForm('#sa-kanban-create-task-form', [
             'Task[subject]' => 'Test task',
@@ -58,7 +62,7 @@ class TaskCest
 
     public function checkUpdateForm(FunctionalTester $I)
     {
-        $I->amOnPage(['kanban/task/update', 'id' => 1, 'return' => 'card', 'readonly' => 0]);
+        $I->amOnRoute('/kanban/task/update', ['id' => 1, 'return' => 'card', 'readonly' => 0]);
 
         $I->seeElement('#sa-kanban-task-modal-form');
         $I->seeInFormFields('#sa-kanban-task-modal-form', [

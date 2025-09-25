@@ -6,6 +6,9 @@
 
 namespace simialbi\yii2\kanban\controllers;
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Table;
 use simialbi\yii2\kanban\models\Board;
 use simialbi\yii2\kanban\models\Bucket;
 use simialbi\yii2\kanban\models\MonitoringForm;
@@ -16,14 +19,17 @@ use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\kanban\models\TaskUserAssignment;
 use simialbi\yii2\kanban\Module;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\Exception;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Inflector;
-use yii\helpers\StringHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * Class MonitoringController
@@ -36,7 +42,7 @@ class MonitoringController extends Controller
     /**
      * {@inheritDoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -54,8 +60,9 @@ class MonitoringController extends Controller
     /**
      * List monitoring lists
      * @return string
+     * @throws \Exception
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new SearchMonitoringList();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Yii::$app->user->id);
@@ -63,15 +70,16 @@ class MonitoringController extends Controller
         return $this->renderAjax('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'users' => ArrayHelper::getColumn($this->module->users, 'name', true)
+            'users' => ArrayHelper::getColumn($this->module->users, 'name')
         ]);
     }
 
     /**
      * Create a new list
-     * @return string|\yii\web\Response
+     * @return string|Response
+     * @throws Exception
      */
-    public function actionCreate()
+    public function actionCreate(): Response|string
     {
         $model = new MonitoringForm();
 
@@ -81,17 +89,19 @@ class MonitoringController extends Controller
 
         return $this->renderAjax('upsert', [
             'model' => $model,
-            'users' => ArrayHelper::getColumn($this->module->users, 'name', true)
+            'users' => ArrayHelper::getColumn($this->module->users, 'name')
         ]);
     }
 
     /**
      * Update an existing list
-     * @param integer|string $id
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException
+     *
+     * @param int $id
+     *
+     * @return string|Response
+     * @throws NotFoundHttpException|Exception
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id): Response|string
     {
         $list = $this->findModel($id);
         $model = new MonitoringForm([
@@ -106,19 +116,21 @@ class MonitoringController extends Controller
 
         return $this->renderAjax('upsert', [
             'model' => $model,
-            'users' => ArrayHelper::getColumn($this->module->users, 'name', true)
+            'users' => ArrayHelper::getColumn($this->module->users, 'name')
         ]);
     }
 
     /**
      * Delete a list
-     * @param integer $id
-     * @return \yii\web\Response
+     *
+     * @param int $id
+     *
+     * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
+     * @throws StaleObjectException
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id): Response
     {
         $list = $this->findModel($id);
 
@@ -129,12 +141,14 @@ class MonitoringController extends Controller
 
     /**
      * View monitoring list details
-     * @param integer $id
+     *
+     * @param int $id
      *
      * @return string
      * @throws NotFoundHttpException
+     * @throws \Exception
      */
-    public function actionView($id)
+    public function actionView(int $id): string
     {
         $list = $this->findModel($id);
 
@@ -277,160 +291,116 @@ class MonitoringController extends Controller
     }
 
     /**
-     * Export list as csv
-     * @param integer $id
-     * @return false|string
+     * Export list as excel file
+     *
+     * @param int $id
      *
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      * @throws \Exception
      */
-    public function actionCsv($id)
+    public function actionCsv(int $id): void
     {
         $list = $this->findModel($id);
 
-        $csv = fopen('php://temp/maxmemory:20971520', 'r+');
-        fputcsv($csv, [
-            $list->getAttributeLabel('name'),
-            $list->name,
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
-        ], ';');
-        fputcsv($csv, [
-            Yii::t('simialbi/kanban/monitoring', 'Export date'),
-            Yii::$app->formatter->asDate('today'),
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
-        ], ';');
-        fputcsv($csv, [
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
-        ], ';');
-        $qry = new Query();
-        $qry->select([
-            '{{t}}.[[id]]',
-            'board' => '{{p}}.[[name]]',
-            'bucket' => '{{b}}.[[name]]',
-            '{{t}}.[[subject]]',
-            '{{t}}.[[description]]',
-            '{{t}}.[[status]]',
-            '{{t}}.[[start_date]]',
-            '{{t}}.[[end_date]]',
-            '{{t}}.[[created_at]]',
-            'assignees' => new Expression('GROUP_CONCAT({{ua}}.[[user_id]])'),
-            '{{t}}.[[created_by]]',
-            '{{t}}.[[finished_at]]',
-            '{{t}}.[[finished_by]]'
-        ])
-            ->distinct(true)
-            ->from(['t' => Task::tableName()])
-            ->innerJoin(['ua' => TaskUserAssignment::tableName()], '{{t}}.[[id]] = {{ua}}.[[task_id]]')
-            ->innerJoin(['b' => Bucket::tableName()], '{{t}}.[[bucket_id]] = {{b}}.[[id]]')
-            ->innerJoin(['p' => Board::tableName()], '{{b}}.[[board_id]] = {{p}}.[[id]]')
-            ->where(['{{ua}}.[[user_id]]' => ArrayHelper::getColumn($list->members, 'user_id')])
-            ->groupBy(['{{t}}.[[id]]']);
-        fputcsv($csv, [
-            Yii::t('simialbi/kanban/model/task', 'Id'),
-            Yii::t('simialbi/kanban/model/bucket', 'Board'),
-            Yii::t('simialbi/kanban/model/task', 'Bucket'),
-            Yii::t('simialbi/kanban/model/task', 'Subject'),
-            Yii::t('simialbi/kanban/model/task', 'Status'),
-            Yii::t('simialbi/kanban/plan', 'Assigned to'),
-            Yii::t('simialbi/kanban/model/task', 'Created by'),
-            Yii::t('simialbi/kanban/model/task', 'Created at'),
-            Yii::t('simialbi/kanban/model/task', 'Start date'),
-            Yii::t('simialbi/kanban/model/task', 'End date'),
-            Yii::t('simialbi/kanban/task', 'Late'),
-            Yii::t('simialbi/kanban/model/task', 'Finished at'),
-            Yii::t('simialbi/kanban/model/task', 'Finished by'),
-            Yii::t('simialbi/kanban/model/task', 'Description')
-        ], ';');
-        foreach ($qry->all() as $row) {
-            $assignees = [];
-            $row['assignees'] = explode(',', $row['assignees']);
-            foreach ($row['assignees'] as $assignee) {
-                if (false !== ($assignee = ArrayHelper::getValue($this->module->users, $assignee, false))) {
-                    $assignees[] = $assignee->name;
-                }
-            }
-            fputcsv($csv, [
-                $row['id'],
-                $row['board'],
-                $row['bucket'],
-                $row['subject'],
-                ArrayHelper::getValue($this->module->statuses, $row['status'], Yii::t('yii', '(not set)')),
-                implode(', ', $assignees),
-                ArrayHelper::getValue($this->module->users, [$row['created_by'], 'name'], Yii::t('yii', '(not set)')),
-                Yii::$app->formatter->asDate($row['created_at']),
-                empty($row['start_date']) ? '' : Yii::$app->formatter->asDate($row['start_date']),
-                empty($row['end_date']) ? '' : Yii::$app->formatter->asDate($row['end_date']),
-                (!empty($row['end_date']) && $row['end_date'] < strtotime('today')) ? '1' : '0',
-                empty($row['finished_at']) ? '' : Yii::$app->formatter->asDate($row['finished_at']),
-                ArrayHelper::getValue($this->module->users, [$row['finished_by'], 'name'], ''),
-                strip_tags(preg_replace('/<br ?\/?>/i', "\n", $row['description']))
-            ], ';');
-        }
-        rewind($csv);
-        $output = stream_get_contents($csv);
-        if (function_exists('mb_convert_encoding')) {
-            $output = mb_convert_encoding($output, 'windows-1252', Yii::$app->charset ?: 'UTF-8');
-        }
-        fclose($csv);
+        $sp = new Spreadsheet();
+        $as = $sp->getActiveSheet();
 
+        $as
+            ->fromArray([
+                $list->getAttributeLabel('name'),
+                $list->name
+            ])
+            ->fromArray([
+                Yii::t('simialbi/kanban/monitoring', 'Export date'),
+                Yii::$app->formatter->asDate('today'),
+            ], startCell: 'A2')
+            ->fromArray([
+                Yii::t('simialbi/kanban/model/task', 'Id'),
+                Yii::t('simialbi/kanban/model/bucket', 'Board'),
+                Yii::t('simialbi/kanban/model/task', 'Bucket'),
+                Yii::t('simialbi/kanban/model/task', 'Subject'),
+                Yii::t('simialbi/kanban/model/task', 'Responsible'),
+                Yii::t('simialbi/kanban/model/task', 'Status'),
+                Yii::t('simialbi/kanban/plan', 'Assigned to'),
+                Yii::t('simialbi/kanban/model/task', 'Created by'),
+                Yii::t('simialbi/kanban/model/task', 'Created at'),
+                Yii::t('simialbi/kanban/model/task', 'Updated by'),
+                Yii::t('simialbi/kanban/model/task', 'Updated at'),
+                Yii::t('simialbi/kanban/model/task', 'Start date'),
+                Yii::t('simialbi/kanban/model/task', 'End date'),
+                Yii::t('simialbi/kanban/task', 'Late'),
+                Yii::t('simialbi/kanban/model/task', 'Finished at'),
+                Yii::t('simialbi/kanban/model/task', 'Finished by'),
+                Yii::t('simialbi/kanban/model/task', 'Description')
+            ], startCell: 'A4');
+
+
+        $userIds = ArrayHelper::getColumn($list->members, 'user_id');
+
+        $searchModel = new SearchTask();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $userIds);
+        $dataProvider->pagination = false;
+
+        $startCell = 5;
+        foreach ($dataProvider->getModels() as $task) {
+            /** @var Task $task */
+            $as->fromArray([
+                $task->id,
+                $task->board->name,
+                $task->bucket->name,
+                $task->subject,
+                $task->responsible?->name ?? '',
+                ArrayHelper::getValue($this->module->statuses, $task->status, Yii::t('yii', '(not set)')),
+                implode(', ', ArrayHelper::getColumn($task->assignees, 'name')),
+                $task->author?->name ?? Yii::t('yii', '(not set)'),
+                Yii::$app->formatter->asDate($task->created_at),
+                $task->updater?->name ?? Yii::t('yii', '(not set)'),
+                Yii::$app->formatter->asDate($task->updated_at),
+                $task->start_date ? Yii::$app->formatter->asDate($task->start_date) : '',
+                $task->end_date ? Yii::$app->formatter->asDate($task->end_date) : '',
+                ($task->end_date && $task->end_date < strtotime('today')) ? '1' : '0',
+                $task->finisher?->name ?? '',
+                $task->finished_at ? Yii::$app->formatter->asDate($task->finished_at) : '',
+                strip_tags(preg_replace('/<br ?\/?>/i', "\n", $task->description))
+            ], '', 'A' . $startCell);
+            $startCell++;
+        }
+
+        // set as Table
+        $start = "A4";
+        $end = $as->getHighestRowAndColumn();
+        $table = new Table($start . ':' . $end['column'] . $end['row']);
+        $as->addTable($table);
+
+        $text = "&C" . Yii::t('hq-re/general/pdf', 'internal') . "&R&D";
+        $as->getHeaderFooter()->setOddFooter($text);
+
+        // Download
+        $filename = 'list_' . Inflector::slug($list->name) . '_' . Yii::$app->formatter->asDate('now', 'yyyyMMddHHmm') . '.xlsx';
         Yii::$app->response->setDownloadHeaders(
-            'list_' . Inflector::slug($list->name) . '_' . Yii::$app->formatter->asDate('now', 'yyyyMMddHHmm') . '.csv',
-            'text/csv',
-            false,
-            StringHelper::byteLength($output)
-        );
+            $filename,
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )->send();
 
-        return $output;
+        $writer = IOFactory::createWriter($sp, IOFactory::WRITER_XLSX);
+        $writer->save('php://output');
+
+        exit;
     }
 
     /**
      * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
+     * @param mixed $condition
      *
      * @return MonitoringList the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel(mixed $condition): MonitoringList
     {
-        if (($model = MonitoringList::findOne($id)) !== null) {
+        if (($model = MonitoringList::findOne($condition)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));

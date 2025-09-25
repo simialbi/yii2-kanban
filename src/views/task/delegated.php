@@ -2,10 +2,12 @@
 
 use rmrevin\yii\fontawesome\FAS;
 use simialbi\yii2\hideseek\HideSeek;
+use simialbi\yii2\kanban\models\Task;
 use simialbi\yii2\turbo\Frame;
-use yii\bootstrap4\ButtonDropdown;
+use yii\bootstrap5\ButtonDropdown;
+use yii\web\View;
 
-/* @var $this \yii\web\View */
+/* @var $this View */
 /* @var $tasks array */
 /* @var $view string|null */
 /* @var $users array */
@@ -87,16 +89,16 @@ Frame::begin([
                 <div class="card mb-3">
                     <div class="card-header">
                         <h4 class="card-title m-0">
-                            <?= $this->render('_user', [
+                            <?= $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/_user.php'), [
                                 'assigned' => false,
                                 'user' => $users[$userId]
                             ]); ?>
                         </h4>
                     </div>
                     <div class="list-group list-group-flush">
-                        <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>
+                        <?php /** @var Task $task */ ?>
                         <?php foreach ($userTasks as $task): ?>
-                            <?= $this->render('list-item', [
+                            <?= $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/list-item.php'), [
                                 'task' => $task
                             ]); ?>
                         <?php endforeach; ?>
@@ -107,17 +109,14 @@ Frame::begin([
     <?php else: ?>
         <div class="kanban-plan-view">
             <div class="d-flex flex-column">
-                <div class="kanban-top-scrollbar mb-2 d-none d-md-block">
-                    <div></div>
-                </div>
                 <div class="kanban-bottom-scrollbar">
-                    <div class="d-flex flex-row kanban-plan-sortable">
+                    <div class="d-flex flex-row h-100 kanban-plan-sortable">
                         <?php foreach ($tasks as $userId => $userTasks): ?>
                             <?php if (isset($users[$userId])): ?>
-                                <div class="kanban-bucket mr-md-4 d-flex flex-column flex-shrink-0">
+                                <div class="kanban-bucket me-md-4 d-flex flex-column flex-shrink-0">
                                     <?= $this->render('/bucket/_header', [
                                         'id' => $userId,
-                                        'title' => $this->render('_user', [
+                                        'title' => $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/_user.php'), [
                                             'assigned' => false,
                                             'user' => $users[$userId],
                                         ]),
@@ -125,9 +124,9 @@ Frame::begin([
                                         'readonly' => false
                                     ]); ?>
                                     <div class="kanban-tasks flex-grow-1 mt-4">
-                                        <?php /** @var \simialbi\yii2\kanban\models\Task $task */ ?>
+                                        <?php /** @var Task $task */ ?>
                                         <?php foreach ($userTasks as $task): ?>
-                                            <?= $this->render('/task/item', [
+                                            <?= $this->renderPhpFile(Yii::getAlias('@simialbi/yii2/kanban/views/task/item.php'), [
                                                 'boardId' => $task->bucket->board_id,
                                                 'model' => $task,
                                                 'statuses' => $statuses,
@@ -153,4 +152,15 @@ Frame::begin([
     <?php endif; ?>
 </div>
 <?php
+
+$js = <<<JS
+// Calculate and apply height
+var el = jQuery('.kanban-bottom-scrollbar');
+var height = Math.floor(jQuery(window).height() - el.offset().top - (jQuery('.body').css('padding-bottom') || '12px').replace('px', ''));
+if (!isNaN(height) && height > 200) {
+    el.css('height', height);
+}
+JS;
+$this->registerJs($js, $this::POS_LOAD);
+
 Frame::end();
